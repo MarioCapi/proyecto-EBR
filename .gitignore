@@ -1,0 +1,42 @@
+# Ignorar archivos de sistema Mac
+.DS_store
+
+# Ignorar archivos de conexion
+.ini
+
+# Ignorar archivos de pyc
+.pyc
+
+# Ignorar carpeta node_modules
+node_modules
+
+# Ignorar carpeta __pycache__
+__pycache__
+
+# Ignorar carpeta myvenv
+myvenv
+
+# Ignorar carpeta myvenv
+.venv
+
+# Ignorar carpeta Files for training
+Files for training
+
+# Ignorar archivos xlsx
+.xlsx
+# Ignorar archivos xls
+.xls
+# Ignorar archivos csv
+.csv
+
+# Ignorar carpeta myvenv
+.venv
+
+# Ignorar todos los archivos de texto
+# - *.txt
+
+# Ignorar archivos relacionados con claves de una API
+.env
+# Ignorar archivos configuración SASS
+.sass-cache
+

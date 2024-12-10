@@ -1,0 +1,127 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>AI & Data Science Portal</title>
+        <!-- Vue.js CDN -->
+        <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+        <!-- Tailwind CSS para estilos -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <!-- Font Awesome para iconos -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="./static/css/PortalEBR.css">
+    </head>
+<body class="bg-[#E3F2FD]">
+    <div id="app">
+        <div class="flex">
+            <!-- Sidebar -->
+            <nav :class="['sidebar text-white', {'collapsed': isSidebarCollapsed}]" 
+                 :style="{width: isSidebarCollapsed ? '60px' : '250px'}">
+                <div class="p-4">
+                    <div class="flex items-center justify-between">
+                        <h1 v-show="!isSidebarCollapsed" class="text-xl font-bold">AI Portal</h1>
+                        <button @click="toggleSidebar" class="text-white hover:text-[#4DD0E1]">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                    </div>
+                    <ul class="mt-8 space-y-4">
+                        <li>
+                            <a href="javascript:void(0)" @click="setActiveView('upload')" 
+                               class="nav-item flex items-center space-x-3 p-2 rounded">
+                                <i class="fas fa-upload"></i>
+                                <span v-show="!isSidebarCollapsed">Cargar Archivos</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="javascript:void(0)" @click="setActiveView('budget')" 
+                               class="nav-item flex items-center space-x-3 p-2 rounded">
+                                <i class="fas fa-chart-pie"></i>
+                                <span v-show="!isSidebarCollapsed">Presupuesto</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="javascript:void(0)" @click="setActiveView('analytics')" 
+                               class="nav-item flex items-center space-x-3 p-2 rounded">
+                                <i class="fas fa-chart-line"></i>
+                                <span v-show="!isSidebarCollapsed">Analítica</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Content Area -->
+            <div class="flex-1 p-8" :style="{marginLeft: isSidebarCollapsed ? '60px' : '250px'}">
+                <!-- Upload View -->
+                <div v-if="activeView === 'upload'" class="space-y-6">
+                    <h2 class="text-2xl font-bold text-[#102A43]">Carga de Archivos</h2>
+                    <div class="upload-area p-8 rounded-lg text-center cursor-pointer"
+                         @dragover.prevent
+                         @drop.prevent="handleFileDrop">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-[#00BCD4]"></i>
+                        <p class="mt-4 text-[#102A43]">
+                            Arrastra archivos aquí o 
+                            <label class="text-[#0277BD] cursor-pointer hover:text-[#00BCD4]">
+                                <span>selecciona archivos</span>
+                                <input type="file" class="hidden" multiple @change="handleFileSelect" 
+                                       accept=".xlsx,.csv">
+                            </label>
+                        </p>
+                    </div>
+
+                    <!-- Upload Progress -->
+                    <div v-if="uploadProgress > 0" class="mt-4">
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="progress-bar h-2.5 rounded-full" 
+                                 :style="{width: uploadProgress + '%'}"></div>
+                        </div>
+                        <p class="text-sm text-[#102A43] mt-2">
+                            Progreso: {{ uploadProgress }}%
+                        </p>
+                    </div>
+
+                    <!-- File List and Process Button -->
+                    <div v-if="files.length > 0" class="mt-6">
+                        <h3 class="text-lg font-semibold text-[#102A43] mb-4">Archivos seleccionados:</h3>
+                        <ul class="space-y-2">
+                            <li v-for="file in files" :key="file.name" 
+                                class="flex items-center justify-between p-3 bg-white rounded-lg shadow">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-file text-[#00BCD4]"></i>
+                                    <span class="text-[#102A43]">{{ file.name }}</span>
+                                </div>
+                                <button @click="removeFile(file)" 
+                                        class="text-red-500 hover:text-red-700">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </li>
+                        </ul>
+                        
+                        <!-- Process Button -->
+                        <div v-if="uploadComplete" class="mt-6 flex justify-center">
+                            <button @click="processFiles" 
+                                    class="process-button text-white px-8 py-3 rounded-lg flex items-center space-x-2">
+                                <i class="fas fa-cogs"></i>
+                                <span>Procesar</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Budget View -->
+                <div v-if="activeView === 'budget'" class="space-y-6">
+                    <h2 class="text-2xl font-bold text-[#102A43]">Reporte de Presupuesto</h2>
+                    <!-- Aquí irá el contenido del reporte de presupuesto -->
+                </div>
+
+                <!-- Analytics View -->
+                <div v-if="activeView === 'analytics'" class="space-y-6">
+                    <h2 class="text-2xl font-bold text-[#102A43]">Analítica</h2>
+                    <!-- Aquí irá el contenido de analítica -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./static/js/PortalEBR.js"></script>
+</body></html>

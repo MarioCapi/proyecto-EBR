@@ -13,6 +13,8 @@ def exec_sp_save_data(db_session, sp_name: str, **params):
             sp_params.append(f"@{key}=:{key}")
         
         sp_call += ", ".join(sp_params)
+        print(f"SQL Query: {sp_call}")  # Para debug
+        print(f"Params: {params}")      # Para debug
         
         # Ejecutar el SP
         result = db_session.execute(text(sp_call), params)
@@ -27,18 +29,18 @@ def exec_sp_save_data(db_session, sp_name: str, **params):
 def sp_save_empresa(db_session, nombre_empresa: str, nit: str):
     return exec_sp_save_data(
         db_session,
-        "Admin.sp_SaveEmpresa",
-        nombre_empresa=nombre_empresa,
-        nit=nit
+        "Admin.InsertarEmpresa",
+        NombreEmpresa=nombre_empresa,
+        NIT=nit
     )
 
 def sp_save_archivo(db_session, nombre_archivo: str, empresa_id: int, periodo: str):
     return exec_sp_save_data(
         db_session,
-        "Admin.sp_SaveArchivo",
-        nombre_archivo=nombre_archivo,
-        empresa_id=empresa_id,
-        periodo=periodo
+        "Admin.InsertarArchivo",
+        NombreArchivo=nombre_archivo,
+        EmpresaID=empresa_id,
+        Periodo=periodo
     )
 
 def sp_save_dato_contable(db_session, archivo_id: int, nivel_id: int, 
@@ -48,13 +50,13 @@ def sp_save_dato_contable(db_session, archivo_id: int, nivel_id: int,
     return exec_sp_save_data(
         db_session,
         "Admin.sp_SaveDatoContable",
-        archivo_id=archivo_id,
-        nivel_id=nivel_id,
-        transaccional=transaccional,
-        codigo_cuenta=codigo_cuenta,
-        nombre_cuenta=nombre_cuenta,
-        saldo_inicial=saldo_inicial,
-        debito=debito,
-        credito=credito,
-        saldo_final=saldo_final
+        ArchivoID=archivo_id,
+        NivelID=nivel_id,
+        Transaccional=transaccional,
+        CodigoCuenta=codigo_cuenta,
+        NombreCuenta=nombre_cuenta,
+        SaldoInicial=saldo_inicial,
+        Debito=debito,
+        Credito=credito,
+        SaldoFinal=saldo_final
     )

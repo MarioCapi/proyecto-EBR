@@ -2,7 +2,7 @@
 CREATE TABLE Admin.DatosContables (
     DatoID INT PRIMARY KEY IDENTITY(1,1),
     ArchivoID INT NOT NULL,
-    NivelID INT NOT NULL,
+    NivelID NVARCHAR(100) NOT NULL,
     Transaccional BIT NOT NULL,
     CodigoCuenta NVARCHAR(50) NOT NULL,
     NombreCuenta NVARCHAR(255) NOT NULL,

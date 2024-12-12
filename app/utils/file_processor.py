@@ -11,32 +11,36 @@ async def process_excel_file(contents: bytes, filename: str, db_session) -> File
     Procesa el archivo Excel y guarda los datos en la base de datos
     """
     # Leer el archivo
-    df = pd.read_excel(io.BytesIO(contents)) if filename.endswith(('.xls', '.xlsx')) else pd.read_csv(io.BytesIO(contents))
-    
-    # Extraer metadata
-    metadata = extract_metadata(df, filename)
-    
-    # Guardar metadata en la base de datos
-    empresa = save_empresa(db_session, metadata)
-    archivo = save_archivo(db_session, metadata, empresa.EmpresaID)
-    
-    # Encontrar donde empiezan los datos y obtener mapeo de columnas
-    start_row, mapeo_columnas = find_table_start(df)
-    
-    # Procesar datos principales
-    datos = process_main_data(df, start_row, mapeo_columnas)
-    
-    # Guardar datos en lotes
-    BATCH_SIZE = 500
-    for i in range(0, len(datos), BATCH_SIZE):
-        batch = datos[i:i + BATCH_SIZE]
-        save_datos_contables(db_session, batch, archivo.ArchivoID)
-        db_session.commit()  # Commit por cada lote
-    
-    return FileProcessor(
-        metadata=metadata,
-        datos=datos
-    )
+    try:
+        df = pd.read_excel(io.BytesIO(contents)) if filename.endswith(('.xls', '.xlsx')) else pd.read_csv(io.BytesIO(contents))
+        
+        # Extraer metadata
+        metadata = extract_metadata(df, filename)
+        
+        # Guardar metadata en la base de datos
+        empresa = save_empresa(db_session, metadata)
+        archivo = save_archivo(db_session, metadata, empresa.EmpresaID)
+        
+        # Encontrar donde empiezan los datos y obtener mapeo de columnas
+        start_row, mapeo_columnas = find_table_start(df) ##### apartir de aqui revisar
+        
+        # Procesar datos principales
+        datos = process_main_data(df, start_row, mapeo_columnas)
+        
+        # Guardar datos en lotes
+        BATCH_SIZE = 500
+        for i in range(0, len(datos), BATCH_SIZE):
+            batch = datos[i:i + BATCH_SIZE]
+            save_datos_contables(db_session, batch, archivo.ArchivoID)
+            db_session.commit()  # Commit por cada lote
+        
+        return FileProcessor(
+            metadata=metadata,
+            datos=datos
+        )
+    except Exception as e:
+        db_session.rollback()
+        raise Exception(f"Error ejecutando: {str(e)}")
 
 def extract_metadata(df: pd.DataFrame, filename: str) -> FileMetadata:
     metadata_dict = {
@@ -177,43 +181,98 @@ def process_main_data(df: pd.DataFrame, start_row: int, mapeo_columnas: dict) ->
             'credito': float(str(row[mapeo_columnas.get('credito', 0)]).replace(',', '') or 0),
             'nivel': str(row[mapeo_columnas.get('nivel', '')]).strip() if 'nivel' in mapeo_columnas else '',
             'transaccional': str(row[mapeo_columnas.get('transaccional', '')]).strip().lower() == 'si' 
-                           if 'transaccional' in mapeo_columnas else False
+                        if 'transaccional' in mapeo_columnas else False
         }
-        
         data_rows.append(row_dict)
     
     return data_rows 
 
 def save_empresa(db_session, metadata: FileMetadata):
-    result = sp_save_empresa(
-        db_session,
-        nombre_empresa=metadata.nombre_empresa,
-        nit=metadata.codigo_nit
-    )
-    # Asumiendo que el SP retorna el ID de la empresa
-    return result.first()
+    try:
+        result = sp_save_empresa(
+            db_session,
+            nombre_empresa=metadata.nombre_empresa,
+            nit=metadata.codigo_nit
+        )
+        # Consultar la empresa recién insertada o actualizada
+        from routes.models import Empresa
+        empresa = db_session.query(Empresa).filter_by(NIT=metadata.codigo_nit).first()
+        if not empresa:
+            raise Exception("No se pudo obtener la empresa después de guardarla")
+        return empresa
+    except Exception as e:
+        db_session.rollback()
+        raise Exception(f"Error al guardar empresa: {str(e)}")
 
 def save_archivo(db_session, metadata: FileMetadata, empresa_id: int):
-    result = sp_save_archivo(
-        db_session,
-        nombre_archivo=metadata.nombre_archivo,
-        empresa_id=empresa_id,
-        periodo=metadata.periodo
-    )
-    # Asumiendo que el SP retorna el ID del archivo
-    return result.first()
+    try:
+        # Convertir el periodo a formato de fecha
+        periodo_texto = metadata.periodo.lower()
+        meses = {
+            'enero': '01', 'febrero': '02', 'marzo': '03', 'abril': '04',
+            'mayo': '05', 'junio': '06', 'julio': '07', 'agosto': '08',
+            'septiembre': '09', 'octubre': '10', 'noviembre': '11', 'diciembre': '12'
+        }
+        
+        # Extraer mes y año
+        for mes_nombre, mes_numero in meses.items():
+            if mes_nombre in periodo_texto:
+                # Encontrar el año en el texto (asumiendo formato '4 dígitos')
+                año = re.search(r'20\d{2}', periodo_texto).group()
+                # Crear fecha en formato YYYY-MM-DD
+                periodo_fecha = f"{año}-{mes_numero}-01"
+                break
+        else:
+            # Si no se encuentra el mes en texto, intentar parsearlo como número
+            match = re.search(r'(\d{1,2}).*?(20\d{2})', periodo_texto)
+            if match:
+                mes, año = match.groups()
+                mes = mes.zfill(2)  # Asegurar que el mes tenga 2 dígitos
+                periodo_fecha = f"{año}-{mes}-01"
+            else:
+                raise ValueError(f"No se pudo convertir el periodo '{metadata.periodo}' a fecha")
+
+        result = sp_save_archivo(
+            db_session,
+            nombre_archivo=metadata.nombre_archivo,
+            empresa_id=empresa_id,
+            periodo=periodo_fecha  # Usar la fecha convertida
+        )
+        
+        # Consultar el archivo recién insertado
+        from routes.models import Archivo
+        archivo = db_session.query(Archivo)\
+            .filter_by(
+                EmpresaID=empresa_id,
+                NombreArchivo=metadata.nombre_archivo,
+                Periodo=periodo_fecha  # Usar la fecha convertida
+            )\
+            .order_by(Archivo.ArchivoID.desc())\
+            .first()
+        
+        if not archivo:
+            raise Exception("No se pudo obtener el archivo después de guardarlo")
+        return archivo
+        
+    except Exception as e:
+        db_session.rollback()
+        raise Exception(f"Error al guardar archivo: {str(e)}")
 
 def save_datos_contables(db_session, datos: List[Dict], archivo_id: int):
-    for dato in datos:
-        sp_save_dato_contable(
-            db_session,
-            archivo_id=archivo_id,
-            nivel_id=dato.get('nivel_id'),
-            transaccional=dato['transaccional'],
-            codigo_cuenta=dato['codigo_cuenta'],
-            nombre_cuenta=dato['nombre_cuenta'],
-            saldo_inicial=dato['saldo_inicial'],
-            debito=dato['debito'],
-            credito=dato['credito'],
-            saldo_final=dato['saldo_final']
-        )
+    try:
+        for dato in datos:
+            sp_save_dato_contable(
+                db_session,
+                archivo_id=archivo_id,
+                nivel_id=dato.get('nivel_id'),
+                transaccional=dato['transaccional'],
+                codigo_cuenta=dato['codigo_cuenta'],
+                nombre_cuenta=dato['nombre_cuenta'],
+                saldo_inicial=dato['saldo_inicial'],
+                debito=dato['debito'],
+                credito=dato['credito'],
+                saldo_final=dato['saldo_final']
+            )
+    except Exception as e:
+        db_session.rollback()
+        raise Exception(f"Error al guardar datos contables: {str(e)}")

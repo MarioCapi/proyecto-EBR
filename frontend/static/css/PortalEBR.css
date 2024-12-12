@@ -1,0 +1,60 @@
+:root {
+    --primary: #1A237E;
+    --secondary: #0277BD;
+    --accent: #00BCD4;
+    --highlight: #4DD0E1;
+    --background: #E3F2FD;
+    --text-primary: #102A43;
+}
+
+.sidebar {
+    transition: all 0.3s ease;
+    height: 100vh;
+    background: linear-gradient(180deg, var(--primary), var(--secondary));
+}
+
+.sidebar.collapsed {
+    width: 60px;
+}
+
+.content {
+    transition: all 0.3s ease;
+    background-color: var(--background);
+}
+
+.upload-area {
+    border: 2px dashed var(--accent);
+    transition: all 0.3s ease;
+    background-color: rgba(0, 188, 212, 0.05);
+}
+
+.upload-area:hover {
+    border-color: var(--highlight);
+    background-color: rgba(77, 208, 225, 0.1);
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, var(--accent), var(--highlight));
+    transition: width 0.3s ease;
+}
+
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.process-button {
+    background: linear-gradient(135deg, var(--secondary), var(--accent));
+    transition: all 0.3s ease;
+}
+
+.process-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 188, 212, 0.3);
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        z-index: 1000;
+    }
+}

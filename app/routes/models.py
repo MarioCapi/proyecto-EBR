@@ -1,7 +1,9 @@
 from sqlalchemy import Column, Integer, String, Date, DateTime, Numeric, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from .connection import Base
+from utils.config.connection import Base
+from pydantic import BaseModel
+from typing import List, Optional, Dict
 
 class Empresa(Base):
     __tablename__ = 'Empresas'
@@ -50,3 +52,24 @@ class DatoContable(Base):
 
     archivo = relationship("Archivo", back_populates="datos_contables")
     nivel = relationship("Nivel")
+
+class FileMetadata(BaseModel):
+    nombre_archivo: str
+    nombre_empresa: str
+    codigo_nit: str
+    periodo: str
+
+class ColumnMapping(BaseModel):
+    columnas_requeridas: List[str] = [
+        "Codigo_Cuenta",
+        "Nombre_cuenta",
+        "Saldo_Inicial",
+        "Saldo_Final",
+        "Debito",
+        "Credito"
+    ]
+    columnas_opcionales: List[str] = ["Nivel", "Transaccional"]
+
+class FileProcessor(BaseModel):
+    metadata: FileMetadata
+    datos: List[Dict]

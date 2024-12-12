@@ -1,89 +1,60 @@
-import pyodbc
-import json
-import os
-def load_db_config(config_file=None):
+from sqlalchemy import text
+
+def exec_sp_save_data(db_session, sp_name: str, **params):
     """
-    Lee el archivo de configuración JSON y devuelve un diccionario con los parámetros de la base de datos.
-    :param config_file: Ruta al archivo de configuración. Si no se proporciona, se busca en una ubicación predeterminada.
-    :return: Diccionario con la configuración del servidor, base de datos, usuario y contraseña.
+    Ejecuta un stored procedure con los parámetros proporcionados
     """
     try:
-        # Establecer una ruta predeterminada si no se proporciona config_file
-        if config_file is None:
-            base_dir = os.path.dirname(os.path.abspath(__file__))
-            config_file = os.path.join(base_dir, "config", "configDB.Json")
-
-        with open(config_file, 'r') as file:
-            config = json.load(file)
-        return config
+        # Construir la llamada al SP
+        sp_call = f"EXEC {sp_name} "
+        sp_params = []
+        
+        for key, value in params.items():
+            sp_params.append(f"@{key}=:{key}")
+        
+        sp_call += ", ".join(sp_params)
+        
+        # Ejecutar el SP
+        result = db_session.execute(text(sp_call), params)
+        db_session.commit()
+        
+        return result
     except Exception as e:
-        raise Exception(f"Error al leer el archivo de configuración: {e}")
+        db_session.rollback()
+        raise Exception(f"Error ejecutando SP {sp_name}: {str(e)}")
 
-def execute_stored_procedure(server, database, username, password, procedure_name, params=None):
-    """
-    Ejecuta un procedimiento almacenado en SQL Server.
-    :param server: Dirección del servidor SQL (ej. 'localhost', '192.168.1.10').
-    :return: Resultado de la ejecución (lista de filas para procedimientos con SELECT).
-    """
-    try:
-        # Configurar la conexión
-        connection_string = (
-            f"DRIVER={{ODBC Driver 17 for SQL Server}};"
-            f"SERVER={server};"
-            f"DATABASE={database};"
-            f"UID={username};"
-            f"PWD={password};"
-        )
-        conn = pyodbc.connect(connection_string)
-        cursor = conn.cursor()
+# Funciones específicas para cada SP
+def sp_save_empresa(db_session, nombre_empresa: str, nit: str):
+    return exec_sp_save_data(
+        db_session,
+        "Admin.sp_SaveEmpresa",
+        nombre_empresa=nombre_empresa,
+        nit=nit
+    )
 
-        # Preparar la llamada al procedimiento almacenado
-        if params:
-            placeholders = ", ".join(["?" for _ in params])  # Generar placeholders para los parámetros
-            query = f"EXEC {procedure_name} {placeholders}"
-            cursor.execute(query, params)
-        else:
-            query = f"EXEC {procedure_name}"
-            cursor.execute(query)
+def sp_save_archivo(db_session, nombre_archivo: str, empresa_id: int, periodo: str):
+    return exec_sp_save_data(
+        db_session,
+        "Admin.sp_SaveArchivo",
+        nombre_archivo=nombre_archivo,
+        empresa_id=empresa_id,
+        periodo=periodo
+    )
 
-        # Intentar recuperar resultados (si aplica)
-        try:
-            rows = cursor.fetchall()  # Para procedimientos con SELECT
-            result = [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
-        except pyodbc.ProgrammingError:
-            # Si no hay resultados (ej. INSERT, UPDATE), retornar éxito
-            result = "Procedimiento almacenado ejecutado exitosamente."
-
-        # Confirmar transacción si es necesario
-        conn.commit()
-
-    except Exception as e:
-        result = f"Error al ejecutar el procedimiento almacenado: {e}"
-
-    finally:
-        # Cerrar la conexión
-        cursor.close()
-        conn.close()
-
-    return result
-
-def execute_stored_procedure_from_config(procedure_name, params=None, config_file=None):
-    """
-    Ejecuta un procedimiento almacenado usando la configuración leída desde un archivo JSON.
-
-    :param procedure_name: Nombre del procedimiento almacenado.
-    :param params: Parámetros a pasar al procedimiento (opcional).
-    :param config_file: Ruta al archivo de configuración (opcional).
-    :return: Resultado de la ejecución.
-    """
-    config = load_db_config(config_file)
-    if config:
-        server = config.get("server")
-        database = config.get("database")
-        username = config.get("username")
-        password = config.get("password")
-
-        # Llamar al método que ejecuta el procedimiento almacenado con la configuración cargada
-        return execute_stored_procedure(server, database, username, password, procedure_name, params)
-    else:
-        return "Error en la configuración de la base de datos."
+def sp_save_dato_contable(db_session, archivo_id: int, nivel_id: int, 
+                        transaccional: bool, codigo_cuenta: str, nombre_cuenta: str,
+                        saldo_inicial: float, debito: float, credito: float, 
+                        saldo_final: float):
+    return exec_sp_save_data(
+        db_session,
+        "Admin.sp_SaveDatoContable",
+        archivo_id=archivo_id,
+        nivel_id=nivel_id,
+        transaccional=transaccional,
+        codigo_cuenta=codigo_cuenta,
+        nombre_cuenta=nombre_cuenta,
+        saldo_inicial=saldo_inicial,
+        debito=debito,
+        credito=credito,
+        saldo_final=saldo_final
+    )

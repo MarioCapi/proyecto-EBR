@@ -1,5 +1,5 @@
 const { createApp } = Vue
-
+const UrlAPIUpload = 'http://127.0.0.1:8080/upload/';
 createApp({
     data() {
         return {
@@ -61,9 +61,33 @@ createApp({
                 }
             }, 200)
         },
-        processFiles() {
-            // Aquí iría la lógica para procesar los archivos
-            alert('Procesando archivos...')
+        async processFiles() {
+            if (this.files.length === 0) {
+                alert('No hay archivos para procesar.')
+                return
+            }
+
+            const file = this.files[0] // Procesar solo el primer archivo seleccionado
+            const formData = new FormData()
+            formData.append('file', file)
+
+            try {
+                const response = await axios.post(UrlAPIUpload, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    },
+                    onUploadProgress: progressEvent => {
+                        this.uploadProgress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+                    }
+                })
+
+                alert('Archivo procesado con éxito: ' + JSON.stringify(response.data))
+                this.uploadComplete = true
+            } catch (error) {
+                alert('Error al procesar el archivo: ' + error.response?.data?.detail || error.message)
+                this.uploadProgress = 0
+                this.uploadComplete = false
+            }
         }
     }
 }).mount('#app')

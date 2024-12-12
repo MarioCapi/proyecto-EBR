@@ -33,3 +33,21 @@ GO
 
 ALTER ROLE db_owner ADD MEMBER EBR_Admin_Super
 GO
+
+
+--========== Consultar ========== --
+
+USE EBR
+GO
+
+
+SELECT SUSER_SNAME(owner_sid) AS db_owner
+FROM sys.databases
+WHERE name = 'EBR'
+
+
+
+SELECT name, type_desc 
+FROM sys.database_principals 
+WHERE type IN ('S', 'U')
+.

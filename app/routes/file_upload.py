@@ -1,71 +1,27 @@
-from fastapi import APIRouter, File, UploadFile, Depends, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from utils.file_processor import process_excel_file
+from utils.config.connection import get_db  # Función que provee la sesión
 from sqlalchemy.orm import Session
-from typing import List
-import os
-from werkzeug.utils import secure_filename
+from .models import FileProcessor
+import pandas as pd
+import io
 
-from routes.file_processor import FileProcessor
-from utils.config.connection import get_db
-from utils.config.config import settings
+router = APIRouter()
 
-router = APIRouter(
-    prefix=f"/api/{settings.API_VERSION}/files",
-    tags=["Cargas de Archivos"]
-)
-
-@router.post("/upload")
-async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_db)
+@router.post("/upload/", response_model=FileProcessor)
+async def upload_file(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)  # Inyección de dependencia para la sesión
 ):
-    """
-    Endpoint para carga de archivos contables
-    """
-    try:
-        # Validaciones iniciales
-        FileProcessor.validate_file(file.filename)
-        
-        # Guardar archivo temporalmente
-        temp_path = f"temp/{secure_filename(file.filename)}"
-        os.makedirs("temp", exist_ok=True)
-        
-        with open(temp_path, "wb") as buffer:
-            buffer.write(await file.read())
-        
-        # Leer y procesar archivo
-        df = FileProcessor.read_file(temp_path)
-        
-        # Validar estructura del DataFrame
-        required_columns = [
-            'CodigoCuenta', 'NombreCuenta', 'SaldoInicial', 
-            'Debito', 'Credito', 'SaldoFinal'
-        ]
-        FileProcessor.validate_dataframe(df, required_columns)
-        
-        # Preparar datos para base de datos
-        processed_data = FileProcessor.prepare_data_for_database(df)
-        
-        # Aquí implementarías la lógica de inserción en base de datos
-        # db.bulk_insert_mappings(DatoContable, processed_data)
-        # db.commit()
-        
-        # Eliminar archivo temporal
-        os.remove(temp_path)
-        
-        return JSONResponse(
-            status_code=200, 
-            content={
-                "message": "Archivo procesado exitosamente",
-                "registros_procesados": len(processed_data)
-            }
-        )
+    # Validar extensión
+    if not file.filename.endswith(('.xls', '.xlsx', '.csv')):
+        raise HTTPException(status_code=400, detail="Formato de archivo no soportado")
     
-    except ValueError as ve:
-        return JSONResponse(
-            status_code=400, 
-            content={"error": str(ve)}
-        )
+    # Leer el contenido del archivo
+    contents = await file.read()
+    
+    # Procesar el archivo
+    try:
+        return await process_excel_file(contents, file.filename, db)
     except Exception as e:
-        return JSONResponse(
-            status_code=500, 
-            content={"error": "Error interno del servidor"}
-        )
+        raise HTTPException(status_code=400, detail=str(e))

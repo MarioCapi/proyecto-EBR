@@ -1,5 +1,5 @@
-from pydantic import BaseSettings
-
+#from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     # Configuraciones de Base de Datos
     DB_SERVER: str = "localhost"

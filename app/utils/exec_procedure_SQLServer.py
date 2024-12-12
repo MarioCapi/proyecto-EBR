@@ -43,20 +43,31 @@ def sp_save_archivo(db_session, nombre_archivo: str, empresa_id: int, periodo: s
         Periodo=periodo
     )
 
-def sp_save_dato_contable(db_session, archivo_id: int, nivel_id: int, 
+def sp_save_dato_contable(db_session, archivo_id: int, nivel_id: str, 
                         transaccional: bool, codigo_cuenta: str, nombre_cuenta: str,
                         saldo_inicial: float, debito: float, credito: float, 
                         saldo_final: float):
-    return exec_sp_save_data(
-        db_session,
-        "Admin.sp_SaveDatoContable",
-        ArchivoID=archivo_id,
-        NivelID=nivel_id,
-        Transaccional=transaccional,
-        CodigoCuenta=codigo_cuenta,
-        NombreCuenta=nombre_cuenta,
-        SaldoInicial=saldo_inicial,
-        Debito=debito,
-        Credito=credito,
-        SaldoFinal=saldo_final
-    )
+    """Ejecuta el SP para guardar un dato contable"""
+    try:
+        # Validar tipos de datos antes de enviar al SP
+        params = {
+            'ArchivoID': int(archivo_id),
+            'NivelID': str(nivel_id),
+            'Transaccional': bool(transaccional),
+            'CodigoCuenta': str(codigo_cuenta),
+            'NombreCuenta': str(nombre_cuenta),
+            'SaldoInicial': float(saldo_inicial),
+            'Debito': float(debito),
+            'Credito': float(credito),
+            'SaldoFinal': float(saldo_final)
+        }
+        
+        return exec_sp_save_data(
+            db_session,
+            "Admin.sp_SaveDatoContable",
+            **params
+        )
+        
+    except Exception as e:
+        print(f"Error en SP: {str(e)}")
+        raise

@@ -30,6 +30,13 @@ BEGIN
             RAISERROR('El periodo no puede ser nulo.', 16, 1);
         END
 
+        -- Validar que no exista un archivo para el mismo EmpresaID y Periodo
+        IF EXISTS (SELECT 1 FROM Admin.Archivos WHERE EmpresaID = @EmpresaID AND Periodo = @Periodo)
+        BEGIN
+            SET @ErrorMessage = 'Archivo repetido para el periodo ' + CONVERT(NVARCHAR, @Periodo, 120);
+            RAISERROR(@ErrorMessage, 16, 1);
+        END
+
         -- Insertar el nuevo archivo
         INSERT INTO Admin.Archivos (NombreArchivo, EmpresaID, Periodo)
         VALUES (@NombreArchivo, @EmpresaID, @Periodo);

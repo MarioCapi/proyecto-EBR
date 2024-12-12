@@ -28,12 +28,9 @@ async def process_excel_file(contents: bytes, filename: str, db_session) -> File
         datos = process_main_data(df, start_row, mapeo_columnas)
         
         # Guardar datos en lotes
-        BATCH_SIZE = 500
-        for i in range(0, len(datos), BATCH_SIZE):
-            batch = datos[i:i + BATCH_SIZE]
-            save_datos_contables(db_session, batch, archivo.ArchivoID)
-            db_session.commit()  # Commit por cada lote
         
+        process_datos_contables(db_session, datos, archivo)
+
         return FileProcessor(
             metadata=metadata,
             datos=datos
@@ -128,15 +125,16 @@ def find_table_start(df: pd.DataFrame) -> tuple[int, dict]:
     Encuentra la fila donde comienzan los datos y mapea las columnas
     Returns: (índice_fila_inicio, mapeo_columnas)
     """
+    
     columnas_esperadas = {
-        'codigo': ['codigo', 'codigo_cuenta', 'cod', 'cuenta'],
+        'codigo': ['codigo', 'código', 'codigo_cuenta', 'cod', 'código cuenta contable'],
         'nivel': ['nivel', 'niv'],
         'transaccional': ['transaccional', 'trans'],
-        'nombre': ['nombre', 'nombre_cuenta', 'descripcion'],
+        'nombre': ['nombre', 'nombre_cuenta', 'descripcion', 'nombre cuenta'],
         'saldo_inicial': ['saldo inicial', 'saldo_inicial', 'saldo_i'],
         'saldo_final': ['saldo final', 'saldo_final', 'saldo_f'],
-        'debito': ['debito', 'deb', 'debe'],
-        'credito': ['credito', 'cred', 'haber']
+        'debito': ['debito', 'deb', 'debe', 'débito'],
+        'credito': ['credito', 'cred', 'haber', 'crédito']
     }
     
     for i in range(len(df)):
@@ -146,15 +144,17 @@ def find_table_start(df: pd.DataFrame) -> tuple[int, dict]:
         # Convertir la fila a string y lowercase para búsqueda
         row_values = [str(val).lower().strip() for val in row]
         
-        # Si encontramos 'codigo' en alguna columna
-        if any('codigo' in val for val in row_values):
-            # Mapear cada columna esperada con su índice real
-            for nombre_campo, alternativas in columnas_esperadas.items():
-                for j, valor in enumerate(row_values):
-                    if any(alt in valor for alt in alternativas):
-                        mapeo_columnas[nombre_campo] = j
-                        break
-            
+        # Verificar si encontramos alguna de las columnas esperadas
+        columnas_encontradas = False
+        for nombre_campo, alternativas in columnas_esperadas.items():
+            for j, valor in enumerate(row_values):
+                if any(alt.lower() in valor for alt in alternativas):
+                    mapeo_columnas[nombre_campo] = j
+                    columnas_encontradas = True
+                    break
+        
+        # Si encontramos columnas en esta fila, verificar si tenemos las mínimas necesarias
+        if columnas_encontradas:
             # Si encontramos al menos las columnas obligatorias
             if all(campo in mapeo_columnas for campo in ['codigo', 'nombre']):
                 return i, mapeo_columnas
@@ -258,21 +258,68 @@ def save_archivo(db_session, metadata: FileMetadata, empresa_id: int):
         db_session.rollback()
         raise Exception(f"Error al guardar archivo: {str(e)}")
 
-def save_datos_contables(db_session, datos: List[Dict], archivo_id: int):
+BATCH_SIZE = 500
+def process_datos_contables(db_session, datos, archivo):
+    """Función principal para procesar los datos en lotes"""
+    total_procesados = 0
+    errores = []
+    
     try:
-        for dato in datos:
-            sp_save_dato_contable(
-                db_session,
-                archivo_id=archivo_id,
-                nivel_id=dato.get('nivel_id'),
-                transaccional=dato['transaccional'],
-                codigo_cuenta=dato['codigo_cuenta'],
-                nombre_cuenta=dato['nombre_cuenta'],
-                saldo_inicial=dato['saldo_inicial'],
-                debito=dato['debito'],
-                credito=dato['credito'],
-                saldo_final=dato['saldo_final']
-            )
+        for i in range(0, len(datos), BATCH_SIZE):
+            batch = datos[i:i + BATCH_SIZE]
+            print(f"\nProcesando lote {i//BATCH_SIZE + 1}, registros {i} a {i + len(batch)}")
+            
+            try:
+                save_datos_contables(db_session, batch, archivo.ArchivoID)
+                db_session.commit()
+                total_procesados += len(batch)
+                print(f"Lote procesado exitosamente. Total procesados: {total_procesados}")
+                
+            except Exception as e:
+                db_session.rollback()
+                errores.append(f"Error en lote {i//BATCH_SIZE + 1}: {str(e)}")
+                print(f"Error procesando lote: {str(e)}")
+                raise
+                
     except Exception as e:
-        db_session.rollback()
-        raise Exception(f"Error al guardar datos contables: {str(e)}")
+        raise Exception(f"Error en el procesamiento por lotes: {str(e)}")
+    
+    return total_procesados, errores
+
+
+def save_datos_contables(db_session, datos: List[Dict], archivo_id: int):
+    """Guarda un lote de datos contables"""
+    errores_batch = []
+    
+    for i, dato in enumerate(datos):
+        try:
+            # Validar que todos los campos requeridos existan
+            campos_requeridos = ['nivel', 'transaccional', 'codigo_cuenta', 
+                            'nombre_cuenta', 'saldo_inicial', 'debito', 
+                            'credito', 'saldo_final']
+            
+            for campo in campos_requeridos:
+                if campo not in dato:
+                    raise ValueError(f"Campo requerido '{campo}' no encontrado")
+            
+            # Preparar y validar los datos
+            datos_procesados = {
+                'archivo_id': archivo_id,
+                'nivel_id': str(dato['nivel']),
+                'transaccional': bool(dato['transaccional']),
+                'codigo_cuenta': str(dato['codigo_cuenta']),
+                'nombre_cuenta': str(dato['nombre_cuenta']),
+                'saldo_inicial': float(dato['saldo_inicial'] or 0),
+                'debito': float(dato['debito'] or 0),
+                'credito': float(dato['credito'] or 0),
+                'saldo_final': float(dato['saldo_final'] or 0)
+            }
+            
+            # Llamar al SP con los datos validados
+            resultado = sp_save_dato_contable(db_session, **datos_procesados)
+            
+        except Exception as e:
+            error_msg = f"Error en registro {i}: {str(e)}"
+            errores_batch.append(error_msg)
+            print(error_msg)
+            raise Exception(f"Error al guardar datos contables: {str(e)}")

@@ -5,17 +5,23 @@ CREATE PROCEDURE [Admin].[InsertarEmpresa]
 AS
 BEGIN
     SET NOCOUNT ON;
-    
+
     DECLARE @ErrorMessage NVARCHAR(4000);
     DECLARE @ErrorSeverity INT;
     DECLARE @ErrorState INT;
     DECLARE @EmpresaID INT;
 
     BEGIN TRY
-        -- Validar que el NIT no esté duplicado
-        IF EXISTS (SELECT 1 FROM Admin.Empresas WHERE NIT = @NIT)
+        -- Validar que el NIT ya exista
+        SELECT @EmpresaID = EmpresaID
+        FROM Admin.Empresas
+        WHERE NIT = @NIT;
+
+        -- Si el NIT ya existe, retornar el EmpresaID
+        IF @EmpresaID IS NOT NULL
         BEGIN
-            RAISERROR('Ya existe una empresa con este NIT.', 16, 1);
+            SELECT @EmpresaID AS EmpresaID;
+            RETURN;
         END
 
         -- Validar que el NombreEmpresa no esté vacío

@@ -23,37 +23,57 @@ createApp({
         },
         
         async loadPresupuestoContent() {
-            try 
-            {
-                // Esperar un momento para asegurar que el DOM se ha actualizado
+            try {
                 await this.$nextTick();
+                
                 const contentDiv = document.getElementById('content');
                 if (!contentDiv) {
                     throw new Error('No se encontró el elemento con id "content"');
-                }
+                }        
                 contentDiv.innerHTML = `
                     <div id="report-container">
-                        <table id="report-table">
+                        <table id="report-table" class="w-full">
                             <thead>
                                 <tr>
-                                    <th>Año</th>
-                                    <th>Mes</th>
-                                    <th>Nombre del Mes</th>
-                                    <th>Total Débito</th>
-                                    <th>Total Crédito</th>
-                                    <th>Diferencia</th>
+                                    <th class="px-4 py-2">Año</th>
+                                    <th class="px-4 py-2">Mes</th>
+                                    <th class="px-4 py-2">Nombre del Mes</th>
+                                    <th class="px-4 py-2">Total Débito</th>
+                                    <th class="px-4 py-2">Total Crédito</th>
+                                    <th class="px-4 py-2">Diferencia</th>
                                 </tr>
                             </thead>
                             <tbody>
                             </tbody>
                         </table>
-                        <canvas id="report-chart"></canvas>
+                        <div class="mt-8">
+                            <canvas id="report-chart"></canvas>
+                        </div>
                     </div>
                 `;
+        
+                // Remover script anterior si existe
+                const oldScript = document.getElementById('presupuesto-script');
+                if (oldScript) {
+                    oldScript.remove();
+                }
+        
+                // Cargar nuevo script
                 const script = document.createElement('script');
+                script.id = 'presupuesto-script';
                 script.src = './static/js/presupuesto.js';
+                script.onload = () => {
+                    console.log('Script de presupuesto cargado correctamente');
+                    // Llamar directamente a la función de inicialización
+                    if (window.initPresupuesto) {
+                        window.initPresupuesto();
+                    }
+                };
+                script.onerror = (error) => {
+                    console.error('Error al cargar el script de presupuesto:', error);
+                };
                 document.body.appendChild(script);
-
+        
             } catch (error) {
                 console.error('Error al cargar el contenido de presupuesto:', error);
             }

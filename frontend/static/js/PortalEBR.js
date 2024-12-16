@@ -1,9 +1,5 @@
 const { createApp } = Vue
-<<<<<<< HEAD
-
-=======
 const UrlAPIUpload = 'http://127.0.0.1:8080/upload/';
->>>>>>> 1989a20d8b073479a4014214b13906e19263d16c
 createApp({
     data() {
         return {
@@ -11,12 +7,8 @@ createApp({
             activeView: 'upload',
             uploadProgress: 0,
             files: [],
-<<<<<<< HEAD
-            uploadComplete: false
-=======
             uploadComplete: false,
             presupuestoContent: '' // Nuevo
->>>>>>> 1989a20d8b073479a4014214b13906e19263d16c
         }
     },
     methods: {
@@ -25,9 +17,6 @@ createApp({
         },
         setActiveView(view) {
             this.activeView = view
-<<<<<<< HEAD
-        },
-=======
             if (view === 'budget') {
                 this.loadPresupuestoContent()
             }
@@ -90,7 +79,6 @@ createApp({
             }
         },
 
->>>>>>> 1989a20d8b073479a4014214b13906e19263d16c
         handleFileDrop(e) {
             const droppedFiles = Array.from(e.dataTransfer.files)
             this.validateAndAddFiles(droppedFiles)
@@ -135,11 +123,6 @@ createApp({
                 }
             }, 200)
         },
-<<<<<<< HEAD
-        processFiles() {
-            // Aquí iría la lógica para procesar los archivos
-            alert('Procesando archivos...')
-=======
         async processFiles() {
             if (this.files.length === 0) {
                 alert('No hay archivos para procesar.')
@@ -167,7 +150,6 @@ createApp({
                 this.uploadProgress = 0
                 this.uploadComplete = false
             }
->>>>>>> 1989a20d8b073479a4014214b13906e19263d16c
         }
     }
 }).mount('#app')

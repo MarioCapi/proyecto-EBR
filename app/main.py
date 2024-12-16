@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from routes.file_upload import router as file_upload_router
+from routes.presupuesto import report
 from utils.config.connection import test_database_connection
 
 
@@ -20,6 +21,7 @@ app.add_middleware(
 )
 
 app.include_router(file_upload_router)
+app.include_router(report.router)
 
 #@app.on_event("startup")
 #async def startup_event():

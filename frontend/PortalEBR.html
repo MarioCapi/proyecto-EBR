@@ -9,9 +9,10 @@
         <script src="https://cdn.tailwindcss.com"></script>
         <!-- Font Awesome para iconos -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>        
 
         <link rel="stylesheet" href="./static/css/PortalEBR.css">
+        <link rel="stylesheet" href="./static/css/presupuesto.css">
     </head>
 <body class="bg-[#E3F2FD]">
     <div id="app">
@@ -113,7 +114,10 @@
                 <!-- Budget View -->
                 <div v-if="activeView === 'budget'" class="space-y-6">
                     <h2 class="text-2xl font-bold text-[#102A43]">Reporte de Presupuesto</h2>
-                    <!-- Aquí irá el contenido del reporte de presupuesto -->
+                    <!-- Contenedor para cargar el contenido dinámico de presupuesto.html -->
+                    <div id="content">
+                        <!-- Aquí se cargará el contenido de presupuesto.html -->
+                    </div>
                 </div>
 
                 <!-- Analytics View -->

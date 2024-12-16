@@ -7,7 +7,8 @@ createApp({
             activeView: 'upload',
             uploadProgress: 0,
             files: [],
-            uploadComplete: false
+            uploadComplete: false,
+            presupuestoContent: '' // Nuevo
         }
     },
     methods: {
@@ -16,7 +17,48 @@ createApp({
         },
         setActiveView(view) {
             this.activeView = view
+            if (view === 'budget') {
+                this.loadPresupuestoContent()
+            }
         },
+        
+        async loadPresupuestoContent() {
+            try 
+            {
+                // Esperar un momento para asegurar que el DOM se ha actualizado
+                await this.$nextTick();
+                const contentDiv = document.getElementById('content');
+                if (!contentDiv) {
+                    throw new Error('No se encontró el elemento con id "content"');
+                }
+                contentDiv.innerHTML = `
+                    <div id="report-container">
+                        <table id="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Año</th>
+                                    <th>Mes</th>
+                                    <th>Nombre del Mes</th>
+                                    <th>Total Débito</th>
+                                    <th>Total Crédito</th>
+                                    <th>Diferencia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                        <canvas id="report-chart"></canvas>
+                    </div>
+                `;
+                const script = document.createElement('script');
+                script.src = './static/js/presupuesto.js';
+                document.body.appendChild(script);
+
+            } catch (error) {
+                console.error('Error al cargar el contenido de presupuesto:', error);
+            }
+        },
+
         handleFileDrop(e) {
             const droppedFiles = Array.from(e.dataTransfer.files)
             this.validateAndAddFiles(droppedFiles)

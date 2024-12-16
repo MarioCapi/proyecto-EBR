@@ -2,6 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from utils.config.connection import get_db
 from utils.exec_any_SP_SQLServer import ejecutar_procedimiento
+from utils.CalculatePrediction import generateBudgetExpectation
+from typing import List, Dict
+
 
 presupuesto_router = APIRouter()
 @presupuesto_router.get("/GenerarReporteIngresos/{anio}")
@@ -38,9 +41,10 @@ async def generar_reporte_ingresos(
                 "data": [],
                 "message": f"No se encontraron datos para el año {anio}"
             }
-
+        predicciones = generateBudgetExpectationFull(anio, resultados)
         return {
             "data": resultados,
+            "predictions": predicciones,
             "message": f"Datos obtenidos exitosamente para el año {anio}"
         }
 
@@ -51,4 +55,24 @@ async def generar_reporte_ingresos(
         raise HTTPException(
             status_code=500, 
             detail=f"Error al generar el reporte: {str(e)}"
+        )
+
+
+def generateBudgetExpectationFull(
+    anio: int,  # Parámetro de año
+    data: List[Dict]) -> Dict:  # Parámetro de datos
+    try:
+        resultados = generateBudgetExpectation(data)
+        return {
+            "data": resultados,
+            "message": f"Datos generados exitosamente para el año {anio}"
+        }
+
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        print(f"Error en generar_reporte presupuesto: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error al generar el reporte presupuesto: {str(e)}"
         )

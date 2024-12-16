@@ -22,11 +22,26 @@ GO
 CREATE SCHEMA admin;
 GO
 
--- Tabla de Empresas en esquema admin
+-- Eliminar las restricciones de clave foránea si existen
+IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK__Users__company_i__*')
+    ALTER TABLE admin.Users DROP CONSTRAINT FK__Users__company_i__;
+IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK__AuditLog__user_i__*')
+    ALTER TABLE admin.AuditLog DROP CONSTRAINT FK__AuditLog__user_i__;
+
+-- Eliminar las tablas si existen (en orden inverso a las dependencias)
+IF OBJECT_ID('admin.AuditLog', 'U') IS NOT NULL DROP TABLE admin.AuditLog;
+IF OBJECT_ID('admin.RolePermissions', 'U') IS NOT NULL DROP TABLE admin.RolePermissions;
+IF OBJECT_ID('admin.Permissions', 'U') IS NOT NULL DROP TABLE admin.Permissions;
+IF OBJECT_ID('admin.Roles', 'U') IS NOT NULL DROP TABLE admin.Roles;
+IF OBJECT_ID('admin.Users', 'U') IS NOT NULL DROP TABLE admin.Users;
+IF OBJECT_ID('admin.Companies', 'U') IS NOT NULL DROP TABLE admin.Companies;
+
+-- Crear las tablas
 CREATE TABLE admin.Companies (
     company_id INT IDENTITY(1,1) PRIMARY KEY,
     company_name NVARCHAR(100) NOT NULL,
-    tax_id NVARCHAR(20) NOT NULL UNIQUE,
+    tax_identification_type NVARCHAR(10) NOT NULL,
+    tax_id NVARCHAR(20) NOT NULL,
     address NVARCHAR(200),
     phone NVARCHAR(20),
     status NVARCHAR(20) DEFAULT 'ACTIVE',  -- ACTIVE, SUSPENDED, CANCELLED
@@ -34,10 +49,11 @@ CREATE TABLE admin.Companies (
     subscription_end_date DATE,
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
-    active BIT DEFAULT 1
+    active BIT DEFAULT 1,
+    CONSTRAINT UQ_tax_id_type UNIQUE (tax_identification_type, tax_id)
 );
 
--- Tabla de Usuarios en esquema admin
+-- Resto de las tablas con sus claves foráneas
 CREATE TABLE admin.Users (
     user_id INT IDENTITY(1,1) PRIMARY KEY,
     company_id INT,

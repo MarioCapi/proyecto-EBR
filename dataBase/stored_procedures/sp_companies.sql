@@ -4,6 +4,7 @@ GO
 -- Procedimiento para crear una nueva empresa
 CREATE OR ALTER PROCEDURE admin.sp_CreateCompany
     @company_name NVARCHAR(100),
+    @tax_identification_type NVARCHAR(10),
     @tax_id NVARCHAR(20),
     @address NVARCHAR(200) = NULL,
     @phone NVARCHAR(20) = NULL,
@@ -13,11 +14,14 @@ AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
-        IF EXISTS (SELECT 1 FROM admin.Companies WHERE tax_id = @tax_id)
-            THROW 50000, 'El ID fiscal ya existe en el sistema.', 1;
+        IF EXISTS (SELECT 1 FROM admin.Companies 
+                  WHERE tax_identification_type = @tax_identification_type 
+                  AND tax_id = @tax_id)
+            THROW 50000, 'La combinación de tipo y número de identificación fiscal ya existe.', 1;
 
         INSERT INTO admin.Companies (
             company_name,
+            tax_identification_type,
             tax_id,
             address,
             phone,
@@ -26,6 +30,7 @@ BEGIN
         )
         VALUES (
             @company_name,
+            @tax_identification_type,
             @tax_id,
             @address,
             @phone,
@@ -50,6 +55,7 @@ BEGIN
     SELECT 
         company_id,
         company_name,
+        tax_identification_type,
         tax_id,
         address,
         phone,
@@ -64,8 +70,9 @@ BEGIN
 END;
 GO
 
--- Procedimiento para listar empresas con filtros
+-- Procedimiento combinado para obtener empresas
 CREATE OR ALTER PROCEDURE admin.sp_GetCompanies
+    @company_id INT = NULL,
     @status NVARCHAR(20) = NULL,
     @subscription_type NVARCHAR(20) = NULL,
     @search_term NVARCHAR(100) = NULL,
@@ -75,9 +82,32 @@ AS
 BEGIN
     SET NOCOUNT ON;
     
+    -- Si se proporciona un ID específico, devolver solo esa empresa
+    IF @company_id IS NOT NULL
+    BEGIN
+        SELECT 
+            company_id,
+            company_name,
+            tax_identification_type,
+            tax_id,
+            address,
+            phone,
+            status,
+            subscription_type,
+            subscription_end_date,
+            created_at,
+            updated_at,
+            active
+        FROM admin.Companies
+        WHERE company_id = @company_id AND active = 1;
+        RETURN;
+    END
+
+    -- Si no se proporciona ID, devolver lista filtrada
     SELECT 
         company_id,
         company_name,
+        tax_identification_type,
         tax_id,
         address,
         phone,
@@ -106,6 +136,7 @@ GO
 CREATE OR ALTER PROCEDURE admin.sp_UpdateCompany
     @company_id INT,
     @company_name NVARCHAR(100),
+    @tax_identification_type NVARCHAR(10),
     @tax_id NVARCHAR(20),
     @address NVARCHAR(200) = NULL,
     @phone NVARCHAR(20) = NULL,
@@ -119,12 +150,16 @@ BEGIN
         IF NOT EXISTS (SELECT 1 FROM admin.Companies WHERE company_id = @company_id)
             THROW 50000, 'La empresa no existe.', 1;
 
-        IF EXISTS (SELECT 1 FROM admin.Companies WHERE tax_id = @tax_id AND company_id != @company_id)
-            THROW 50000, 'El ID fiscal ya existe para otra empresa.', 1;
+        IF EXISTS (SELECT 1 FROM admin.Companies 
+                  WHERE tax_identification_type = @tax_identification_type 
+                  AND tax_id = @tax_id 
+                  AND company_id != @company_id)
+            THROW 50000, 'La combinación de tipo y número de identificación fiscal ya existe para otra empresa.', 1;
 
         UPDATE admin.Companies
         SET 
             company_name = @company_name,
+            tax_identification_type = @tax_identification_type,
             tax_id = @tax_id,
             address = @address,
             phone = @phone,

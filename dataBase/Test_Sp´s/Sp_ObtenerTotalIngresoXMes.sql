@@ -9,3 +9,10 @@ EXEC [dbo].[sp_ObtenerTotalIngresoXMes]
     @AnioBase = @AnioBase;
 GO
 
+DECLARE @Mes int =1
+DECLARE @AnioBase int = 2024
+EXECUTE [dbo].[sp_ObtenerTotalesDebitoCreditoPorAnio] 
+   @Mes
+  ,@AnioBase
+GO
+

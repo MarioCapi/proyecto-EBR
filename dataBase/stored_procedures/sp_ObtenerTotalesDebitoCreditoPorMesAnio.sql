@@ -15,7 +15,7 @@ BEGIN
         DATENAME(MONTH, arc.Periodo) AS NombreMes,
         SUM(dat.Debito) AS TotalDebito,
         SUM(dat.Credito) AS TotalCredito,
-        SUM(dat.Debito) - SUM(dat.Credito) AS Diferencia
+        SUM(dat.Credito) - SUM(dat.Debito) AS Diferencia
     FROM 
         admin.empresas emp
         INNER JOIN admin.Archivos arc ON emp.empresaId = arc.empresaId

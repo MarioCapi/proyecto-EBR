@@ -1,1 +1,34 @@
- 
+budget_automation/
+│
+├── src/
+│   ├── auth/
+│   │   ├── __init__.py
+│   │   ├── routes.py          # Rutas de autenticación
+│   │   ├── controllers.py     # Lógica de control de autenticación
+│   │   ├── models.py          # Modelos de usuario y empresa
+│   │   └── schemas.py         # Esquemas de validación
+│   │
+│   ├── database/
+│   │   ├── __init__.py
+│   │   └── connection.py      # Configuración de conexión a SQL Server
+│   │
+│   ├── config/
+│   │   ├── __init__.py
+│   │   └── settings.py        # Configuraciones generales
+│   │
+│   └── utils/
+│       ├── __init__.py
+│       └── security.py        # Utilidades de seguridad (hash, tokens)
+│
+├── migrations/               # Scripts de migración de base de datos
+│   └── initial_schema.sql
+│
+├── tests/
+│   └── auth/
+│       ├── __init__.py
+│       └── test_auth.py
+│
+├── requirements.txt
+├── .env.example
+├── .gitignore
+└── main.py 

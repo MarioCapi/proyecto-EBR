@@ -1,5 +1,9 @@
 const { createApp } = Vue
+<<<<<<< HEAD
 
+=======
+const UrlAPIUpload = 'http://127.0.0.1:8080/upload/';
+>>>>>>> 1989a20d8b073479a4014214b13906e19263d16c
 createApp({
     data() {
         return {
@@ -7,7 +11,12 @@ createApp({
             activeView: 'upload',
             uploadProgress: 0,
             files: [],
+<<<<<<< HEAD
             uploadComplete: false
+=======
+            uploadComplete: false,
+            presupuestoContent: '' // Nuevo
+>>>>>>> 1989a20d8b073479a4014214b13906e19263d16c
         }
     },
     methods: {
@@ -16,7 +25,72 @@ createApp({
         },
         setActiveView(view) {
             this.activeView = view
+<<<<<<< HEAD
         },
+=======
+            if (view === 'budget') {
+                this.loadPresupuestoContent()
+            }
+        },
+        
+        async loadPresupuestoContent() {
+            try {
+                await this.$nextTick();
+                
+                const contentDiv = document.getElementById('content');
+                if (!contentDiv) {
+                    throw new Error('No se encontró el elemento con id "content"');
+                }        
+                contentDiv.innerHTML = `
+                    <div id="report-container">
+                        <table id="report-table" class="w-full">
+                            <thead>
+                                <tr>
+                                    <th class="px-4 py-2">Año</th>
+                                    <th class="px-4 py-2">Mes</th>
+                                    <th class="px-4 py-2">Nombre del Mes</th>
+                                    <th class="px-4 py-2">Total Débito</th>
+                                    <th class="px-4 py-2">Total Crédito</th>
+                                    <th class="px-4 py-2">Diferencia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                        <div class="mt-8">
+                            <canvas id="report-chart"></canvas>
+                        </div>
+                    </div>
+                `;
+        
+                // Remover script anterior si existe
+                const oldScript = document.getElementById('presupuesto-script');
+                if (oldScript) {
+                    oldScript.remove();
+                }
+        
+                // Cargar nuevo script
+                const script = document.createElement('script');
+                script.id = 'presupuesto-script';
+                script.src = './static/js/presupuesto.js';
+                script.onload = () => {
+                    console.log('Script de presupuesto cargado correctamente');
+                    // Llamar directamente a la función de inicialización
+                    if (window.initPresupuesto) {
+                        window.initPresupuesto();
+                    }
+                };
+                script.onerror = (error) => {
+                    console.error('Error al cargar el script de presupuesto:', error);
+                };
+                document.body.appendChild(script);
+        
+            } catch (error) {
+                console.error('Error al cargar el contenido de presupuesto:', error);
+            }
+        },
+
+>>>>>>> 1989a20d8b073479a4014214b13906e19263d16c
         handleFileDrop(e) {
             const droppedFiles = Array.from(e.dataTransfer.files)
             this.validateAndAddFiles(droppedFiles)
@@ -61,9 +135,39 @@ createApp({
                 }
             }, 200)
         },
+<<<<<<< HEAD
         processFiles() {
             // Aquí iría la lógica para procesar los archivos
             alert('Procesando archivos...')
+=======
+        async processFiles() {
+            if (this.files.length === 0) {
+                alert('No hay archivos para procesar.')
+                return
+            }
+
+            const file = this.files[0] // Procesar solo el primer archivo seleccionado
+            const formData = new FormData()
+            formData.append('file', file)
+
+            try {
+                const response = await axios.post(UrlAPIUpload, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    },
+                    onUploadProgress: progressEvent => {
+                        this.uploadProgress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+                    }
+                })
+
+                alert('Archivo procesado con éxito: ' + JSON.stringify(response.data))
+                this.uploadComplete = true
+            } catch (error) {
+                alert('Error al procesar el archivo: ' + error.response?.data?.detail || error.message)
+                this.uploadProgress = 0
+                this.uploadComplete = false
+            }
+>>>>>>> 1989a20d8b073479a4014214b13906e19263d16c
         }
     }
 }).mount('#app')

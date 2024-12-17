@@ -128,7 +128,7 @@ def find_table_start(df: pd.DataFrame) -> tuple[int, dict]:
     
     columnas_esperadas = {
         'codigo': ['codigo', 'código', 'codigo_cuenta', 'cod', 'código cuenta contable'],
-        'nivel': ['nivel', 'niv'],
+        #'nivel': ['nivel', 'niv'],
         'transaccional': ['transaccional', 'trans'],
         'nombre': ['nombre', 'nombre_cuenta', 'descripcion', 'nombre cuenta'],
         'saldo_inicial': ['saldo inicial', 'saldo_inicial', 'saldo_i'],
@@ -172,7 +172,8 @@ def process_main_data(df: pd.DataFrame, start_row: int, mapeo_columnas: dict) ->
         
         try:
             # Verificar si la fila es la cadena de procesamiento
-            primera_columna = str(row[mapeo_columnas['nivel']]).strip().lower()
+            #primera_columna = str(row[mapeo_columnas['nivel']]).strip().lower()
+            primera_columna = str(row[0]).strip().lower()
             if primera_columna.startswith('procesado'):
                 print(f"Se encontró marca de procesamiento en fila {i}: {primera_columna}")
                 break
@@ -325,9 +326,9 @@ def save_datos_contables(db_session, datos: List[Dict], archivo_id: int):
     for i, dato in enumerate(datos):
         try:
             # Validar que todos los campos requeridos existan
-            campos_requeridos = ['nivel', 'transaccional', 'codigo_cuenta', 
-                            'nombre_cuenta', 'saldo_inicial', 'debito', 
-                            'credito', 'saldo_final']
+            #nivel ya no es necesario
+            #campos_requeridos = ['nivel', 'transaccional', 'codigo_cuenta','nombre_cuenta', 'saldo_inicial', 'debito','credito', 'saldo_final']
+            campos_requeridos = ['transaccional', 'codigo_cuenta','nombre_cuenta', 'saldo_inicial', 'debito','credito', 'saldo_final']
             
             for campo in campos_requeridos:
                 if campo not in dato:
@@ -336,7 +337,7 @@ def save_datos_contables(db_session, datos: List[Dict], archivo_id: int):
             # Preparar y validar los datos
             datos_procesados = {
                 'archivo_id': archivo_id,
-                'nivel_id': str(dato['nivel']),
+                #'nivel_id': str(dato['nivel']),
                 'transaccional': bool(dato['transaccional']),
                 'codigo_cuenta': str(dato['codigo_cuenta']),
                 'nombre_cuenta': str(dato['nombre_cuenta']),

@@ -43,16 +43,17 @@ def sp_save_archivo(db_session, nombre_archivo: str, empresa_id: int, periodo: s
         Periodo=periodo
     )
 
-def sp_save_dato_contable(db_session, archivo_id: int, nivel_id: str, 
-                        transaccional: bool, codigo_cuenta: str, nombre_cuenta: str,
-                        saldo_inicial: float, debito: float, credito: float, 
-                        saldo_final: float):
+#def sp_save_dato_contable(db_session, archivo_id: int, nivel_id: str,transaccional: bool, codigo_cuenta: str, nombre_cuenta: str,saldo_inicial: float, debito: float, credito: float, saldo_final: float):
+def sp_save_dato_contable(db_session, archivo_id: int, 
+                        transaccional: bool, codigo_cuenta: str, nombre_cuenta: str,saldo_inicial: float, 
+                        debito: float, credito: float, saldo_final: float):
     """Ejecuta el SP para guardar un dato contable"""
     try:
         # Validar tipos de datos antes de enviar al SP
+        # < nivel_id: str >:    en version anterior se requeria el parametro NIVEL
+        # ahora se calcula en el SP este parametro
         params = {
             'ArchivoID': int(archivo_id),
-            'NivelID': str(nivel_id),
             'Transaccional': bool(transaccional),
             'CodigoCuenta': str(codigo_cuenta),
             'NombreCuenta': str(nombre_cuenta),

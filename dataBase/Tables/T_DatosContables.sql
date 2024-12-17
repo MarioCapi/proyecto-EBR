@@ -10,6 +10,5 @@ CREATE TABLE Admin.DatosContables (
     Debito DECIMAL(18, 2) NOT NULL,
     Credito DECIMAL(18, 2) NOT NULL,
     SaldoFinal DECIMAL(18, 2) NOT NULL,
-    FOREIGN KEY (ArchivoID) REFERENCES Admin.Archivos(ArchivoID),
-    FOREIGN KEY (NivelID) REFERENCES Admin.Niveles(NivelID)
+    FOREIGN KEY (ArchivoID) REFERENCES Admin.Archivos(ArchivoID)    
 );

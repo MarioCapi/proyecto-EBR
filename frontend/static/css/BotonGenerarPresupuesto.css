@@ -1,0 +1,53 @@
+/* Estilos para el contenedor del botón */
+.prediction-button-container {
+    display: flex;
+    justify-content: flex-end;
+    padding: 20px;
+    margin-bottom: 10px;
+}
+
+/* Estilos para el botón de ciencia de datos */
+.data-science-button {
+    background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(75, 108, 183, 0.2);
+}
+
+.data-science-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(75, 108, 183, 0.3);
+    background: linear-gradient(135deg, #5d7ec9 0%, #243b6b 100%);
+}
+
+.data-science-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(75, 108, 183, 0.2);
+}
+
+/* Asegúrate de incluir Font Awesome para el ícono */
+.data-science-button i {
+    font-size: 18px;
+}
+
+/* Efecto de pulso suave */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.data-science-button:focus {
+    outline: none;
+    animation: pulse 1s infinite;
+    box-shadow: 0 0 0 3px rgba(75, 108, 183, 0.3);
+}

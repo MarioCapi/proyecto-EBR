@@ -14,7 +14,7 @@ function determinarAnioConsulta() {
     return anioConsulta;
 }
 
-
+let presupuestoData = null;
 
 // Función principal de inicialización
 async function initPresupuesto() {
@@ -31,6 +31,7 @@ async function initPresupuesto() {
         }
         const data = await response.json();
         console.log('Datos recibidos:', data);
+        presupuestoData = data;
         
         if (data && data.data) {
             renderTable(data.data);
@@ -40,6 +41,24 @@ async function initPresupuesto() {
         }
     } catch (error) {
         console.error('Error al obtener datos:', error);
+    }
+}
+// Evento click del botón de predicción
+function setupPredictionButton() {
+    const generatePredictionBtn = document.getElementById('generatePredictionBtn');
+    if (generatePredictionBtn) {
+        generatePredictionBtn.addEventListener('click', function() {
+            if (presupuestoData?.predictions?.data) {
+                // Guardar solo los datos relevantes de predicción
+                const predictionData = presupuestoData.predictions.data;
+                console.log('Guardando datos de predicción:', predictionData);
+                sessionStorage.setItem('predictionData', JSON.stringify(predictionData));
+                window.location.href = 'PrediccionesPresupuesto.html';
+            } else {
+                console.error('No hay datos de predicción disponibles');
+                alert('No hay datos de predicción disponibles en este momento');
+            }
+        });
     }
 }
 
@@ -176,6 +195,14 @@ function renderChart(data) {
     });
 }
 
+// Modificar el evento click del botón en el archivo original
+document.getElementById('generatePredictionBtn').addEventListener('click', function() {
+    // Guardar los datos en sessionStorage
+    sessionStorage.setItem('predictionData', JSON.stringify(presupuestoData));
+    // Redirigir a la página de predicciones
+    window.location.href = 'PrediccionesPresupuesto.html';
+});
+
 // Exponer la función de inicialización globalmente
 window.initPresupuesto = initPresupuesto;
 
@@ -183,5 +210,6 @@ window.initPresupuesto = initPresupuesto;
 document.addEventListener("DOMContentLoaded", () => {
     if (document.getElementById('report-container')) {
         initPresupuesto();
+        setupPredictionButton();
     }
 });

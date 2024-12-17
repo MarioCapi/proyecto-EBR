@@ -11,8 +11,10 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>        
 
+        <!-- Agregar en el <head> del HTML -->        
         <link rel="stylesheet" href="./static/css/PortalEBR.css">
         <link rel="stylesheet" href="./static/css/presupuesto.css">
+        <link rel="stylesheet" href="./static/css/BotonGenerarPresupuesto.css">
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         
@@ -120,6 +122,12 @@
                     <!-- Contenedor para cargar el contenido dinámico de presupuesto.html -->
                     <div id="content">
                         <!-- Aquí se cargará el contenido de presupuesto.html -->
+                    </div>
+                    <div class="prediction-button-container">
+                        <button id="generatePredictionBtn" class="data-science-button">
+                            <i class="fas fa-brain"></i> <!-- Ícono de cerebro para IA -->
+                            Generar Presupuesto
+                        </button>
                     </div>
                 </div>
 

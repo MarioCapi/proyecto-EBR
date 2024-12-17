@@ -1,0 +1,56 @@
+<!-- predicciones.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predicciones Presupuestales</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="./static/css/prediccionesPresupuesto.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="predictions-container">
+        <header class="predictions-header">
+            <h1><i class="fas fa-brain"></i> Predicciones Presupuestales</h1>
+            <div class="metrics-summary">
+                <div class="metric-card">
+                    <i class="fas fa-calendar"></i>
+                    <span id="yearRange"></span>
+                </div>
+                <div class="metric-card">
+                    <i class="fas fa-chart-line"></i>
+                    <span id="totalMonths"></span>
+                </div>
+                <div class="metric-card">
+                    <i class="fas fa-clock"></i>
+                    <span id="generationDate"></span>
+                </div>
+            </div>
+        </header>
+
+        <div class="chart-container">
+            <canvas id="predictionsChart"></canvas>
+        </div>
+
+        <div class="table-container">
+            <table id="predictionsTable">
+                <thead>
+                    <tr>
+                        <th>Mes</th>
+                        <th>Métrica</th>
+                        <th>Valor Predicho</th>
+                        <th>R²</th>
+                        <th>Tendencia</th>
+                        <th>Coeficiente</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Se llenará dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="./static/js/prediccionesPresupuesto.js"></script>
+</body>
+</html>

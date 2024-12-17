@@ -48,7 +48,8 @@ def generateBudgetExpectation(dataFull: List[Dict]) -> Dict:
             X = datos_mes["Anio"].values.reshape(-1, 1)
             
             # Generar predicciones para cada métrica
-            for metrica in ["TotalDebito", "TotalCredito", "Diferencia"]:
+            #for metrica in ["TotalDebito", "TotalCredito", "Diferencia"]:
+            for metrica in ["Diferencia"]:
                 y = datos_mes[metrica].values
                 
                 # Crear y entrenar el modelo

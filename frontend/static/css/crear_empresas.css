@@ -9,7 +9,7 @@ body {
     max-width: 600px;
     margin: 50px auto;
     background: #fff;
-    padding: 20px;
+    padding: 20px 30px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -17,33 +17,99 @@ body {
 h1 {
     text-align: center;
     color: #333;
+    margin-bottom: 30px;
 }
 
 form {
     display: flex;
     flex-direction: column;
+    gap: 15px;
 }
 
 label {
-    margin-bottom: 5px;
     color: #555;
+    font-weight: 500;
 }
 
-input, select, button {
-    margin-bottom: 15px;
+input, select {
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #007BFF;
+}
+
+input[type="number"] {
+    width: 150px;
+}
+
+input[type="email"] {
+    width: 100%;
+}
+
+select {
+    background-color: white;
+    cursor: pointer;
 }
 
 button {
     background-color: #007BFF;
     color: #fff;
     border: none;
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 16px;
     cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s;
 }
 
 button:hover {
     background-color: #0056b3;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+/* Estilos para campos requeridos */
+input:required, select:required {
+    border-left: 3px solid #007BFF;
+}
+
+#other_company_type_container {
+    margin-top: -10px;  /* Para acercarlo al select cuando aparece */
+}
+
+#other_company_type_container input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+#other_company_type_container input:focus {
+    outline: none;
+    border-color: #007BFF;
+}
+
+/* Animación para mostrar/ocultar el campo */
+#other_company_type_container {
+    transition: all 0.3s ease;
+    overflow: hidden;
+    opacity: 1;
+}
+
+#other_company_type_container.hidden {
+    opacity: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
 }

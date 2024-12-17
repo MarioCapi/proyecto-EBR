@@ -42,6 +42,9 @@ CREATE TABLE admin.Companies (
     company_name NVARCHAR(100) NOT NULL,
     tax_identification_type NVARCHAR(10) NOT NULL,
     tax_id NVARCHAR(20) NOT NULL,
+    email NVARCHAR(100),
+    num_employees INT,
+    company_type NVARCHAR(50),
     address NVARCHAR(200),
     phone NVARCHAR(20),
     status NVARCHAR(20) DEFAULT 'ACTIVE',  -- ACTIVE, SUSPENDED, CANCELLED

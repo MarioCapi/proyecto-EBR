@@ -94,27 +94,7 @@ function renderChart(data) {
             labels: labels,
             datasets: [
                 {
-                    label: "Total Débito",
-                    data: debitData,
-                    borderColor: "#3498db",
-                    backgroundColor: "rgba(52, 152, 219, 0.1)",
-                    borderWidth: 2,
-                    pointBackgroundColor: "#3498db",
-                    pointRadius: 4,
-                    tension: 0.4
-                },
-                {
-                    label: "Total Crédito",
-                    data: creditData,
-                    borderColor: "#e74c3c",
-                    backgroundColor: "rgba(231, 76, 60, 0.1)",
-                    borderWidth: 2,
-                    pointBackgroundColor: "#e74c3c",
-                    pointRadius: 4,
-                    tension: 0.4
-                },
-                {
-                    label: "Diferencia",
+                    label: "Total Ingreso",
                     data: diferenciaData,
                     borderColor: "#2ecc71",
                     backgroundColor: "rgba(46, 204, 113, 0.1)",

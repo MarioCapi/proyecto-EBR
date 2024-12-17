@@ -165,27 +165,58 @@ def process_main_data(df: pd.DataFrame, start_row: int, mapeo_columnas: dict) ->
     """
     Procesa los datos principales usando el mapeo de columnas
     """
-    # Obtener los datos desde la fila siguiente al encabezado
     data_rows = []
     
     for i in range(start_row + 1, len(df)):
         row = df.iloc[i]
         
-        # Crear diccionario con los datos mapeados
-        row_dict = {
-            'codigo_cuenta': str(row[mapeo_columnas['codigo']]).strip(),
-            'nombre_cuenta': str(row[mapeo_columnas['nombre']]).strip(),
-            'saldo_inicial': float(str(row[mapeo_columnas.get('saldo_inicial', 0)]).replace(',', '') or 0),
-            'saldo_final': float(str(row[mapeo_columnas.get('saldo_final', 0)]).replace(',', '') or 0),
-            'debito': float(str(row[mapeo_columnas.get('debito', 0)]).replace(',', '') or 0),
-            'credito': float(str(row[mapeo_columnas.get('credito', 0)]).replace(',', '') or 0),
-            'nivel': str(row[mapeo_columnas.get('nivel', '')]).strip() if 'nivel' in mapeo_columnas else '',
-            'transaccional': str(row[mapeo_columnas.get('transaccional', '')]).strip().lower() == 'si' 
-                        if 'transaccional' in mapeo_columnas else False
-        }
-        data_rows.append(row_dict)
+        try:
+            # Verificar si la fila es la cadena de procesamiento
+            primera_columna = str(row[mapeo_columnas['nivel']]).strip().lower()
+            if primera_columna.startswith('procesado'):
+                print(f"Se encontró marca de procesamiento en fila {i}: {primera_columna}")
+                break
+                
+            # Verificar si todas las columnas numéricas son válidas
+            valores_numericos = [
+                str(row[mapeo_columnas.get(campo, 0)]).replace(',', '')
+                for campo in ['saldo_inicial', 'saldo_final', 'debito', 'credito']
+                if campo in mapeo_columnas
+            ]
+            
+            # Si todos los valores numéricos están vacíos o no son números, saltar la fila
+            if all(not val.strip() or not any(char.isdigit() for char in val) for val in valores_numericos):
+                print(f"Fila {i} ignorada: no contiene valores numéricos válidos")
+                continue
+            
+            # Crear diccionario con los datos mapeados
+            row_dict = {
+                'codigo_cuenta': str(row[mapeo_columnas['codigo']]).strip(),
+                'nombre_cuenta': str(row[mapeo_columnas['nombre']]).strip(),
+                'saldo_inicial': float(str(row[mapeo_columnas.get('saldo_inicial', 0)]).replace(',', '') or 0),
+                'saldo_final': float(str(row[mapeo_columnas.get('saldo_final', 0)]).replace(',', '') or 0),
+                'debito': float(str(row[mapeo_columnas.get('debito', 0)]).replace(',', '') or 0),
+                'credito': float(str(row[mapeo_columnas.get('credito', 0)]).replace(',', '') or 0),
+                'nivel': str(row[mapeo_columnas.get('nivel', '')]).strip() if 'nivel' in mapeo_columnas else '',
+                'transaccional': str(row[mapeo_columnas.get('transaccional', '')]).strip().lower() == 'si' 
+                            if 'transaccional' in mapeo_columnas else False
+            }
+            
+            # Validar que los campos obligatorios no estén vacíos
+            if row_dict['codigo_cuenta'] and row_dict['nombre_cuenta']:
+                data_rows.append(row_dict)
+            else:
+                print(f"Fila {i} ignorada: campos obligatorios vacíos")
+                
+        except ValueError as ve:
+            print(f"Error procesando fila {i}: {str(ve)}")
+            continue
+        except Exception as e:
+            print(f"Error inesperado en fila {i}: {str(e)}")
+            continue
     
-    return data_rows 
+    return data_rows
+
 
 def save_empresa(db_session, metadata: FileMetadata):
     try:

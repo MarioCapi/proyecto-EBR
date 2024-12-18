@@ -13,6 +13,50 @@ createApp({
         }
     },
     methods: {
+        // Método para parsear el valor de la moneda
+        parseCurrency(value) {
+            // Eliminar caracteres no numéricos, excepto el punto y la coma
+            value = value.replace(/[$\s]/g, ''); // Eliminar el símbolo de la moneda y espacios
+            // Reemplazar el punto por nada (para miles) y la coma por un punto (para decimales)
+            value = value.replace(/\./g, '').replace(/,/g, '.');
+            return parseFloat(value);
+        },
+
+        updateCounter(event) {
+            const sliderValue = event.target.value;
+            document.getElementById('sliderValue').innerText = sliderValue; // Actualiza el valor mostrado
+            this.adjustTableValues(sliderValue);
+        },
+
+        adjustTableValues(sliderValue) {
+            const tbody = document.querySelector('#predictionsTable tbody');
+            if (!tbody) {
+                console.error('No se encontró el elemento tbody');
+                return;
+            }
+    
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach(row => {
+            const valorPredichoCell = row.cells[1]; // Suponiendo que el valor predicho está en la segunda celda
+            const coeficienteCell = row.cells[3]; // Suponiendo que el coeficiente está en la cuarta celda
+
+            // Obtener los valores originales
+            const originalValorPredicho = parseFloat(valorPredichoCell.getAttribute('data-original-value'));
+            const originalCoeficiente = parseFloat(coeficienteCell.getAttribute('data-original-value'));
+
+            // Calcular el nuevo valor basado en el porcentaje del slider
+            const newValorPredicho = originalValorPredicho * (1 + (sliderValue / 100));
+            const newCoeficiente = originalCoeficiente * (1 + (sliderValue / 100));
+
+            // Actualizar las celdas con el nuevo valor
+            valorPredichoCell.textContent = formatCurrency(newValorPredicho);
+            coeficienteCell.textContent = formatCurrency(newCoeficiente);
+        });
+    },
+
+
+
+
         toggleSidebar() {
             this.isSidebarCollapsed = !this.isSidebarCollapsed
         },
@@ -155,15 +199,30 @@ createApp({
                     console.error('Error al cargar el script de predicciones:', error);
                 };
                 document.body.appendChild(script);
+
+                const sliderContainer = document.createElement('div');
+                sliderContainer.className = 'slider-container';
+                sliderContainer.innerHTML = `
+                    <label for="dataSlider" class="text-[#102A43] font-semibold">Ajustar Porcentaje de Incremento:</label>
+                    <input type="range" id="dataSlider" min="0" max="100" value="1" class="slider" @input="updateCounter">
+                    <span id="sliderValue" class="text-[#102A43] font-semibold">1</span>
+                `;
+                
+               // Insertar el control deslizante en el DOM
+                const predictionsTable = document.getElementById('predictionsTable');
+                predictionsTable.parentNode.insertBefore(sliderContainer, predictionsTable);
+            
+                // Asegúrate de que Vue reconozca el nuevo elemento
+                this.$nextTick(() => {
+                const slider = document.getElementById('dataSlider');
+                slider.addEventListener('input', this.updateCounter);
+                });
+            
         
             } catch (error) {
                 console.error('Error al cargar el contenido de predicciones:', error);
             }
         },
-
-
-
-
 
         handleFileDrop(e) {
             const droppedFiles = Array.from(e.dataTransfer.files)
@@ -211,31 +270,38 @@ createApp({
         },
         async processFiles() {
             if (this.files.length === 0) {
-                alert('No hay archivos para procesar.')
-                return
+                alert('No hay archivos para procesar.');
+                return;
             }
-
-            const file = this.files[0] // Procesar solo el primer archivo seleccionado
-            const formData = new FormData()
-            formData.append('file', file)
-
-            try {
-                const response = await axios.post(UrlAPIUpload, formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    },
-                    onUploadProgress: progressEvent => {
-                        this.uploadProgress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-                    }
-                })
-
-                alert('Archivo procesado con éxito: ' + JSON.stringify(response.data))
-                this.uploadComplete = true
-            } catch (error) {
-                alert('Error al procesar el archivo: ' + error.response?.data?.detail || error.message)
-                this.uploadProgress = 0
-                this.uploadComplete = false
-            }
+        
+            // Procesar todos los archivos seleccionados
+            const promises = Array.from(this.files).map(async (file) => {
+                const formData = new FormData();
+                formData.append('file', file);
+        
+                try {
+                    const response = await axios.post(UrlAPIUpload, formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        },
+                        onUploadProgress: progressEvent => {
+                            this.uploadProgress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                        }
+                    });
+                    this.uploadComplete = true;
+                } catch (error) {
+                    alert('Error al procesar el archivo: ' + error.response?.data?.detail || error.message);
+                    this.uploadProgress = 0;
+                    this.uploadComplete = false;
+                }
+                alert('Archivo procesado con éxito: ' + JSON.stringify(response.data));
+            });
+        
+            // Esperar a que todas las promesas se resuelvan            
+            await Promise.all(promises);            
         }
+
+
+
     }
 }).mount('#app')

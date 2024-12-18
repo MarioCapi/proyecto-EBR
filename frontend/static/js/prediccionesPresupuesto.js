@@ -41,13 +41,13 @@ function renderPredictionsTable(data) {
             Object.entries(metricas).forEach(([metrica, valores]) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${mes}</td>                    
-                    <td>${formatCurrency(valores.valor_predicho)}</td>
+                    <td>${mes}</td> 
+                    <td data-original-value="${valores.valor_predicho}">${formatCurrency(valores.valor_predicho)}</td>
                     <td class="${valores.tendencia === 'incremento' ? 'trend-up' : 'trend-down'}">
                         <i class="fas fa-${valores.tendencia === 'incremento' ? 'arrow-up' : 'arrow-down'}"></i>
                         ${valores.tendencia}
                     </td>
-                    <td>${formatCurrency(valores.coeficiente)}</td>
+                    <td data-original-value="${valores.coeficiente}">${formatCurrency(valores.coeficiente)}</td>
                 `;
                 tbody.appendChild(row);
             });
@@ -201,9 +201,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Recuperar los datos de predicción almacenados en sessionStorage
         const predictionData = JSON.parse(sessionStorage.getItem('predictionData'));
         console.log('Datos recuperados:', predictionData);
-
-        
-        
         // Verificar que los datos de predicción están completos
         if (predictionData && 
             predictionData.predictions && 

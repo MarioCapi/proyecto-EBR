@@ -10,14 +10,14 @@
         <!-- Font Awesome para iconos -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>        
-
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <!-- Agregar en el <head> del HTML -->        
+        <link rel="stylesheet" href="./static/css/BotonGenerarPresupuesto.css">
         <link rel="stylesheet" href="./static/css/PortalEBR.css">
         <link rel="stylesheet" href="./static/css/presupuesto.css">
-        <link rel="stylesheet" href="./static/css/BotonGenerarPresupuesto.css">
         <link rel="stylesheet" href="./static/css/prediccionesPresupuesto.css">
 
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        
         
     </head>
 <body class="bg-[#E3F2FD]">
@@ -45,7 +45,7 @@
                             <a href="javascript:void(0)" @click="setActiveView('budget')" 
                             class="nav-item flex items-center space-x-3 p-2 rounded">
                                 <i class="fas fa-chart-pie"></i>
-                                <span v-show="!isSidebarCollapsed">Presupuesto</span>
+                                <span v-show="!isSidebarCollapsed">Reporte de Ingresos</span>
                             </a>
                         </li>
                         <li></li>
@@ -131,12 +131,13 @@
                     <div id="content">
                         <!-- Aquí se cargará el contenido de presupuesto.html -->
                     </div>
-                    <div class="prediction-button-container">
+                    <!-- Ícono de cerebro para IA -->
+                    <!--<div class="prediction-button-container">
                         <button id="generatePredictionBtn" class="data-science-button">
-                            <i class="fas fa-brain"></i> <!-- Ícono de cerebro para IA -->
+                            <i class="fas fa-brain"></i> 
                             Generar Presupuesto
                         </button>
-                    </div>
+                    </div>-->
                 </div>
                 <!-- Prediccion Presupuesto View -->
                 <div v-if="activeView === 'budgetPresu'" class="space-y-6">
@@ -144,9 +145,13 @@
                     <div id="contentPresu"></div>
                         <!-- Aquí se cargará el contenido de presupuesto.html -->
                     </div>
-                    
+                    <div id="savePredictionContainer"  class="hidden">
+                        <button id="savePredictionButton" class="data-science-button">                        
+                            <i class="fas fa-brain"></i> 
+                            Guardar Prediccion
+                        </button>
+                    </div>                    
                 </div>
-
 
                 <!-- Analytics View -->
                 <div v-if="activeView === 'analytics'" class="space-y-6">

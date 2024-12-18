@@ -7,12 +7,8 @@ from typing import List, Dict
 def generateBudgetExpectation(dataFull: List[Dict]) -> Dict:
     """
     Genera predicciones de presupuesto para el próximo año basado en datos históricos.
-    
-    Args:
-        dataFull (List[Dict]): Lista de diccionarios con datos históricos
-        
-    Returns:
-        Dict: Predicciones por mes y métricas adicionales
+    Args: dataFull (List[Dict]): Lista de diccionarios con datos históricos
+    Returns: Dict: Predicciones por mes y métricas adicionales
     """
     try:
         # Convertir la lista de diccionarios a DataFrame

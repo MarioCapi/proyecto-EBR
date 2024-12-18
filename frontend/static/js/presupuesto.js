@@ -14,29 +14,45 @@ function determinarAnioConsulta() {
     return anioConsulta;
 }
 
-let presupuestoData = null;
 
 // Función principal de inicialización
 async function initPresupuesto() {
     console.log('Iniciando carga de datos de presupuesto...');
     const anioConsulta = determinarAnioConsulta();
-    const API_URL = `http://127.0.0.1:8080/GenerarReporteIngresos/${anioConsulta}`;
+    const API_URL = "http://127.0.0.1:8080/GenerarReporteIngresos";
 
+    const params = {
+        anio: anioConsulta,
+        nit: "901292126" // Reemplaza con el valor real
+    };
 
     try {
-        console.log('Consultando API para el año:', anioConsulta);
-        const response = await fetch(API_URL);
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(params)
+        });
+
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            console.error('Error en la respuesta de la API:', response.status, response.statusText);
+            return;
         }
-        const data = await response.json();
-        console.log('Datos recibidos:', data);
-        presupuestoData = data;
-        const predictionData = presupuestoData.predictions.data;        
-        sessionStorage.setItem('predictionData', JSON.stringify(predictionData));
-        if (data && data.data) {
-            renderTable(data.data);
-            renderChart(data.data);
+
+        const result = await response.json();
+        console.log('Datos recibidos:', result);
+
+        if (result && result.data) {
+            const presupuestoData = result.data;
+            const predictionData = result.predictions; // Ajustar si las predicciones están estructuradas de otra manera
+
+            // Guardar predicciones en el sessionStorage
+            sessionStorage.setItem('predictionData', JSON.stringify(predictionData.data));
+
+            // Renderizar tabla y gráfico
+            renderTable(presupuestoData);
+            renderChart(presupuestoData);
         } else {
             console.error('No se recibieron datos válidos de la API');
         }

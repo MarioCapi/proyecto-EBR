@@ -5,6 +5,16 @@
     padding: 20px;
     margin-bottom: 10px;
 }
+.save-button-prediction {
+    display: flex;
+    justify-content: flex-end;
+    padding: 20px;
+    margin-bottom: 10px;
+}
+
+.hidden {
+    display: none;
+}
 
 /* Estilos para el botón de ciencia de datos */
 .data-science-button {

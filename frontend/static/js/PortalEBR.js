@@ -144,6 +144,12 @@ createApp({
                     if (window.initPredictions && predictionData) {
                         window.initPredictions(predictionData);
                     }
+                      // Mostrar el botón después de cargar las predicciones
+                    const savePredictionContainer = document.getElementById('savePredictionContainer');
+                    if (savePredictionContainer) {
+                        savePredictionContainer.classList.remove('hidden');
+                    }
+
                 };
                 script.onerror = (error) => {
                     console.error('Error al cargar el script de predicciones:', error);

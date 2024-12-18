@@ -1,11 +1,12 @@
 // predicciones.js
-
+let presupuestoData = null;
 function initPredictions(data) {
     console.log('Iniciando renderizado de predicciones:', data);
 
     try {
         // Actualizar métricas
         if (data.metricas) {
+            presupuestoData = data;
             document.getElementById('yearRange').textContent = `Rango: ${data.metricas.rango_años}`;
             document.getElementById('totalMonths').textContent = `${data.metricas.total_meses_analizados} meses analizados`;
             document.getElementById('generationDate').textContent = `Generado: ${data.metricas.fecha_generacion}`;
@@ -122,22 +123,123 @@ function formatCurrency(value) {
     }).format(value);
 }
 
+
+
+
+async function GuardaPrediccionPresupuesto(data) {
+    const API_URL = "http://127.0.0.1:8080/GuardaPrediccionPresupuesto_x_empresa";
+    const Nit_Empresa = '901292126'; // NIT de la empresa
+
+    try {
+        const { anio_prediccion, predicciones_mensuales, metricas } = data;
+
+        // Mapa de meses en inglés a español
+        const monthMap = {
+            "January": "ENERO",
+            "February": "FEBRERO",
+            "March": "MARZO",
+            "April": "ABRIL",
+            "May": "MAYO",
+            "June": "JUNIO",
+            "July": "JULIO",
+            "August": "AGOSTO",
+            "September": "SEPTIEMBRE",
+            "October": "OCTUBRE",
+            "November": "NOVIEMBRE",
+            "December": "DICIEMBRE"
+        };
+
+        // Iterar sobre las predicciones mensuales
+        for (const [mes, valores] of Object.entries(predicciones_mensuales)) {
+            const prediccion = valores.Diferencia;
+
+            // Preparar los datos a enviar
+            const params = {
+                Nit_Empresa: Nit_Empresa,
+                Anio_Prediccion: anio_prediccion, 
+                Mes: monthMap[mes] || mes.toUpperCase(), // Convertir el mes a español
+                Valor_Predicho: parseFloat(prediccion.valor_predicho), // Asegúrate de que sea un número
+                Tendencia: prediccion.tendencia.toUpperCase(), // Asegúrate de que la tendencia esté en mayúsculas
+                Coeficiente_Diferencia: parseFloat(prediccion.coeficiente) // Asegúrate de que sea un número
+            };
+
+            console.log('Datos a enviar:', JSON.stringify(params, null, 2));
+            // Enviar solicitud POST a la API
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(params)
+            });
+
+            if (!response.ok) {
+                const errorResponse = await response.json(); // Obtener el cuerpo de la respuesta de error
+                console.error(
+                    `Error al guardar la predicción del mes ${mes}:`,
+                    response.status,
+                    response.statusText,
+                    errorResponse // Mostrar el mensaje de error del servidor
+                );
+                continue;
+            }
+            const result = await response.json();
+            //console.log(`Predicción del mes ${mes} guardada exitosamente:`, result);
+        }
+
+        // Mostrar información de métricas
+        //console.log('Métricas:', metricas);
+        alert('Predicciones Guardadas exitosamente.')
+
+    } catch (error) {
+        console.error('Error al guardar predicciones:', error);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     try {
-        console.log('Iniciando carga de predicciones...');
+        // Recuperar los datos de predicción almacenados en sessionStorage
         const predictionData = JSON.parse(sessionStorage.getItem('predictionData'));
         console.log('Datos recuperados:', predictionData);
+
         
+        
+        // Verificar que los datos de predicción están completos
         if (predictionData && 
+            predictionData.predictions && 
+            predictionData.predictions.data && 
             predictionData.predictions.data.predicciones_mensuales && 
             predictionData.predictions.data.metricas) {
             initPredictions(predictionData);
         } else {
+            // Si los datos están incompletos, mostrar error y redirigir
             console.error('Datos de predicción incompletos:', predictionData);
             alert('Los datos de predicción están incompletos');
             window.location.href = 'index.html';
         }
+
     } catch (error) {
         console.error('Error al inicializar predicciones:', error);
     }
 });
+const savePredictionContainer = document.getElementById('savePredictionContainer');
+    savePredictionContainer.classList.remove('hidden'); // Asegúrate de que el botón esté visible
+
+    // Agregar el evento de clic al botón para guardar las predicciones
+    const savePredictionButton = document.getElementById('savePredictionButton');
+    if (savePredictionButton) {
+
+        savePredictionButton.addEventListener('click', async () => {
+        console.log('Botón de guardar predicción clickeado');  // Depuración
+
+        // Llamar a la función GuardaPrediccionPresupuesto con los datos completos
+        try {            
+            await GuardaPrediccionPresupuesto(presupuestoData);
+        } catch (error) {
+            console.error('Error al guardar predicción:', error);
+        }
+    });
+    } else {
+        console.error('El botón de guardar predicción no se encontró en el DOM');
+    }
+

@@ -31,7 +31,7 @@ async def generar_reporte_ingresos(
         # Invocar al procedimiento almacenado
         resultados = ejecutar_procedimiento(
             db, 
-            "sp_ObtenerTotalesDebitoCreditoPorMesAnio", 
+            "Admin.sp_ObtenerTotalesDebitoCreditoPorMesAnio", 
             parametros
         )
 

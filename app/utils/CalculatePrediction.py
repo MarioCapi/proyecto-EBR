@@ -69,9 +69,14 @@ def generateBudgetExpectation(dataFull: List[Dict]) -> Dict:
                 if mes not in predicciones["predicciones_mensuales"]:
                     predicciones["predicciones_mensuales"][mes] = {}
                 
+                #predicciones["predicciones_mensuales"][mes][metrica] = {
+                #    "valor_predicho": round(float(prediccion), 2),
+#                    "r2": round(float(r2), 4),
+#                    "tendencia": tendencia,
+#                    "coeficiente": round(float(modelo.coef_[0]), 2)
+#                }
                 predicciones["predicciones_mensuales"][mes][metrica] = {
                     "valor_predicho": round(float(prediccion), 2),
-                    "r2": round(float(r2), 4),
                     "tendencia": tendencia,
                     "coeficiente": round(float(modelo.coef_[0]), 2)
                 }

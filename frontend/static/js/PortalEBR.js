@@ -8,6 +8,7 @@ createApp({
             uploadProgress: 0,
             files: [],
             uploadComplete: false,
+            presupuestoData: null,
             presupuestoContent: '' // Nuevo
         }
     },
@@ -19,6 +20,9 @@ createApp({
             this.activeView = view
             if (view === 'budget') {
                 this.loadPresupuestoContent()
+            }
+            if (view === 'budgetPresu') {
+                this.loadPrediccionPresupuesto()
             }
         },
         
@@ -51,20 +55,17 @@ createApp({
                         </div>
                     </div>
                 `;
-        
                 // Remover script anterior si existe
                 const oldScript = document.getElementById('presupuesto-script');
                 if (oldScript) {
                     oldScript.remove();
-                }
-        
+                }        
                 // Cargar nuevo script
                 const script = document.createElement('script');
                 script.id = 'presupuesto-script';
                 script.src = './static/js/presupuesto.js';
                 script.onload = () => {
                     console.log('Script de presupuesto cargado correctamente');
-                    // Llamar directamente a la función de inicialización
                     if (window.initPresupuesto) {
                         window.initPresupuesto();
                     }
@@ -78,6 +79,85 @@ createApp({
                 console.error('Error al cargar el contenido de presupuesto:', error);
             }
         },
+
+
+        async loadPrediccionPresupuesto() {
+            try {
+                await this.$nextTick();
+                const contentDiv = document.getElementById('contentPresu');
+                if (!contentDiv) {
+                    throw new Error('No se encontró el elemento con id "contentPresu"');
+                }        
+                contentDiv.innerHTML = `
+                <div class="predictions-container">
+                    <header class="predictions-header">
+                        <h1><i class="fas fa-brain"></i> Predicciones Presupuestales</h1>
+                        <div class="metrics-summary">
+                            <div class="metric-card">
+                                <i class="fas fa-calendar"></i>
+                                <span id="yearRange"></span>
+                            </div>
+                            <div class="metric-card">
+                                <i class="fas fa-chart-line"></i>
+                                <span id="totalMonths"></span>
+                            </div>
+                            <div class="metric-card">
+                                <i class="fas fa-clock"></i>
+                                <span id="generationDate"></span>
+                            </div>
+                        </div>
+                    </header>
+    
+                    <div class="chart-container">
+                        <canvas id="predictionsChart"></canvas>
+                    </div>
+    
+                    <div class="table-container">
+                        <table id="predictionsTable">
+                            <thead>
+                                <tr>
+                                    <th>Mes</th>
+                                    <th>Valor Predicho</th>
+                                    <th>Tendencia</th>
+                                    <th>Coeficiente</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Se llenará dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+                // Remover script anterior si existe
+                const oldScript = document.getElementById('presupuesto-script');
+                if (oldScript) {
+                    oldScript.remove();
+                }        
+                // Cargar nuevo script
+                const script = document.createElement('script');
+                script.id = 'presupuesto-script';
+                script.src = './static/js/prediccionesPresupuesto.js';
+                script.onload = () => {
+                    console.log('Script de predicciones cargado correctamente');
+                    const predictionData = JSON.parse(sessionStorage.getItem('predictionData'));
+                    if (window.initPredictions && predictionData) {
+                        window.initPredictions(predictionData);
+                    }
+                };
+                script.onerror = (error) => {
+                    console.error('Error al cargar el script de predicciones:', error);
+                };
+                document.body.appendChild(script);
+        
+            } catch (error) {
+                console.error('Error al cargar el contenido de predicciones:', error);
+            }
+        },
+
+
+
+
 
         handleFileDrop(e) {
             const droppedFiles = Array.from(e.dataTransfer.files)

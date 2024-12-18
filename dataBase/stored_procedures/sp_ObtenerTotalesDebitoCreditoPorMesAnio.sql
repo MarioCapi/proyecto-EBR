@@ -5,7 +5,7 @@ ultimos 3 años
 USE [EBR]
 GO
 
-ALTER PROCEDURE [dbo].[sp_ObtenerTotalesDebitoCreditoPorMesAnio]
+CREATE PROCEDURE [Admin].[sp_ObtenerTotalesDebitoCreditoPorMesAnio]
     @AnioBase INT      -- Año base actual para calcular los últimos tres años
 AS
 BEGIN

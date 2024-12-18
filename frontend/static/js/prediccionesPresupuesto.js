@@ -5,17 +5,16 @@ function initPredictions(data) {
 
     try {
         // Actualizar métricas
-        if (data.predictions.data.metricas) {
-            document.getElementById('yearRange').textContent = `Rango: ${data.predictions.data.metricas.rango_años}`;
-            document.getElementById('totalMonths').textContent = `${data.predictions.data.metricas.total_meses_analizados} meses analizados`;
-            document.getElementById('generationDate').textContent = `Generado: ${data.predictions.data.metricas.fecha_generacion}`;
+        if (data.metricas) {
+            document.getElementById('yearRange').textContent = `Rango: ${data.metricas.rango_años}`;
+            document.getElementById('totalMonths').textContent = `${data.metricas.total_meses_analizados} meses analizados`;
+            document.getElementById('generationDate').textContent = `Generado: ${data.metricas.fecha_generacion}`;
         }
 
         // Renderizar tabla y gráfico
-        if (data.predictions.data.predicciones_mensuales) {
-            neededData = data.predictions.data;
-            renderPredictionsTable(neededData);
-            renderPredictionsChart(neededData);
+        if (data.predicciones_mensuales) {            
+            renderPredictionsTable(data);
+            renderPredictionsChart(data);
         }
     } catch (error) {
         console.error('Error en initPredictions:', error);
@@ -41,10 +40,8 @@ function renderPredictionsTable(data) {
             Object.entries(metricas).forEach(([metrica, valores]) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${mes}</td>
-                    <td>${metrica}</td>
+                    <td>${mes}</td>                    
                     <td>${formatCurrency(valores.valor_predicho)}</td>
-                    <td>${(valores.r2 * 100).toFixed(2)}%</td>
                     <td class="${valores.tendencia === 'incremento' ? 'trend-up' : 'trend-down'}">
                         <i class="fas fa-${valores.tendencia === 'incremento' ? 'arrow-up' : 'arrow-down'}"></i>
                         ${valores.tendencia}

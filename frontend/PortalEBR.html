@@ -15,6 +15,7 @@
         <link rel="stylesheet" href="./static/css/PortalEBR.css">
         <link rel="stylesheet" href="./static/css/presupuesto.css">
         <link rel="stylesheet" href="./static/css/BotonGenerarPresupuesto.css">
+        <link rel="stylesheet" href="./static/css/prediccionesPresupuesto.css">
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         
@@ -24,7 +25,7 @@
         <div class="flex">
             <!-- Sidebar -->
             <nav :class="['sidebar text-white', {'collapsed': isSidebarCollapsed}]" 
-                 :style="{width: isSidebarCollapsed ? '60px' : '250px'}">
+                :style="{width: isSidebarCollapsed ? '60px' : '250px'}">
                 <div class="p-4">
                     <div class="flex items-center justify-between">
                         <h1 v-show="!isSidebarCollapsed" class="text-xl font-bold">AI Portal</h1>
@@ -35,21 +36,28 @@
                     <ul class="mt-8 space-y-4">
                         <li>
                             <a href="javascript:void(0)" @click="setActiveView('upload')" 
-                               class="nav-item flex items-center space-x-3 p-2 rounded">
+                            class="nav-item flex items-center space-x-3 p-2 rounded">
                                 <i class="fas fa-upload"></i>
                                 <span v-show="!isSidebarCollapsed">Cargar Archivos</span>
                             </a>
                         </li>
                         <li>
                             <a href="javascript:void(0)" @click="setActiveView('budget')" 
-                               class="nav-item flex items-center space-x-3 p-2 rounded">
+                            class="nav-item flex items-center space-x-3 p-2 rounded">
                                 <i class="fas fa-chart-pie"></i>
                                 <span v-show="!isSidebarCollapsed">Presupuesto</span>
                             </a>
                         </li>
+                        <li></li>
+                            <a href="javascript:void(0)" @click="setActiveView('budgetPresu')" 
+                            class="nav-item flex items-center space-x-3 p-2 rounded">
+                                <i class="fas fa-chart-pie"></i>
+                                <span v-show="!isSidebarCollapsed">Prediccion Presupuesto</span>
+                            </a>
+                        </li>
                         <li>
                             <a href="javascript:void(0)" @click="setActiveView('analytics')" 
-                               class="nav-item flex items-center space-x-3 p-2 rounded">
+                            class="nav-item flex items-center space-x-3 p-2 rounded">
                                 <i class="fas fa-chart-line"></i>
                                 <span v-show="!isSidebarCollapsed">Analítica</span>
                             </a>
@@ -130,6 +138,15 @@
                         </button>
                     </div>
                 </div>
+                <!-- Prediccion Presupuesto View -->
+                <div v-if="activeView === 'budgetPresu'" class="space-y-6">
+                    <h2 class="text-2xl font-bold text-[#102A43]">Predicción de Presupuesto</h2>
+                    <div id="contentPresu"></div>
+                        <!-- Aquí se cargará el contenido de presupuesto.html -->
+                    </div>
+                    
+                </div>
+
 
                 <!-- Analytics View -->
                 <div v-if="activeView === 'analytics'" class="space-y-6">

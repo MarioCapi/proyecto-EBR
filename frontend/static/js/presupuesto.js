@@ -32,7 +32,8 @@ async function initPresupuesto() {
         const data = await response.json();
         console.log('Datos recibidos:', data);
         presupuestoData = data;
-        
+        const predictionData = presupuestoData.predictions.data;        
+        sessionStorage.setItem('predictionData', JSON.stringify(predictionData));
         if (data && data.data) {
             renderTable(data.data);
             renderChart(data.data);
@@ -51,7 +52,6 @@ function setupPredictionButton() {
             if (presupuestoData?.predictions?.data) {
                 // Guardar solo los datos relevantes de predicción
                 const predictionData = presupuestoData.predictions.data;
-                console.log('Guardando datos de predicción:', predictionData);
                 sessionStorage.setItem('predictionData', JSON.stringify(predictionData));
                 window.location.href = 'PrediccionesPresupuesto.html';
             } else {

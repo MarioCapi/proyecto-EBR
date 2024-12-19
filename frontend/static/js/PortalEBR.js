@@ -120,9 +120,9 @@ createApp({
                             </tbody>
                         </table>
                           <div id="pagination-controls" class="mt-4">
-                            <button id="prev-page" class="px-4 py-2 bg-blue-500 text-white rounded" disabled>Anterior</button>
+                            <button id="prev-page" class="px-4 py-2 bg-blue-500 text-white rounded" disabled><</button>
                             <span id="page-info" class="mx-2"></span>
-                            <button id="next-page" class="px-4 py-2 bg-blue-500 text-white rounded">Siguiente</button>
+                            <button id="next-page" class="px-4 py-2 bg-blue-500 text-white rounded">></button>
                         </div>
                         <div id="detailed-table-container" style="display: none;">
                             <h3>Detalles de la Cuenta</h3>

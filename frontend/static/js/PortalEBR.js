@@ -104,8 +104,6 @@ createApp({
                     throw new Error('No se encontró el elemento con id "content"');
                 }        
                 contentDiv.innerHTML = `
-              
-
                     <div id="report-container">
                         <table id="report-table" class="w-full">
                             <thead>
@@ -227,10 +225,10 @@ createApp({
                     <td class="border border-gray-300 px-4 py-2">${item.CodigoCuenta}</td>
                     <td class="border border-gray-300 px-4 py-2">${item.NombreCuenta}</td>
                     <td class="border border-gray-300 px-4 py-2">${item.Anio}</td>
-                    <td class="border border-gray-300 px-4 py-2">${item.Mes}</td>
-                    <td class="border border-gray-300 px-4 py-2">${item.TotalDebito}</td>
-                    <td class="border border-gray-300 px-4 py-2">${item.TotalCredito}</td>
-                    <td class="border border-gray-300 px-4 py-2">${item.TotalIngreso}</td>
+                    <td class="border border-gray-300 px-4 py-2">${item.Mes}</td>                    
+                    <td class="border border-gray-300 px-4 py-2">${item.TotalDebito.toLocaleString('es-CO')}</td>
+                    <td class="border border-gray-300 px-4 py-2">${item.TotalCredito.toLocaleString('es-CO')}</td>
+                    <td class="border border-gray-300 px-4 py-2">${item.TotalIngreso.toLocaleString('es-CO')}</td>
                 `;
                 detailedTableBody.appendChild(row);
             });

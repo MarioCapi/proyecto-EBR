@@ -120,6 +120,29 @@ createApp({
                         <div class="mt-8">
                             <canvas id="report-chart"></canvas>
                         </div>
+
+                        <div id="detailed-table-container" style="display: none;">
+                            <h3>Detalles de la Cuenta</h3>
+                            <table id="detailed-table" class="w-full border-collapse border border-gray-300">
+                                <thead>
+                                    <tr>
+                                        <th class="border border-gray-300 px-4 py-2">Código Cuenta</th>
+                                        <th class="border border-gray-300 px-4 py-2">Nombre Cuenta</th>
+                                        <th class="border border-gray-300 px-4 py-2">Año</th>
+                                        <th class="border border-gray-300 px-4 py-2">Mes</th>
+                                        <th class="border border-gray-300 px-4 py-2">Total Débito</th>
+                                        <th class="border border-gray-300 px-4 py-2">Total Crédito</th>
+                                        <th class="border border-gray-300 px-4 py-2">Total Ingreso</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Aquí se llenarán los detalles -->
+                                </tbody>
+                            </table>
+                        </div>
+
+
+
                     </div>
                 `;
                 // Remover script anterior si existe
@@ -172,16 +195,42 @@ createApp({
                 Periodo: parseInt(mes), // Asegúrate de que sea un número
                 nit: nit // El NIT como string
             };
-
+        
             axios.post(UrlAPI_tot_prod_mes, data)
                 .then(response => {
-                    console.log('Datos obtenidos:', response.data);
-                    // Aquí puedes manejar la respuesta, como mostrar los datos en la interfaz
+                    const resultados = response.data.data;
+                    console.log('Datos obtenidos:', resultados); // Para depuración
+                    if (resultados.length > 0) {
+                        this.mostrarTablaDetallada(resultados);
+                    } else {
+                        console.log('No se encontraron datos.');
+                    }
                 })
                 .catch(error => {
                     console.error('Error al obtener datos:', error);
                     alert('Error al obtener datos. Intenta nuevamente.');
                 });
+        },
+
+        mostrarTablaDetallada(resultados) {
+            const detailedTableBody = document.querySelector('#detailed-table tbody');
+            detailedTableBody.innerHTML = ''; // Limpiar contenido anterior
+            resultados.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="border border-gray-300 px-4 py-2">${item.CodigoCuenta}</td>
+                    <td class="border border-gray-300 px-4 py-2">${item.NombreCuenta}</td>
+                    <td class="border border-gray-300 px-4 py-2">${item.Anio}</td>
+                    <td class="border border-gray-300 px-4 py-2">${item.Mes}</td>
+                    <td class="border border-gray-300 px-4 py-2">${item.TotalDebito}</td>
+                    <td class="border border-gray-300 px-4 py-2">${item.TotalCredito}</td>
+                    <td class="border border-gray-300 px-4 py-2">${item.TotalIngreso}</td>
+                `;
+                detailedTableBody.appendChild(row);
+            });
+        
+            // Mostrar el contenedor de la tabla detallada
+            document.getElementById('detailed-table-container').style.display = 'block';
         },
 
         async loadPrediccionPresupuesto() {

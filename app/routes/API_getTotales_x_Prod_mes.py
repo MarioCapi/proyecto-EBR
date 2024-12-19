@@ -4,7 +4,6 @@ from decimal import Decimal
 from sqlalchemy.orm import Session
 from utils.config.connection import get_db
 from utils.exec_any_SP_SQLServer import ejecutar_procedimiento_read
-from utils.CalculatePrediction import generateBudgetExpectation
 from typing import List, Dict
 
 

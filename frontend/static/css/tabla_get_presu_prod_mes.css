@@ -1,0 +1,23 @@
+#detailed-table {
+    margin-top: 20px;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#detailed-table th, #detailed-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+#detailed-table th {
+    background-color: #4CAF50; /* Color de fondo */
+    color: white; /* Color del texto */
+}
+
+#detailed-table tr:nth-child(even) {
+    background-color: #f2f2f2; /* Color de fondo para filas pares */
+}
+
+#detailed-table tr:hover {
+    background-color: #ddd; /* Color de fondo al pasar el mouse */
+}

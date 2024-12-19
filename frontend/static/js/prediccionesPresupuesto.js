@@ -130,6 +130,32 @@ async function GuardaPrediccionPresupuesto(data) {
     const API_URL = "http://127.0.0.1:8080/GuardaPrediccionPresupuesto_x_empresa";
     const Nit_Empresa = '901292126'; // NIT de la empresa
 
+    const tbody = document.querySelector('#predictionsTable tbody');
+    if (!tbody || tbody.rows.length === 0) {
+        alert('No hay datos en la tabla para guardar.');
+        return;
+    }
+
+    const predicciones = [];
+
+    // Recorrer las filas de la tabla y extraer los datos
+    const rows = tbody.querySelectorAll('tr');
+    rows.forEach(row => {
+        const mes = row.cells[0].textContent; // el mes está en la primera celda
+        const valorPredicho = parseCurrency(row.cells[1].textContent); //  el valor predicho está en la segunda celda
+        const tendencia = row.cells[2].textContent.trim(); //la tendencia está en la tercera celda
+        const coeficiente = parseCurrency(row.cells[3].textContent); // Suponiendo que el coeficiente está en la cuarta celda
+
+        // Agregar los datos a la lista de predicciones
+        predicciones.push({
+            mes,
+            valorPredicho,
+            tendencia,
+            coeficiente
+        });
+    });
+
+
     try {
         const { anio_prediccion, predicciones_mensuales, metricas } = data;
 
@@ -150,17 +176,17 @@ async function GuardaPrediccionPresupuesto(data) {
         };
 
         // Iterar sobre las predicciones mensuales
-        for (const [mes, valores] of Object.entries(predicciones_mensuales)) {
-            const prediccion = valores.Diferencia;
+        for (const [mes, valores] of Object.entries(predicciones)) {
+            const prediccion = valores;
 
             // Preparar los datos a enviar
             const params = {
                 Nit_Empresa: Nit_Empresa,
                 Anio_Prediccion: anio_prediccion, 
-                Mes: monthMap[mes] || mes.toUpperCase(), // Convertir el mes a español
-                Valor_Predicho: parseFloat(prediccion.valor_predicho), // Asegúrate de que sea un número
-                Tendencia: prediccion.tendencia.toUpperCase(), // Asegúrate de que la tendencia esté en mayúsculas
-                Coeficiente_Diferencia: parseFloat(prediccion.coeficiente) // Asegúrate de que sea un número
+                Mes: prediccion.mes.toUpperCase(), 
+                Valor_Predicho: parseFloat(prediccion.valorPredicho), // debe ser un número
+                Tendencia: prediccion.tendencia.toUpperCase(), // la tendencia esté en mayúsculas
+                Coeficiente_Diferencia: parseFloat(prediccion.coeficiente) // debe ser un número
             };
 
             console.log('Datos a enviar:', JSON.stringify(params, null, 2));
@@ -194,6 +220,13 @@ async function GuardaPrediccionPresupuesto(data) {
     } catch (error) {
         console.error('Error al guardar predicciones:', error);
     }
+}
+function parseCurrency(value) {
+    // Eliminar el símbolo de la moneda y los espacios
+    value = value.replace(/[$\s]/g, ''); // Eliminar el símbolo de la moneda y espacios
+    // Reemplazar el punto por nada (para miles) y la coma por un punto (para decimales)
+    value = value.replace(/\./g, '').replace(/,/g, '.');
+    return parseFloat(value);
 }
 
 document.addEventListener('DOMContentLoaded', function() {

@@ -12,8 +12,7 @@ createApp({
             presupuestoContent: '' // Nuevo
         }
     },
-    methods: {
-        // Método para parsear el valor de la moneda
+    methods: {        
         parseCurrency(value) {
             // Eliminar caracteres no numéricos, excepto el punto y la coma
             value = value.replace(/[$\s]/g, ''); // Eliminar el símbolo de la moneda y espacios
@@ -26,6 +25,33 @@ createApp({
             const sliderValue = event.target.value;
             document.getElementById('sliderValue').innerText = sliderValue; // Actualiza el valor mostrado
             this.adjustTableValues(sliderValue);
+            this.updateChart();
+        },
+        updateChart() {
+            const tbody = document.querySelector('#predictionsTable tbody');
+            const labels = [];
+            const dataPredicted = [];
+            const dataCoefficient = [];
+    
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const mes = row.cells[0].textContent; // Suponiendo que el mes está en la primera celda
+                const valorPredicho = this.parseCurrency(row.cells[1].textContent);
+                const coeficiente = this.parseCurrency(row.cells[3].textContent);
+    
+                labels.push(mes);
+                dataPredicted.push(valorPredicho);
+                dataCoefficient.push(coeficiente);
+            });
+    
+            // Actualizar el gráfico
+            const chart = Chart.getChart('predictionsChart'); // Obtén la instancia del gráfico
+            if (chart) {
+                chart.data.labels = labels; // Actualiza las etiquetas
+                chart.data.datasets[0].data = dataPredicted; // Actualiza los datos del primer conjunto
+                //chart.data.datasets[1].data = dataCoefficient; // Actualiza los datos del segundo conjunto
+                chart.update(); // Refresca el gráfico
+            }
         },
 
         adjustTableValues(sliderValue) {

@@ -32,6 +32,23 @@ def ejecutar_procedimiento(db: Session, sp_name: str, parametros: dict):
         print(f"Error ejecutando procedimiento {sp_name}: {str(e)}")
         raise Exception(f"Error ejecutando procedimiento almacenado: {str(e)}")
     
+def ejecutar_procedimiento_read(db: Session, sp_name: str, parametros: dict):
+    try:
+        query = text(f"EXEC {sp_name} " + ", ".join([f"@{k} = :{k}" for k in parametros.keys()]))
+        
+        result = db.execute(query, parametros)
+        if result.returns_rows:
+            rows = result.fetchall()  # Obtener todas las filas
+            if not rows:
+                return {"message": "Operación completada sin resultados."}
+            columns = result.keys()
+            return [dict(zip(columns, row)) for row in rows]
+        else:            
+            return {"message": "Operación completada exitosamente."}
+    except Exception as e:
+        print(f"Error ejecutando procedimiento {sp_name}: {str(e)}")
+        raise Exception(f"Error ejecutando procedimiento almacenado: {str(e)}")
+    
 
 def ejecutar_procedimiento_ingresos(db: Session, sp_name: str, parametros: dict):
     try:

@@ -1,5 +1,6 @@
 const { createApp } = Vue
 const UrlAPIUpload = 'http://127.0.0.1:8080/upload/';
+const UrlAPI_tot_prod_mes = 'http://127.0.0.1:8080/getTot_x_prod_mes/';
 createApp({
     data() {
         return {
@@ -80,9 +81,6 @@ createApp({
         });
     },
 
-
-
-
         toggleSidebar() {
             this.isSidebarCollapsed = !this.isSidebarCollapsed
         },
@@ -95,11 +93,10 @@ createApp({
                 this.loadPrediccionPresupuesto()
             }
         },
-        
-        async loadPresupuestoContent() {
+        async loadPresupuestoContent() {            
             try {
+                const nit_actual = '901292126'
                 await this.$nextTick();
-                
                 const contentDiv = document.getElementById('content');
                 if (!contentDiv) {
                     throw new Error('No se encontró el elemento con id "content"');
@@ -135,21 +132,57 @@ createApp({
                 script.id = 'presupuesto-script';
                 script.src = './static/js/presupuesto.js';
                 script.onload = () => {
-                    console.log('Script de presupuesto cargado correctamente');
                     if (window.initPresupuesto) {
                         window.initPresupuesto();
                     }
+                    this.agregarEventosClick(nit_actual);
                 };
                 script.onerror = (error) => {
                     console.error('Error al cargar el script de presupuesto:', error);
                 };
                 document.body.appendChild(script);
+                
         
             } catch (error) {
                 console.error('Error al cargar el contenido de presupuesto:', error);
             }
         },
 
+        /*eventos para seleccionar valores de la tabla*/ 
+        agregarEventosClick(nit_actual) {
+            const tbody = document.querySelector('#report-table tbody');
+            tbody.addEventListener('click', (event) => {
+                const row = event.target.closest('tr'); // Encuentra la fila más cercana al clic
+                if (row) {
+                    const anio = row.cells[0].textContent.trim(); // Año
+                    const mes = row.cells[1].textContent.trim(); // Mes
+                    const nit = nit_actual;
+        
+                    console.log(`Fila clickeada: Año: ${anio}, Mes: ${mes}, NIT: ${nit}`); // Para depuración
+        
+                    // Llamar a la función para enviar los datos a la API
+                    this.enviarDatosANuevaAPI(anio, mes, nit);
+                }
+            });
+        },
+
+        enviarDatosANuevaAPI(anio, mes, nit) {
+            const data = {
+                AnioBase: parseInt(anio), // Asegúrate de que sea un número
+                Periodo: parseInt(mes), // Asegúrate de que sea un número
+                nit: nit // El NIT como string
+            };
+
+            axios.post(UrlAPI_tot_prod_mes, data)
+                .then(response => {
+                    console.log('Datos obtenidos:', response.data);
+                    // Aquí puedes manejar la respuesta, como mostrar los datos en la interfaz
+                })
+                .catch(error => {
+                    console.error('Error al obtener datos:', error);
+                    alert('Error al obtener datos. Intenta nuevamente.');
+                });
+        },
 
         async loadPrediccionPresupuesto() {
             try {
@@ -326,8 +359,5 @@ createApp({
             // Esperar a que todas las promesas se resuelvan            
             await Promise.all(promises);            
         }
-
-
-
     }
 }).mount('#app')

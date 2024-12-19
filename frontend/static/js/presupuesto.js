@@ -1,4 +1,15 @@
 // Función para determinar el año a consultar
+let currentPage = 1;
+const recordsPerPage = 7;
+let allResults = []; // Almacena todos los resultados
+
+function mostrarResultadosEnTabla(resultados) {
+    allResults = resultados; // Almacena todos los resultados
+    currentPage = 1; // Reinicia a la primera página
+    renderTable(); // Renderiza la tabla
+}
+
+
 function determinarAnioConsulta() {
     const fechaActual = new Date();
     const anioActual = fechaActual.getFullYear();
@@ -51,7 +62,8 @@ async function initPresupuesto() {
             sessionStorage.setItem('predictionData', JSON.stringify(predictionData.data));
 
             // Renderizar tabla y gráfico
-            renderTable(presupuestoData);
+            //renderTable(presupuestoData);
+            mostrarResultadosEnTabla(presupuestoData);
             renderChart(presupuestoData);
         } else {
             console.error('No se recibieron datos válidos de la API');
@@ -80,35 +92,50 @@ function setupPredictionButton() {
 
 
 // También actualiza la función renderTable para usar el nuevo formato de moneda
-function renderTable(data) {
-    console.log('Renderizando tabla...');
-    const tbody = document.querySelector("#report-table tbody");
-    if (!tbody) {
-        console.error('No se encontró el elemento tbody');
-        return;
-    }
-    
-    const formatCurrency = new Intl.NumberFormat('es-CO', {
-        style: 'currency',
-        currency: 'COP'
-    });
-    
-    tbody.innerHTML = "";
-    data.forEach(row => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${row.Anio}</td>
-                <td>${row.Mes}</td>
-                <td>${row.NombreMes}</td>
-                <td>${formatCurrency.format(row.TotalDebito)}</td>
-                <td>${formatCurrency.format(row.TotalCredito)}</td>
-                <td class="${row.Diferencia >= 0 ? 'positive-amount' : 'negative-amount'}">
-                    ${formatCurrency.format(row.Diferencia)}
-                </td>
-            </tr>
+function renderTable() {
+    const reportTableBody = document.querySelector('#report-table tbody');
+    reportTableBody.innerHTML = ''; // Limpiar contenido anterior
+
+    // Calcular los índices de inicio y fin
+    const start = (currentPage - 1) * recordsPerPage;
+    const end = start + recordsPerPage;
+    const paginatedResults = allResults.slice(start, end); // Obtener solo los resultados de la página actual
+
+    paginatedResults.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="px-4 py-2">${item.Anio}</td>
+            <td class="px-4 py-2">${item.Mes}</td>
+            <td class="px-4 py-2">${item.NombreMes}</td>
+            <td class="px-4 py-2">${item.TotalDebito}</td>
+            <td class="px-4 py-2">${item.TotalCredito}</td>
+            <td class="px-4 py-2">${item.TotalIngreso}</td>
         `;
+        reportTableBody.appendChild(row);
     });
+
+    // Actualizar la información de la página
+    document.getElementById('page-info').textContent = `Página ${currentPage} de ${Math.ceil(allResults.length / recordsPerPage)}`;
+
+    // Habilitar o deshabilitar botones de paginación
+    document.getElementById('prev-page').disabled = currentPage === 1;
+    document.getElementById('next-page').disabled = currentPage === Math.ceil(allResults.length / recordsPerPage);
 }
+
+// Agregar eventos a los botones de paginación
+document.getElementById('prev-page').addEventListener('click', () => {
+    if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+    }
+});
+
+document.getElementById('next-page').addEventListener('click', () => {
+    if (currentPage < Math.ceil(allResults.length / recordsPerPage)) {
+        currentPage++;
+        renderTable();
+    }
+});
 
 function renderChart(data) {
     console.log('Renderizando gráfico...');

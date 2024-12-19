@@ -1,6 +1,8 @@
 const { createApp } = Vue
 const UrlAPIUpload = 'http://127.0.0.1:8080/upload/';
 const UrlAPI_tot_prod_mes = 'http://127.0.0.1:8080/getTot_x_prod_mes/';
+
+
 createApp({
     data() {
         return {
@@ -102,6 +104,8 @@ createApp({
                     throw new Error('No se encontró el elemento con id "content"');
                 }        
                 contentDiv.innerHTML = `
+              
+
                     <div id="report-container">
                         <table id="report-table" class="w-full">
                             <thead>
@@ -117,10 +121,11 @@ createApp({
                             <tbody>
                             </tbody>
                         </table>
-                        <div class="mt-8">
-                            <canvas id="report-chart"></canvas>
+                          <div id="pagination-controls" class="mt-4">
+                            <button id="prev-page" class="px-4 py-2 bg-blue-500 text-white rounded" disabled>Anterior</button>
+                            <span id="page-info" class="mx-2"></span>
+                            <button id="next-page" class="px-4 py-2 bg-blue-500 text-white rounded">Siguiente</button>
                         </div>
-
                         <div id="detailed-table-container" style="display: none;">
                             <h3>Detalles de la Cuenta</h3>
                             <table id="detailed-table" class="w-full border-collapse border border-gray-300">
@@ -141,8 +146,9 @@ createApp({
                             </table>
                         </div>
 
-
-
+                        <div class="mt-8">
+                            <canvas id="report-chart"></canvas>
+                        </div>                        
                     </div>
                 `;
                 // Remover script anterior si existe

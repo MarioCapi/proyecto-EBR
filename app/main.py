@@ -5,7 +5,8 @@ from routes.file_upload import router as file_upload_router
 from routes.API_presupuesto import presupuesto_router as presupuesto_router
 from routes.API_GuardaPresupuesto import PredicPres_x_empresa_router as PredicPres_x_empresa_router
 from routes.API_getTotales_x_Prod_mes import Tot_prod_mes_router as Tot_prod_mes_router
-from utils.config.connection import test_database_connection
+from routes.API_Pred_x_Prod import Tot_pred_prod_monthly_router as Tot_pred_prod_monthly_router
+
 
 
 app = FastAPI(
@@ -26,6 +27,7 @@ app.include_router(file_upload_router)
 app.include_router(presupuesto_router)
 app.include_router(PredicPres_x_empresa_router)
 app.include_router(Tot_prod_mes_router)
+app.include_router(Tot_pred_prod_monthly_router)
 
 #@app.on_event("startup")
 #async def startup_event():

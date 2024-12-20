@@ -18,6 +18,10 @@
         <link rel="stylesheet" href="./static/css/prediccionesPresupuesto.css">
         <link rel="stylesheet" href="./static/css/sliderContainer.css">
         <link rel="stylesheet" href="./static/css/tabla_get_presu_prod_mes.css">
+        <link rel="stylesheet" href="./static/css/report_table_products.css">
+
+
+
 
         
         
@@ -50,13 +54,24 @@
                                 <span v-show="!isSidebarCollapsed">Reporte de Ingresos</span>
                             </a>
                         </li>
-                        <li></li>
+                        <li>
                             <a href="javascript:void(0)" @click="setActiveView('budgetPresu')" 
                             class="nav-item flex items-center space-x-3 p-2 rounded">
                                 <i class="fas fa-chart-pie"></i>
                                 <span v-show="!isSidebarCollapsed">Prediccion Presupuesto</span>
                             </a>
                         </li>
+                        
+                        <li>
+                            <a href="javascript:void(0)" @click="setActiveView('budgetPresuXProduct')" 
+                            class="nav-item flex items-center space-x-3 p-2 rounded">
+                                <i class="fas fa-chart-pie"></i>
+                                <span v-show="!isSidebarCollapsed">Prediccion Presupuesto X Producto</span>
+                            </a>
+                        </li>
+
+
+
                         <li>
                             <a href="javascript:void(0)" @click="setActiveView('analytics')" 
                             class="nav-item flex items-center space-x-3 p-2 rounded">
@@ -74,15 +89,15 @@
                 <div v-if="activeView === 'upload'" class="space-y-6">
                     <h2 class="text-2xl font-bold text-[#102A43]">Carga de Archivos</h2>
                     <div class="upload-area p-8 rounded-lg text-center cursor-pointer"
-                         @dragover.prevent
-                         @drop.prevent="handleFileDrop">
+                        @dragover.prevent
+                        @drop.prevent="handleFileDrop">
                         <i class="fas fa-cloud-upload-alt text-4xl text-[#00BCD4]"></i>
                         <p class="mt-4 text-[#102A43]">
                             Arrastra archivos aquí o 
                             <label class="text-[#0277BD] cursor-pointer hover:text-[#00BCD4]">
                                 <span>selecciona archivos</span>
                                 <input type="file" class="hidden" multiple @change="handleFileSelect" 
-                                       accept=".xlsx,.csv">
+                                    accept=".xlsx,.csv">
                             </label>
                         </p>
                     </div>
@@ -91,7 +106,7 @@
                     <div v-if="uploadProgress > 0" class="mt-4">
                         <div class="w-full bg-gray-200 rounded-full h-2.5">
                             <div class="progress-bar h-2.5 rounded-full" 
-                                 :style="{width: uploadProgress + '%'}"></div>
+                                :style="{width: uploadProgress + '%'}"></div>
                         </div>
                         <p class="text-sm text-[#102A43] mt-2">
                             Progreso: {{ uploadProgress }}%
@@ -142,17 +157,27 @@
                     </div>-->
                 </div>
                 <!-- Prediccion Presupuesto View -->
-                <div v-if="activeView === 'budgetPresu'" class="space-y-6">
-                    <h2 class="text-2xl font-bold text-[#102A43]">Predicción de Presupuesto</h2>
-                    <div id="contentPresu"></div>
-                        <!-- Aquí se cargará el contenido de presupuesto.html -->
+                    <div v-if="activeView === 'budgetPresu'" class="space-y-6">
+                        <h2 class="text-2xl font-bold text-[#102A43]">Predicción de Presupuesto</h2>
+                        <div id="contentPresu">
+                            <!-- Aquí se cargará el contenido de presupuesto.html -->
+                        </div>
                     </div>
+                    <div v-if="activeView === 'budgetPresuXProduct'" class="space-y-6">
+                        <h2 class="text-2xl font-bold text-[#102A43]">Predicción Presupuesto  x Producto</h2>
+                        <div id="contentPresuXProduct">
+                            <!-- Aquí se cargará el contenido de presupuesto. X PRODUCTO  -->
+                        </div>
+                    </div>
+
+
                     <div id="savePredictionContainer"  class="hidden">
                         <button id="savePredictionButton" class="data-science-button">                        
                             <i class="fas fa-brain"></i> 
                             Guardar Prediccion
                         </button>
-                    </div>                    
+                    </div>
+
                 </div>
 
                 <!-- Analytics View -->

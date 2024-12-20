@@ -32,6 +32,7 @@ def generateBudgetExpectation(dataFull: List[Dict]) -> Dict:
         }
 
         # Generar predicciones para cada mes
+        total=0
         for mes in meses_unicos:
             datos_mes = df[df["NombreMes"] == mes].copy()
             
@@ -57,6 +58,7 @@ def generateBudgetExpectation(dataFull: List[Dict]) -> Dict:
                 
                 # Realizar predicción
                 prediccion = modelo.predict([[anio_prediccion]])[0]
+                total = total + prediccion
                 
                 # Calcular tendencia
                 tendencia = "incremento" if modelo.coef_[0] > 0 else "decremento"
@@ -81,7 +83,8 @@ def generateBudgetExpectation(dataFull: List[Dict]) -> Dict:
         predicciones["metricas"] = {
             "total_meses_analizados": len(meses_unicos),
             "rango_años": f"{df['Anio'].min()} - {df['Anio'].max()}",
-            "fecha_generacion": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+            "fecha_generacion": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "TotalPrediccion": round(float(total),2)
         }
 
         return predicciones

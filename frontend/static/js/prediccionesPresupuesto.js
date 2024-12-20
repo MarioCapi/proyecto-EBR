@@ -7,9 +7,11 @@ function initPredictions(data) {
         // Actualizar métricas
         if (data.metricas) {
             presupuestoData = data;
+            Predict_Presupuesto = data.metricas.TotalPrediccion;
+            Predict_Presupuesto = Predict_Presupuesto.toLocaleString('es-Co');
             document.getElementById('yearRange').textContent = `Rango: ${data.metricas.rango_años}`;
             document.getElementById('totalMonths').textContent = `${data.metricas.total_meses_analizados} meses analizados`;
-            document.getElementById('generationDate').textContent = `Generado: ${data.metricas.fecha_generacion}`;
+            document.getElementById('TotalPrediccionPresupuesto').textContent = `Presupuesto: ${Predict_Presupuesto}`;
         }
 
         // Renderizar tabla y gráfico

@@ -6,9 +6,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-Alter PROCEDURE [Admin].[sp_ObtenerTotalesPorProductoMes]
-    @AnioBase INT,      -- Año base
-	@Periodo INT,      -- Mes base 
+Alter PROCEDURE [Admin].[sp_for_Product_Prediction_monthly]    
     @NIT NVARCHAR(50)   -- NIT de la empresa
 AS
 BEGIN
@@ -28,9 +26,7 @@ BEGIN
 		INNER JOIN admin.DatosContables dat ON dat.ArchivoID = arc.archivoId
 		WHERE emp.nit = @NIT
 		  AND dat.CodigoCuenta LIKE '4%'
-		  AND LEN(dat.CodigoCuenta) >= 7
-		  AND YEAR(arc.Periodo) = @AnioBase
-		  AND MONTH(arc.Periodo) = @Periodo
+		  AND LEN(dat.CodigoCuenta) >= 7		  
 		GROUP BY 
 			dat.CodigoCuenta, 
 			dat.NombreCuenta, 

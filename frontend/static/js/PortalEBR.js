@@ -94,6 +94,9 @@ createApp({
             if (view === 'budgetPresu') {
                 this.loadPrediccionPresupuesto()
             }
+            if (view === 'budgetPresuXProduct') {
+                this.loadPredictionXProducto()
+            }
         },
         async loadPresupuestoContent() {            
             try {
@@ -258,8 +261,8 @@ createApp({
                                 <span id="totalMonths"></span>
                             </div>
                             <div class="metric-card">
-                                <i class="fas fa-clock"></i>
-                                <span id="generationDate"></span>
+                                <i class="fas fa-chart-line"></i>
+                                <span id="TotalPrediccionPresupuesto"></span>
                             </div>
                         </div>
                     </header>
@@ -335,6 +338,103 @@ createApp({
                 console.error('Error al cargar el contenido de predicciones:', error);
             }
         },
+
+
+
+
+
+        async loadPredictionXProducto()
+        {
+            try {
+                const nit_actual = '901292126'
+                await this.$nextTick();
+                const contentDiv = document.getElementById('contentPresuXProduct');
+                if (!contentDiv) {
+                    throw new Error('No se encontró el elemento con id "content"');
+                }        
+                contentDiv.innerHTML = `
+
+                <div id="report-container2">
+                        <table id="report-table-products" class="w-full">
+                            <thead>
+                                <tr>
+                                    <th class="px-4 py-2">Codigo</th>
+                                    <th class="px-4 py-2">Producto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                            <div id="pagination-controls" class="mt-4">
+                                <button id="prev-page_products" class="px-4 py-2 bg-blue-500 text-white rounded" disabled><</button>
+                                <span id="page-info_products" class="mx-2"></span>
+                                <button id="next-page_products" class="px-4 py-2 bg-blue-500 text-white rounded">></button>
+                            </div>
+                        <div class="mt-8">
+                            <canvas id="report-chart"></canvas>
+                        </div>                        
+                    </div>
+
+
+
+
+
+                    <div id="report-container">
+                        <table id="report-table-products-forecast" class="w-full">
+                            <thead>
+                                <tr>
+                                    <th>Mes</th>
+                                    <th>Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody id="report-table-products-forecast-body">
+                                
+                            </tbody>
+                        </table>
+                            <div id="pagination-controls" class="mt-4">
+                                <button id="prev-page" class="px-4 py-2 bg-blue-500 text-white rounded" disabled><</button>
+                                <span id="page-info" class="mx-2"></span>
+                                <button id="next-page" class="px-4 py-2 bg-blue-500 text-white rounded">></button>
+                            </div>
+                        <div class="mt-8">
+                            <canvas id="report-chart"></canvas>
+                        </div>                        
+                    </div>
+                `;
+                // Remover script anterior si existe
+                const oldScript = document.getElementById('presupuesto-script');
+                if (oldScript) {
+                    oldScript.remove();
+                }        
+                // Cargar nuevo script
+                const script = document.createElement('script');
+                script.id = 'presupuesto-script';
+                script.src = './static/js/predict_x_prod_mes.js';
+                script.onload = () => {
+                    if (window.initPresupuesto_x_producto) {
+                        window.initPresupuesto_x_producto();
+                    }
+                    //this.agregarEventosClick(nit_actual);
+                };
+                script.onerror = (error) => {
+                    console.error('Error al cargar el script de presupuesto:', error);
+                };
+                document.body.appendChild(script);
+                
+        
+            } catch (error) {
+                console.error('Error al cargar el contenido de presupuesto:', error);
+            }
+        },
+
+
+
+
+
+
+
+
+
 
         handleFileDrop(e) {
             const droppedFiles = Array.from(e.dataTransfer.files)

@@ -1,0 +1,80 @@
+#report-table-products {
+    margin-top: 20px;
+    border-collapse: collapse;
+    width: 100%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Sombra para un efecto de elevación */
+    border-radius: 8px; /* Bordes redondeados */
+    overflow: hidden; /* Para que los bordes redondeados se apliquen */
+}
+
+#report-table-products th, #report-table-products td {
+    border: 1px solid #e0e0e0; /* Color de borde más suave */
+    padding: 12px; /* Espaciado más amplio */
+    text-align: left; /* Alinear texto a la izquierda */
+    font-family: 'Arial', sans-serif; /* Fuente moderna */
+}
+
+#report-table-products th {
+    background-color: #007BFF; /* Color de fondo azul vibrante */
+    color: white; /* Color del texto */
+    font-weight: bold; /* Negrita para encabezados */
+}
+
+#report-table-products tr:nth-child(even) {
+    background-color: #f9f9f9; /* Color de fondo para filas pares */
+}
+
+#report-table-products tr:hover {
+    background-color: #e7f3ff; /* Color de fondo al pasar el mouse */
+}
+
+#report-table-products tr {
+    transition: background-color 0.3s; /* Transición suave para el hover */
+}
+
+#report-table-products td {
+    color: #333; /* Color de texto más oscuro para mejor legibilidad */
+}
+.selected {
+    background-color: #d1e7dd; /* Color de fondo para la fila seleccionada */
+}
+
+
+
+#report-table-products-forecast {
+    margin-top: 20px;
+    border-collapse: collapse;
+    width: 100%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#report-table-products-forecast th, #report-table-products-forecast td {
+    border: 1px solid #e0e0e0;
+    padding: 12px;
+    text-align: left;
+    font-family: 'Arial', sans-serif;
+}
+
+#report-table-products-forecast th {
+    background-color: #007BFF;
+    color: white;
+    font-weight: bold;
+}
+
+#report-table-products-forecast tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+#report-table-products-forecast tr:hover {
+    background-color: #e7f3ff;
+}
+
+#report-table-products-forecast tr {
+    transition: background-color 0.3s;
+}
+
+#report-table-products-forecast td {
+    color: #333;
+}

@@ -7,6 +7,8 @@ from routes.API_GuardaPresupuesto import PredicPres_x_empresa_router as PredicPr
 from routes.API_getTotales_x_Prod_mes import Tot_prod_mes_router as Tot_prod_mes_router
 from routes.API_Pred_x_Prod import Tot_pred_prod_monthly_router as Tot_pred_prod_monthly_router
 
+from utils.config.connection import test_database_connection
+from routes.companies import companies_router
 
 
 app = FastAPI(
@@ -28,6 +30,7 @@ app.include_router(presupuesto_router)
 app.include_router(PredicPres_x_empresa_router)
 app.include_router(Tot_prod_mes_router)
 app.include_router(Tot_pred_prod_monthly_router)
+app.include_router(companies_router, prefix="/api")
 
 #@app.on_event("startup")
 #async def startup_event():
@@ -36,5 +39,5 @@ app.include_router(Tot_pred_prod_monthly_router)
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8080)
+    uvicorn.run(app, host="127.0.0.1", port=8000)
     

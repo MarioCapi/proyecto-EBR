@@ -47,7 +47,7 @@ BEGIN
             @subscription_end_date
         );
 
-        SELECT SCOPE_IDENTITY() as company_id;
+        --SELECT SCOPE_IDENTITY() as company_id;
     END TRY
     BEGIN CATCH
         THROW;

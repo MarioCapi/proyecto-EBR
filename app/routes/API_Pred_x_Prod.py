@@ -73,37 +73,42 @@ def getTot_prod_mes(nit, db: Session):
         data = resultados
         productos_unicos = set(item['CodigoCuenta'] for item in data)  # Usar un conjunto para obtener valores únicos
         predicciones_totales = []  # Lista para almacenar las predicciones de todos los productos
+        exitosas = 0  # Contador de iteraciones exitosas
+        errores = []  # Lista para almacenar errores
         
         for producto in productos_unicos:
             df_producto = [item for item in data if item["CodigoCuenta"] == producto]
             df_producto = pd.DataFrame(df_producto)
+            
             if df_producto.empty:
                 continue  # Saltar este producto si no hay datos
             
             # Asegurar que las columnas sean del tipo correcto
             df_producto['Fecha'] = pd.to_datetime(df_producto['Anio'].astype(str) + "-" + df_producto['Mes'].astype(str) + "-01", errors='coerce')
             df_producto['TotalIngreso'] = pd.to_numeric(df_producto['TotalIngreso'], errors='coerce')  # Asegurar que la columna de valores sea numérica
-            
-            # Eliminar filas con NaN
-            df_producto = df_producto.dropna()
-            
+            df_producto = df_producto.dropna() # Eliminar filas con NaN
             # Verificar si hay suficientes datos
             if len(df_producto) < 2:  # Necesitamos al menos 2 puntos para hacer una predicción
                 continue
             
+            #Ajustar forecast_length basado en la cantidad de datos
+            if len(df_producto) < 5:
+                forecast_length = 1  # Si hay menos de 5 datos, predecir solo 1 mes
+            elif len(df_producto) < 10:
+                forecast_length = 3  # Si hay entre 5 y 10 datos, predecir 3 meses
+            else:
+                forecast_length = 12  # Si hay 10 o más datos, predecir 12 meses
             # Configurar el modelo AutoTS
             model = AutoTS(
-                forecast_length=12,
+                forecast_length=forecast_length,
                 frequency='M',
                 ensemble='simple',
                 model_list="fast",
                 max_generations=5,
                 num_validations=2
-            )            
+            )
             # Entrenamiento
-            model = model.fit(df_producto, date_col="Fecha", value_col="TotalIngreso")  # Asegúrate de que "TotalIngreso" sea la columna correcta
-            
-            # Predicción
+            model = model.fit(df_producto, date_col="Fecha", value_col="TotalIngreso")  # Asegúrate de que "TotalIngreso" sea la columna correcta                        
             prediction = model.predict()
             forecast = prediction.forecast
             
@@ -112,9 +117,16 @@ def getTot_prod_mes(nit, db: Session):
             predicciones_totales.append({"CodigoCuenta": producto, "predicciones": predicciones_producto})
             
             # Insertar predicciones en la base de datos
-            insertar_predicciones(nit, producto, predicciones_totales, usuario, db)            
+            try:
+                insertar_predicciones(nit, producto, predicciones_producto, usuario, db)
+                exitosas += 1  # Incrementar contador de exitosas
+            except Exception as e:
+                errores.append(f"Error al insertar predicciones para {producto}: {str(e)}")
         
-        return {"predicciones": "insertadas exitosamente"}
+        return {
+            "mensaje": f"Insertadas exitosamente {exitosas} predicciones.",
+            "errores": errores
+        }
     
     except HTTPException as he:
         raise he
@@ -130,7 +142,7 @@ def insertar_predicciones(nit_empresa, codigo_producto, predicciones, usuario, d
 # Método para invocar el procedimiento almacenado Admin.sp_InsertOrUpdatePredicciones_x_producto.
     try:
         predicciones_json = []
-        for prediccion in predicciones[0]['predicciones']:  # Accede a la clave 'predicciones'
+        for prediccion in predicciones:  # Accede a la clave 'predicciones'
             fecha = prediccion['index']  # Timestamp
             valor = prediccion['TotalIngreso']  # Predicción
             predicciones_json.append({

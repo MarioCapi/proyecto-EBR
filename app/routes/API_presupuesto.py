@@ -30,8 +30,7 @@ async def generar_reporte_ingresos(
         parametros = {
             "AnioBase": request.anio,
             "NIT": request.nit
-        }        
-        # Ejecutar el procedimiento almacenado
+        }
         resultados = ejecutar_procedimiento_ingresos(
             db, 
             "Admin.sp_ObtenerTotalesDebitoCreditoPorMesAnio", 
@@ -60,13 +59,11 @@ async def generar_reporte_ingresos(
         predicciones = generateBudgetExpectationFull(request.anio, resultados)
         
         try:
-            # Generar predicciones
-            getTot_prod_mes(request.nit,db)
+            resultado_predicciones = getTot_prod_mes(request.nit, db)
+            if resultado_predicciones["errores"]:
+                print("Errores en la inserción de predicciones:", resultado_predicciones["errores"])
         except Exception as e:        
-            raise HTTPException(
-                status_code=500, 
-                detail=f"Error al generar el reporte: {str(e)}"
-            )
+            print(f"Error al generar el reporte: {str(e)}")
         
         return {
             "data": formatted_results,
@@ -80,7 +77,8 @@ async def generar_reporte_ingresos(
         print(f"Error en generar_reporte_ingresos: {str(e)}")
         raise HTTPException(
             status_code=500, 
-            detail=f"Error al generar el reporte: {str(e)}"
+            detail=f"Error al generar el reporte: {str(e)}",
+            resultado_predicciones_x_prod=f"resultado_predicciones"
         )
 
 def generateBudgetExpectationFull(

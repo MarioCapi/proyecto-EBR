@@ -28,6 +28,7 @@ BEGIN
 		  AND LEN(dat.CodigoCuenta) >= 7
 		  AND (dat.CodigoCuenta LIKE '41%' OR dat.CodigoCuenta LIKE '4%') -- Incluye valores que comiencen con 41 o 4
 		  AND dat.CodigoCuenta NOT LIKE '4175%' -- Excluye valores que comiencen con 4175
+		  --AND dat.CodigoCuenta NOT LIKE '4180%' -- Excluye valores que comiencen con 4175
 		  AND dat.CodigoCuenta NOT LIKE '42%' -- Excluye valores que comiencen con 42
 		GROUP BY 
 			dat.CodigoCuenta, 

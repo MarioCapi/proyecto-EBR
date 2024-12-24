@@ -19,6 +19,7 @@
         <link rel="stylesheet" href="./static/css/sliderContainer.css">
         <link rel="stylesheet" href="./static/css/tabla_get_presu_prod_mes.css">
         <link rel="stylesheet" href="./static/css/report_table_products.css">
+        <link rel="stylesheet" href="./static/css/spinner.css">
 
 
 
@@ -142,6 +143,7 @@
                 </div>
 
                 <!-- Budget View -->
+                <div id="loading-container"></div> <!--Spinner mientras carga la pagina-->
                 <div v-if="activeView === 'budget'" class="space-y-6">
                     <h2 class="text-2xl font-bold text-[#102A43]">Reporte del Ingreso  ultimos 3 años</h2>
                     <!-- Contenedor para cargar el contenido dinámico de presupuesto.html -->

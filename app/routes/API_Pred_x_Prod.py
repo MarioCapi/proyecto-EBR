@@ -1,9 +1,10 @@
+import json
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from decimal import Decimal
 from sqlalchemy.orm import Session
 from utils.config.connection import get_db
-from utils.exec_any_SP_SQLServer import ejecutar_procedimiento_read
+from utils.exec_any_SP_SQLServer import ejecutar_procedimiento_read, ejecutar_procedimiento_JSONParams
 
 
 from autots import AutoTS
@@ -56,88 +57,65 @@ async def get_all_list_Products(
         )
 
 
-@Tot_pred_prod_monthly_router.post("/get_for_Product_Prediction_monthly")
-async def getTot_prod_mes(
-    request: ReporteForecastProd,
-    db: Session = Depends(get_db)
-):
+#@Tot_pred_prod_monthly_router.post("/get_for_Product_Prediction_monthly")
+#async def getTot_prod_mes(request: ReporteForecastProd,db: Session = Depends(get_db)):
+def getTot_prod_mes(nit, db: Session):
     try:
-        parametros = {"nit": request.nit}
-        producto = request.codigoCuenta
+        # quemamos un usuario
+        usuario = 'genericoAPI'
+        parametros = {"NIT": nit}
         resultados = ejecutar_procedimiento_read(
             db, 
             "Admin.sp_for_Product_Prediction_monthly",
             parametros
-        )
- 
+        )   
         # Cargar los datos
         data = resultados
-        
         productos_unicos = set(item['CodigoCuenta'] for item in data)  # Usar un conjunto para obtener valores únicos
-
+        predicciones_totales = []  # Lista para almacenar las predicciones de todos los productos
         
-        predicciones = {}
-
-        # Iterar sobre cada producto
+        for producto in productos_unicos:
+            df_producto = [item for item in data if item["CodigoCuenta"] == producto]
+            df_producto = pd.DataFrame(df_producto)
+            if df_producto.empty:
+                continue  # Saltar este producto si no hay datos
+            
+            # Asegurar que las columnas sean del tipo correcto
+            df_producto['Fecha'] = pd.to_datetime(df_producto['Anio'].astype(str) + "-" + df_producto['Mes'].astype(str) + "-01", errors='coerce')
+            df_producto['TotalIngreso'] = pd.to_numeric(df_producto['TotalIngreso'], errors='coerce')  # Asegurar que la columna de valores sea numérica
+            
+            # Eliminar filas con NaN
+            df_producto = df_producto.dropna()
+            
+            # Verificar si hay suficientes datos
+            if len(df_producto) < 2:  # Necesitamos al menos 2 puntos para hacer una predicción
+                continue
+            
+            # Configurar el modelo AutoTS
+            model = AutoTS(
+                forecast_length=12,
+                frequency='M',
+                ensemble='simple',
+                model_list="fast",
+                max_generations=5,
+                num_validations=2
+            )            
+            # Entrenamiento
+            model = model.fit(df_producto, date_col="Fecha", value_col="TotalIngreso")  # Asegúrate de que "TotalIngreso" sea la columna correcta
+            
+            # Predicción
+            prediction = model.predict()
+            forecast = prediction.forecast
+            
+            # Almacenar las predicciones en la lista total
+            predicciones_producto = forecast.reset_index().to_dict(orient='records')  # Convertir a lista de diccionarios
+            predicciones_totales.append({"CodigoCuenta": producto, "predicciones": predicciones_producto})
+            
+            # Insertar predicciones en la base de datos
+            insertar_predicciones(nit, producto, predicciones_totales, usuario, db)            
         
-            # Filtrar datos para el producto específico
-        df_producto = [item for item in data if item["CodigoCuenta"] == producto]
-
-        # Convertir a DataFrame de pandas
-        df_producto = pd.DataFrame(df_producto)
-
-        # Verificar si hay datos para el producto
-        if df_producto.empty:
-            #print(f"No hay datos para el producto {producto}.")
-            return {"predicciones": []}  # Retornar una lista vacía si no hay datos
-
-        # Preparar los datos para AutoTS
-        df_producto["Fecha"] = pd.to_datetime(df_producto["Anio"].astype(str) + "-" + df_producto["Mes"].astype(str) + "-01")
-        df_producto = df_producto.sort_values("Fecha")
-        df_producto = df_producto[["Fecha", "TotalIngreso"]].rename(columns={"Fecha": "datetime", "TotalIngreso": "value"})
-
-        # Verificar si hay valores NaN
-        if df_producto.isnull().values.any():
-            #print(f"Valores NaN encontrados en los datos de {producto}.")
-            df_producto = df_producto.dropna()  # O puedes rellenar con un valor, por ejemplo, df_producto.fillna(0)
-
-        # Asegurarse de que hay suficientes datos
-        if len(df_producto) < 2:  # Necesitamos al menos 2 puntos para hacer una predicción
-            return {"predicciones": []}  # Retornar una lista vacía si no hay suficientes datos
-
-        # Configurar el modelo AutoTS
-        model = AutoTS(
-            forecast_length=12,
-            frequency='M',
-            ensemble='simple',
-            model_list="fast",
-            max_generations=5,
-            num_validations=2
-        )
-
-        # Entrenamiento
-        model = model.fit(df_producto, date_col="datetime", value_col="value")
-
-        # Predicción
-        prediction = model.predict()
-        forecast = prediction.forecast
-
-        # Almacenar las predicciones en el diccionario
-        predicciones = forecast.reset_index().to_dict(orient='records')  # Convertir a lista de diccionarios
-                
-        return {"predicciones": predicciones}
-        #### Visualizar predicciones
-        #print("Predicciones futuras:")
-        #print(forecast)
-
-        '''
-        plt.figure(figsize=(10, 6))
-        plt.plot(df_producto["datetime"], df_producto["value"], label="Datos reales", color="blue")
-        plt.plot(forecast.index, forecast["value"], label="Predicciones futuras", color="green")
-        plt.legend()
-        plt.title(f"Predicción AutoTS para {producto}")
-        plt.show()
-        '''
+        return {"predicciones": "insertadas exitosamente"}
+    
     except HTTPException as he:
         raise he
     except Exception as e:
@@ -146,3 +124,39 @@ async def getTot_prod_mes(
             status_code=500, 
             detail=f"Error al generar consulta mes producto: {str(e)}"
         )
+
+
+def insertar_predicciones(nit_empresa, codigo_producto, predicciones, usuario, db: Session):
+# Método para invocar el procedimiento almacenado Admin.sp_InsertOrUpdatePredicciones_x_producto.
+    try:
+        predicciones_json = []
+        for prediccion in predicciones[0]['predicciones']:  # Accede a la clave 'predicciones'
+            fecha = prediccion['index']  # Timestamp
+            valor = prediccion['TotalIngreso']  # Predicción
+            predicciones_json.append({
+                "anio": fecha.year,
+                "mes": f"{fecha.month:02}",  # Mes en formato de dos dígitos
+                "prediccion": valor
+            })
+    # Convertimos a JSON string
+        json_data = json.dumps(predicciones_json)
+        # Ajustar el nombre del parámetro
+        parametros = {
+            "NIT_Empresa": nit_empresa,
+            "Codigo_Producto": codigo_producto,
+            "JsonData": json_data,
+            "Usuario": usuario  # Cambiado de "@Usuario" a "Usuario"
+        }
+    # Llamar al procedimiento almacenado
+        resultados = ejecutar_procedimiento_JSONParams(    
+            db,
+            "Admin.sp_InsertOrUpdatePredicciones_x_producto",
+            parametros
+        )
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error al generar insertar_predicciones: {str(e)}"
+    )

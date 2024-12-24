@@ -340,9 +340,6 @@ createApp({
         },
 
 
-
-
-
         async loadPredictionXProducto()
         {
             try {

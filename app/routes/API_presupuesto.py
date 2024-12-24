@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from utils.config.connection import get_db
 from utils.exec_any_SP_SQLServer import ejecutar_procedimiento_ingresos
 from utils.CalculatePrediction import generateBudgetExpectation
+from routes.API_Pred_x_Prod import getTot_prod_mes
 from typing import List, Dict
 
 
@@ -25,13 +26,11 @@ async def generar_reporte_ingresos(
                 status_code=400, 
                 detail=f"Año inválido: {request.anio}. Debe estar entre 2000 y 2100"
             )
-
         # Parámetros del procedimiento almacenado
         parametros = {
             "AnioBase": request.anio,
             "NIT": request.nit
-        }
-        
+        }        
         # Ejecutar el procedimiento almacenado
         resultados = ejecutar_procedimiento_ingresos(
             db, 
@@ -57,9 +56,17 @@ async def generar_reporte_ingresos(
                 "data": [],
                 "message": f"No se encontraron datos para el año {request.anio}"
             }
-        
-        # Generar predicciones
+
         predicciones = generateBudgetExpectationFull(request.anio, resultados)
+        
+        try:
+            # Generar predicciones
+            getTot_prod_mes(request.nit,db)
+        except Exception as e:        
+            raise HTTPException(
+                status_code=500, 
+                detail=f"Error al generar el reporte: {str(e)}"
+            )
         
         return {
             "data": formatted_results,

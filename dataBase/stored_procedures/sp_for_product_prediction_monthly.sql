@@ -1,12 +1,12 @@
 USE [EBR]
 GO
-/****** Object:  StoredProcedure [Admin].[sp_ObtenerTotalesDebitoCreditoPorMesAnio]    Script Date: 12/18/2024 9:24:51 AM ******/
+/****** Object:  StoredProcedure [Admin].[sp_for_Product_Prediction_monthly]    Script Date: 12/23/2024 2:06:29 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-Alter PROCEDURE [Admin].[sp_for_Product_Prediction_monthly]    
+ALTER PROCEDURE [Admin].[sp_for_Product_Prediction_monthly]    
     @NIT NVARCHAR(50)   -- NIT de la empresa
 AS
 BEGIN
@@ -25,8 +25,10 @@ BEGIN
 		INNER JOIN admin.Archivos arc ON emp.empresaId = arc.empresaId
 		INNER JOIN admin.DatosContables dat ON dat.ArchivoID = arc.archivoId
 		WHERE emp.nit = @NIT
-		  AND dat.CodigoCuenta LIKE '4%'
-		  AND LEN(dat.CodigoCuenta) >= 7		  
+		  AND LEN(dat.CodigoCuenta) >= 7
+		  AND (dat.CodigoCuenta LIKE '41%' OR dat.CodigoCuenta LIKE '4%') -- Incluye valores que comiencen con 41 o 4
+		  AND dat.CodigoCuenta NOT LIKE '4175%' -- Excluye valores que comiencen con 4175
+		  AND dat.CodigoCuenta NOT LIKE '42%' -- Excluye valores que comiencen con 42
 		GROUP BY 
 			dat.CodigoCuenta, 
 			dat.NombreCuenta, 
@@ -36,6 +38,7 @@ BEGIN
 			dat.CodigoCuenta, 
 			Anio, 
 			Mes;
+
 	END TRY
 		BEGIN CATCH			
 			PRINT 'Ocurrió un error:';

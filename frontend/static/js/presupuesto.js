@@ -49,6 +49,20 @@ async function initPresupuesto() {
         nit: "901292126" // Reemplaza con el valor real
     };
 
+    // Mostrar spinner y mensaje
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner'; // Asegúrate de tener estilos CSS para '.spinner'
+    const message = document.createElement('p');
+    message.textContent = "Estamos procesando las predicciones. Esto puede tomar algunos minutos...";
+    const container = document.getElementById('loading-container'); // Asegúrate de tener un contenedor en tu HTML
+    if (!container) {
+        console.error('El contenedor "loading-container" no existe en el DOM.');
+        return;
+    }
+    container.innerHTML = ''; // Limpiar el contenedor
+    container.appendChild(spinner);
+    container.appendChild(message);
+
     try {
         const response = await fetch(API_URL, {
             method: "POST",
@@ -60,6 +74,8 @@ async function initPresupuesto() {
 
         if (!response.ok) {
             console.error('Error en la respuesta de la API:', response.status, response.statusText);
+            message.textContent = "Hubo un error al procesar las predicciones. Por favor, intenta nuevamente.";
+            container.removeChild(spinner); // Ocultar spinner
             return;
         }
 
@@ -73,17 +89,24 @@ async function initPresupuesto() {
             // Guardar predicciones en el sessionStorage
             sessionStorage.setItem('predictionData', JSON.stringify(predictionData.data));
 
+            // Ocultar spinner y mensaje
+            container.innerHTML = '';
+
             // Renderizar tabla y gráfico
-            //renderTable(presupuestoData);
             mostrarResultadosEnTabla_presupuesto(presupuestoData);
             renderChart(presupuestoData);
         } else {
             console.error('No se recibieron datos válidos de la API');
+            message.textContent = "No se recibieron datos válidos. Por favor, revisa los parámetros.";
+            container.removeChild(spinner); // Ocultar spinner
         }
     } catch (error) {
         console.error('Error al obtener datos:', error);
+        message.textContent = "Ocurrió un error inesperado. Por favor, intenta más tarde.";
+        container.removeChild(spinner); // Ocultar spinner
     }
 }
+
 // Evento click del botón de predicción
 function setupPredictionButton() {
     const generatePredictionBtn = document.getElementById('generatePredictionBtn');

@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from utils.config.connection import get_db
-from utils.exec_any_SP_SQLServer import ejecutar_procedimiento
+from utils.exec_any_SP_SQLServer import ejecutar_procedimiento, ejecutar_procedimiento_ingresos, ejecutar_procedimiento_read
 from typing import Optional, List
 from datetime import date
 
-# Modelos Pydantic
+
 class CompanyBase(BaseModel):
     company_name: str
     tax_identification_type: str

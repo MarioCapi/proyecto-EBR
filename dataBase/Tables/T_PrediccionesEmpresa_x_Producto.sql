@@ -10,6 +10,7 @@ CREATE TABLE Admin.PrediccioneEmpresa_x_Producto (
     ID_Prediccion INT IDENTITY(1,1) PRIMARY KEY,         -- Identificador único de la predicción
     NIT_Empresa NVARCHAR(20) NOT NULL,                  -- Identificación de la empresa
     Codigo_Producto NVARCHAR(50) NOT NULL,              -- Código del producto
+	Nombre_Producto NVARCHAR(50) NOT NULL,              -- Código del producto
     Año INT NOT NULL,                                   -- Año de la predicción
     Mes INT NOT NULL CHECK (Mes BETWEEN 1 AND 12),      -- Mes de la predicción (1: Enero, 12: Diciembre)
     Presupuesto_Predicho DECIMAL(18,2) NOT NULL,        -- Valor predicho del presupuesto

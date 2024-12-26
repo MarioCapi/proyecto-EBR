@@ -1,0 +1,36 @@
+/* GraficaPredictionsProducto.css */
+.chart-container {
+    width: 100%;
+    height: 400px; /* Altura de la gráfica */
+    margin: 20px 0;
+    border-radius: 10px; /* Bordes redondeados */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Sombra para efecto de elevación */
+    background: linear-gradient(135deg, #f0f4f8, #d9e2ec); /* Fondo suave */
+}
+
+select {
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid #007BFF; /* Borde azul */
+    border-radius: 5px; /* Bordes redondeados */
+    font-size: 16px;
+    color: #333; /* Color de texto */
+}
+
+select:focus {
+    outline: none; /* Sin borde al enfocar */
+    border-color: #0056b3; /* Color de borde al enfocar */
+}
+
+button {
+    padding: 10px 15px;
+    background-color: #007BFF; /* Color de fondo azul */
+    color: white; /* Color de texto */
+    border: none;
+    border-radius: 5px; /* Bordes redondeados */
+    cursor: pointer; /* Cambiar cursor al pasar */
+}
+
+button:hover {
+    background-color: #0056b3; /* Color de fondo al pasar el mouse */
+}

@@ -122,7 +122,7 @@ createApp({
                             <tbody>
                             </tbody>
                         </table>
-                          <div id="pagination-controls" class="mt-4">
+                        <div id="pagination-controls" class="mt-4">
                             <button id="prev-page" class="px-4 py-2 bg-blue-500 text-white rounded" disabled><</button>
                             <span id="page-info" class="mx-2"></span>
                             <button id="next-page" class="px-4 py-2 bg-blue-500 text-white rounded">></button>
@@ -153,13 +153,13 @@ createApp({
                     </div>
                 `;
                 // Remover script anterior si existe
-                const oldScript = document.getElementById('presupuesto-script');
+                const oldScript = document.getElementById('presupuesto-script_1');
                 if (oldScript) {
                     oldScript.remove();
                 }        
                 // Cargar nuevo script
                 const script = document.createElement('script');
-                script.id = 'presupuesto-script';
+                script.id = 'presupuesto-script_1';
                 script.src = './static/js/presupuesto.js';
                 script.onload = () => {
                     if (window.initPresupuesto) {
@@ -289,13 +289,13 @@ createApp({
                 </div>
             `;
                 // Remover script anterior si existe
-                const oldScript = document.getElementById('presupuesto-script');
+                const oldScript = document.getElementById('presupuesto-script_2');
                 if (oldScript) {
                     oldScript.remove();
                 }        
                 // Cargar nuevo script
                 const script = document.createElement('script');
-                script.id = 'presupuesto-script';
+                script.id = 'presupuesto-script_2';
                 script.src = './static/js/prediccionesPresupuesto.js';
                 script.onload = () => {
                     console.log('Script de predicciones cargado correctamente');
@@ -352,46 +352,36 @@ createApp({
                 contentDiv.innerHTML = `
 
                 <div id="report-container2">
+                    <div>
+                        <label for="codigoProducto">Selecciona un Código de Producto:</label>
+                        <select id="codigoProducto"></select>
+
+                        <label for="anio">Selecciona un Año:</label>
+                        <select id="anio"></select>
+
+                        <button id="filterButton">Filtrar</button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="predictionsChart"></canvas>
+                    </div>
+
                         <table id="report-table-products" class="w-full">
                             <thead>
                                 <tr>
-                                    <th class="px-4 py-2">Codigo</th>
-                                    <th class="px-4 py-2">Producto</th>
+                                    <th class="px-4 py-2">Codigo_Producto</th>
+                                    <th class="px-4 py-2">Nombre_Producto</th>
+                                    <th class="px-4 py-2">Año</th>
+                                    <th class="px-4 py-2">Mes</th>
+                                    <th class="px-4 py-2">Presupuesto_Predicho</th>
                                 </tr>
                             </thead>
                             <tbody>
                             </tbody>
                         </table>
                             <div id="pagination-controls" class="mt-4">
-                                <button id="prev-page_products" class="px-4 py-2 bg-blue-500 text-white rounded" disabled><</button>
+                                <button id="prev-page_products_predict" class="px-4 py-2 bg-blue-500 text-white rounded" disabled><</button>
                                 <span id="page-info_products" class="mx-2"></span>
-                                <button id="next-page_products" class="px-4 py-2 bg-blue-500 text-white rounded">></button>
-                            </div>
-                        <div class="mt-8">
-                            <canvas id="report-chart"></canvas>
-                        </div>                        
-                    </div>
-
-
-
-
-
-                    <div id="report-container">
-                        <table id="report-table-products-forecast" class="w-full">
-                            <thead>
-                                <tr>
-                                    <th>Mes</th>
-                                    <th>Valor</th>
-                                </tr>
-                            </thead>
-                            <tbody id="report-table-products-forecast-body">
-                                
-                            </tbody>
-                        </table>
-                            <div id="pagination-controls" class="mt-4">
-                                <button id="prev-page" class="px-4 py-2 bg-blue-500 text-white rounded" disabled><</button>
-                                <span id="page-info" class="mx-2"></span>
-                                <button id="next-page" class="px-4 py-2 bg-blue-500 text-white rounded">></button>
+                                <button id="next-page_products__predict" class="px-4 py-2 bg-blue-500 text-white rounded">></button>
                             </div>
                         <div class="mt-8">
                             <canvas id="report-chart"></canvas>
@@ -406,10 +396,10 @@ createApp({
                 // Cargar nuevo script
                 const script = document.createElement('script');
                 script.id = 'presupuesto-script';
-                script.src = './static/js/predict_x_prod_mes.js';
+                script.src = './static/js/predict_x_empresa_x_product.js';
                 script.onload = () => {
-                    if (window.initPresupuesto_x_producto) {
-                        window.initPresupuesto_x_producto();
+                    if (window.init_get_prediction_x_producto) {
+                        window.init_get_prediction_x_producto();
                     }
                     //this.agregarEventosClick(nit_actual);
                 };

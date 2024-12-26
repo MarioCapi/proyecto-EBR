@@ -1,6 +1,7 @@
 CREATE OR ALTER PROCEDURE Admin.sp_InsertOrUpdatePredicciones_x_producto
     @NIT_Empresa NVARCHAR(20),
     @Codigo_Producto NVARCHAR(50),
+	@Nombre_Producto NVARCHAR(100),
     @JsonData NVARCHAR(MAX), -- Bloque de datos en formato JSON
     @Usuario NVARCHAR(100)
 AS
@@ -38,8 +39,8 @@ BEGIN
                 Usuario_Actualizador = @Usuario
         WHEN NOT MATCHED THEN
             -- Insertar un nuevo registro
-            INSERT (NIT_Empresa, Codigo_Producto, Año, Mes, Presupuesto_Predicho, Fecha_Creacion, Usuario_Creador)
-            VALUES (@NIT_Empresa, @Codigo_Producto, Source.Año, Source.Mes, Source.Presupuesto_Predicho, GETDATE(), @Usuario);
+            INSERT (NIT_Empresa, Codigo_Producto, Nombre_Producto, Año, Mes, Presupuesto_Predicho, Fecha_Creacion, Usuario_Creador)
+            VALUES (@NIT_Empresa, @Codigo_Producto, @Nombre_Producto, Source.Año, Source.Mes, Source.Presupuesto_Predicho, GETDATE(), @Usuario);
 
         -- Limpiar la tabla temporal
         DROP TABLE #TempPredicciones;

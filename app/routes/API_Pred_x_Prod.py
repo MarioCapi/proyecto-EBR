@@ -82,6 +82,9 @@ def getTot_prod_mes(nit, db: Session):
             
             if df_producto.empty:
                 continue  # Saltar este producto si no hay datos
+            else:
+                productos_Nameunicos = df_producto['NombreCuenta'].unique()
+            
             
             # Asegurar que las columnas sean del tipo correcto
             df_producto['Fecha'] = pd.to_datetime(df_producto['Anio'].astype(str) + "-" + df_producto['Mes'].astype(str) + "-01", errors='coerce')
@@ -118,7 +121,7 @@ def getTot_prod_mes(nit, db: Session):
             
             # Insertar predicciones en la base de datos
             try:
-                insertar_predicciones(nit, producto, predicciones_producto, usuario, db)
+                insertar_predicciones(nit, producto, productos_Nameunicos[0], predicciones_producto, usuario, db)
                 exitosas += 1  # Incrementar contador de exitosas
             except Exception as e:
                 errores.append(f"Error al insertar predicciones para {producto}: {str(e)}")
@@ -138,7 +141,7 @@ def getTot_prod_mes(nit, db: Session):
         )
 
 
-def insertar_predicciones(nit_empresa, codigo_producto, predicciones, usuario, db: Session):
+def insertar_predicciones(nit_empresa, codigo_producto, NombreCuenta, predicciones, usuario, db: Session):
 # Método para invocar el procedimiento almacenado Admin.sp_InsertOrUpdatePredicciones_x_producto.
     try:
         predicciones_json = []
@@ -156,6 +159,7 @@ def insertar_predicciones(nit_empresa, codigo_producto, predicciones, usuario, d
         parametros = {
             "NIT_Empresa": nit_empresa,
             "Codigo_Producto": codigo_producto,
+            "Nombre_Producto": NombreCuenta,
             "JsonData": json_data,
             "Usuario": usuario  # Cambiado de "@Usuario" a "Usuario"
         }

@@ -12,15 +12,42 @@ CREATE OR ALTER PROCEDURE admin.sp_CreateCompany
     @address NVARCHAR(200) = NULL,
     @phone NVARCHAR(20) = NULL,
     @subscription_type NVARCHAR(20) = 'BASIC',
-    @subscription_end_date DATE = NULL
+    @subscription_end_date DATE = NULL,
+    @company_id INT OUTPUT  -- Parámetro de salida para el ID de la compañía
 AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
-        IF EXISTS (SELECT 1 FROM admin.Companies 
-                  WHERE tax_identification_type = @tax_identification_type 
-                  AND tax_id = @tax_id)
-            THROW 50000, 'La combinación de tipo y número de identificación fiscal ya existe.', 1;
+        -- Verificar si ya existe la combinación de tipo y número de identificación fiscal
+        IF EXISTS (
+            SELECT 1 
+            FROM admin.Companies 
+            WHERE tax_identification_type = @tax_identification_type 
+            AND tax_id = @tax_id
+            AND active = 1
+        )
+        BEGIN
+            SET @company_id = NULL
+            SELECT 
+                0 as success,
+                'La combinación de tipo y número de identificación fiscal ya existe.' as message
+            RETURN;
+        END
+
+        -- Verificar si ya existe el email
+        IF EXISTS (
+            SELECT 1 
+            FROM admin.Companies 
+            WHERE email = @email 
+            AND active = 1
+        )
+        BEGIN
+            SET @company_id = NULL
+            SELECT 
+                0 as success,
+                'Ya existe una empresa con este correo electrónico.' as message
+            RETURN;
+        END
 
         INSERT INTO admin.Companies (
             company_name,
@@ -32,7 +59,9 @@ BEGIN
             address,
             phone,
             subscription_type,
-            subscription_end_date
+            subscription_end_date,
+            status,
+            active
         )
         VALUES (
             @company_name,
@@ -44,13 +73,23 @@ BEGIN
             @address,
             @phone,
             @subscription_type,
-            @subscription_end_date
+            @subscription_end_date,
+            'ACTIVE',
+            1
         );
 
-        --SELECT SCOPE_IDENTITY() as company_id;
+        SET @company_id = SCOPE_IDENTITY()
+
+        SELECT 
+            1 as success,
+            'Compañía creada exitosamente' as message
+
     END TRY
     BEGIN CATCH
-        THROW;
+        SET @company_id = NULL
+        SELECT 
+            0 as success,
+            ERROR_MESSAGE() as message
     END CATCH
 END;
 GO

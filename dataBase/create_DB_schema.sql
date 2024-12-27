@@ -56,15 +56,18 @@ CREATE TABLE admin.Companies (
     CONSTRAINT UQ_tax_id_type UNIQUE (tax_identification_type, tax_id)
 );
 
+-- Crear un índice único en tax_id en admin.Companies
+CREATE UNIQUE INDEX IX_tax_id ON admin.Companies(tax_id);
+
 -- Resto de las tablas con sus claves foráneas
 CREATE TABLE admin.Users (
     user_id INT IDENTITY(1,1) PRIMARY KEY,
-    company_id INT,
+    company_id INT NOT NULL,
+    role_id INT NOT NULL,
     email NVARCHAR(100) NOT NULL UNIQUE,
     password_hash NVARCHAR(255) NOT NULL,
     first_name NVARCHAR(50),
     last_name NVARCHAR(50),
-    role NVARCHAR(20) NOT NULL,  -- SUPER_ADMIN, COMPANY_ADMIN, USER
     last_login DATETIME,
     login_attempts INT DEFAULT 0,
     password_reset_token NVARCHAR(255),
@@ -72,7 +75,8 @@ CREATE TABLE admin.Users (
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
     active BIT DEFAULT 1,
-    FOREIGN KEY (company_id) REFERENCES admin.Companies(company_id)
+    CONSTRAINT FK_Users_Companies FOREIGN KEY (company_id) REFERENCES admin.Companies(company_id),
+    CONSTRAINT FK_Users_Roles FOREIGN KEY (role_id) REFERENCES admin.Roles(role_id)
 );
 
 -- Tabla de Permisos en esquema admin
@@ -85,12 +89,11 @@ CREATE TABLE admin.Permissions (
 
 -- Tabla de Roles en esquema admin
 CREATE TABLE admin.Roles (
-    role_id INT IDENTITY(1,1) PRIMARY KEY,
-    role_name NVARCHAR(50) NOT NULL UNIQUE,
-    description NVARCHAR(200),
-    created_at DATETIME DEFAULT GETDATE()
+    role_id INT IDENTITY(1,1) PRIMARY KEY, -- Identificador único para cada rol
+    role_name NVARCHAR(50) NOT NULL UNIQUE, -- Nombre del rol único
+    description NVARCHAR(200), -- Descripción del rol
+    created_at DATETIME DEFAULT GETDATE() -- Fecha de creación
 );
-
 -- Tabla de relación Roles-Permisos en esquema admin
 CREATE TABLE admin.RolePermissions (
     role_id INT,
@@ -118,9 +121,9 @@ CREATE TABLE admin.AuditLog (
 -- Insertar roles básicos
 INSERT INTO admin.Roles (role_name, description)
 VALUES 
-    ('SUPER_ADMIN', 'Administrador del sistema con acceso total'),
-    ('COMPANY_ADMIN', 'Administrador de empresa cliente'),
-    ('USER', 'Usuario regular del sistema');
+    ('Gerente', 'Administrador del sistema con acceso total'),
+    ('Contador', 'Administrador de empresa cliente'),
+    ('Analista contable y financiero', 'Usuario regular del sistema');
 
 -- Insertar permisos básicos
 INSERT INTO admin.Permissions (permission_name, description)

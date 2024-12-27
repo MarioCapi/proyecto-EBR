@@ -7,6 +7,7 @@ from routes.API_GuardaPresupuesto import PredicPres_x_empresa_router as PredicPr
 from routes.API_getTotales_x_Prod_mes import Tot_prod_mes_router as Tot_prod_mes_router
 #from routes.API_Pred_x_Prod import Tot_pred_prod_monthly_router as Tot_pred_prod_monthly_router
 from routes.API_get_Predicciones_Empresa_Producto import Get_pred_empresa_producto_router  as Get_pred_empresa_producto_router
+from routes.users import users_router
 
 from utils.config.connection import test_database_connection
 from routes.companies import companies_router
@@ -32,6 +33,7 @@ app.include_router(PredicPres_x_empresa_router)
 app.include_router(Tot_prod_mes_router)
 app.include_router(Get_pred_empresa_producto_router)
 app.include_router(companies_router, prefix="/api")
+app.include_router(users_router, prefix="/api")
 
 #@app.on_event("startup")
 #async def startup_event():

@@ -1,6 +1,7 @@
 from sqlalchemy import text
 
-def exec_sp_save_data(db_session, sp_name: str, **params):
+#def exec_sp_save_data(db_session, sp_name: str, **params):
+def exec_sp_save_data(db_session, sp_name: str, return_scalar: bool = False, **params):
     """
     Ejecuta un stored procedure con los parámetros proporcionados
     """
@@ -18,8 +19,17 @@ def exec_sp_save_data(db_session, sp_name: str, **params):
         
         # Ejecutar el SP
         result = db_session.execute(text(sp_call), params)
-        db_session.commit()
+        #db_session.commit()
         
+        if return_scalar:
+            # Obtener el resultado de manera segura
+            row = result.fetchone()
+            db_session.commit()
+            if row is None:
+                return None
+            return row[0]  # Retorna el primer valor de la primera fila
+            
+        db_session.commit()
         return result
     except Exception as e:
         db_session.rollback()

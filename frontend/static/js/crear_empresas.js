@@ -1,32 +1,53 @@
 document.getElementById('createCompanyForm').addEventListener('submit', async function(event) {
     event.preventDefault();
-
+    showLoader();
+    
     // Validaciones básicas
     const email = document.getElementById('email').value;
     const numEmployees = document.getElementById('num_employees').value;
     const companyType = document.getElementById('company_type').value;
     const otherCompanyType = document.getElementById('other_company_type').value;
+    const taxId = document.getElementById('tax_id').value;
+    const taxIdType = document.getElementById('id_type').value;
+    const companyName = document.getElementById('company_name').value;
+
+    // Validación de campos requeridos
+    if (!companyName.trim()) {
+        showValidationError('El nombre de la empresa es requerido');
+        return;
+    }
+
+    if (!taxId.trim()) {
+        showValidationError('El número de identificación fiscal es requerido');
+        return;
+    }
 
     if (!validateEmail(email)) {
-        alert('Por favor ingrese un email válido');
+        showValidationError('Por favor ingrese un email válido');
         return;
     }
 
     if (numEmployees && numEmployees < 1) {
-        alert('El número de empleados debe ser mayor a 0');
+        showValidationError('El número de empleados debe ser mayor a 0');
         return;
     }
 
     if (companyType === 'OTROS' && !otherCompanyType.trim()) {
-        alert('Por favor especifique el tipo de compañía');
+        showValidationError('Por favor especifique el tipo de compañía');
         return;
     }
 
-    // Preparar los datos en el formato que espera el backend
+    // Validación de formato de identificación fiscal según el tipo
+    if (!validateTaxId(taxId, taxIdType)) {
+        showValidationError('El formato del número de identificación fiscal no es válido');
+        return;
+    }
+
+    // Preparar los datos
     const formData = {
-        company_name: document.getElementById('company_name').value,
-        tax_identification_type: document.getElementById('id_type').value,
-        tax_id: document.getElementById('tax_id').value,
+        company_name: companyName,
+        tax_identification_type: taxIdType,
+        tax_id: taxId,
         email: email,
         num_employees: numEmployees ? parseInt(numEmployees) : null,
         company_type: companyType === 'OTROS' ? otherCompanyType : companyType,
@@ -37,7 +58,8 @@ document.getElementById('createCompanyForm').addEventListener('submit', async fu
     };
 
     try {
-        const API_URL = 'http://localhost:8000/api/companies';
+        console.log('Enviando datos:', formData);
+        const API_URL = 'http://localhost:8080/api/companies';
         
         const response = await fetch(API_URL, {
             method: 'POST',
@@ -46,22 +68,26 @@ document.getElementById('createCompanyForm').addEventListener('submit', async fu
                 'Accept': 'application/json'
             },
             body: JSON.stringify(formData)
-        }).catch(error => {
-            throw new Error(`Error de conexión: No se puede conectar al servidor en ${API_URL}. Asegúrese de que el servidor esté corriendo.`);
         });
 
-        if (!response) {
-            throw new Error('No se recibió respuesta del servidor');
-        }
-
         const result = await response.json();
+        console.log('Respuesta del servidor:', result);
 
         if (!response.ok) {
-            throw new Error(result.detail || 'Error al crear la compañía');
+            // Manejar diferentes tipos de errores
+            if (response.status === 409) {
+                showValidationError('Ya existe una empresa con este número de identificación fiscal');
+            } else if (response.status === 400) {
+                showValidationError(result.detail || 'Datos inválidos. Por favor verifique la información');
+            } else if (response.status === 500) {
+                showValidationError('Error interno del servidor. Por favor intente más tarde');
+            } else {
+                throw new Error(result.detail || 'Error al crear la compañía');
+            }
+            return;
         }
 
-        // Mostrar mensaje de éxito
-        alert(result.message || 'Compañía creada exitosamente');
+        showMessage('¡Compañía creada exitosamente!', 'success');
         
         // Limpiar el formulario
         document.getElementById('createCompanyForm').reset();
@@ -71,8 +97,10 @@ document.getElementById('createCompanyForm').addEventListener('submit', async fu
         otherContainer.style.display = 'none';
         
     } catch (error) {
-        console.error('Error:', error);
-        showValidationError(error.message || 'Error al crear la compañía');
+        console.error('Error completo:', error);
+        showValidationError('Error de conexión: No se pudo conectar con el servidor');
+    } finally {
+        hideLoader();
     }
 });
 
@@ -81,6 +109,124 @@ function validateEmail(email) {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
 }
+
+// Función para validar el formato de identificación fiscal
+function validateTaxId(taxId, taxIdType) {
+    const taxIdPatterns = {
+        'NIT': /^\d{9}$/, // Formato NIT: 9 dígitos sin dígito verificador
+        'RUC': /^\d{11}$/, // Formato RUC peruano: 11 dígitos
+        'CUIT': /^\d{2}-\d{8}-\d{1}$/, // Formato CUIT argentino: 2-8-1 dígitos
+        'RFC': /^[A-Z]{4}\d{6}[A-Z0-9]{3}$/, // Formato RFC mexicano
+        'RUT': /^\d{8}-[\dK]$/, // Formato RUT chileno
+        'CNPJ': /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/ // Formato CNPJ brasileño
+    };
+
+    const pattern = taxIdPatterns[taxIdType];
+    if (!pattern) return true;  // Si no hay patrón definido, se considera válido
+
+    // Limpiar el taxId de guiones y espacios para el NIT
+    const cleanTaxId = taxIdType === 'NIT' ? taxId.replace(/[-\s]/g, '') : taxId;
+    
+    return pattern.test(cleanTaxId);
+}
+
+// Función para mostrar mensajes
+function showMessage(message, type = 'info', duration = 5000) {
+    const messageContainer = document.querySelector('.message-container') || 
+                           createMessageContainer();
+    
+    const messageElement = document.createElement('div');
+    messageElement.className = `message ${type}`;
+    
+    const icon = getIconForType(type);
+    
+    messageElement.innerHTML = `
+        <span class="message-icon">${icon}</span>
+        <span class="message-content">${message}</span>
+        <span class="message-close">&times;</span>
+    `;
+    
+    messageContainer.appendChild(messageElement);
+    
+    // Animación de entrada
+    messageElement.style.animation = 'slideIn 0.3s ease-out';
+    
+    // Configurar el botón de cerrar
+    const closeButton = messageElement.querySelector('.message-close');
+    closeButton.onclick = () => removeMessage(messageElement);
+    
+    // Auto-remover después del tiempo especificado
+    if (duration > 0) {
+        setTimeout(() => removeMessage(messageElement), duration);
+    }
+    
+    return messageElement;
+}
+
+function createMessageContainer() {
+    const container = document.createElement('div');
+    container.className = 'message-container';
+    document.body.appendChild(container);
+    return container;
+}
+
+function getIconForType(type) {
+    switch(type) {
+        case 'success': return '✓';
+        case 'error': return '✕';
+        case 'warning': return '⚠';
+        case 'info': return 'ℹ';
+        default: return '';
+    }
+}
+
+function removeMessage(messageElement) {
+    messageElement.style.animation = 'fadeOut 0.3s ease-out';
+    setTimeout(() => {
+        messageElement.remove();
+        // Limpiar el contenedor si no hay más mensajes
+        const container = document.querySelector('.message-container');
+        if (container && container.children.length === 0) {
+            container.remove();
+        }
+    }, 300);
+}
+
+// Función para mostrar el loader
+function showLoader() {
+    const loader = document.createElement('div');
+    loader.className = 'loader';
+    loader.innerHTML = '<div class="loader-spinner"></div>';
+    document.body.appendChild(loader);
+    loader.style.display = 'flex';
+}
+
+function hideLoader() {
+    const loader = document.querySelector('.loader');
+    if (loader) {
+        loader.remove();
+    }
+}
+
+// Modificar las funciones existentes para usar el nuevo sistema de mensajes
+function showValidationError(message) {
+    showMessage(message, 'error');
+}
+
+function showSuccessMessage(message) {
+    showMessage(message, 'success');
+}
+
+// Agregar tooltips de ayuda para los campos
+document.querySelectorAll('input, select').forEach(element => {
+    const tooltip = element.getAttribute('data-tooltip');
+    if (tooltip) {
+        const tooltipSpan = document.createElement('span');
+        tooltipSpan.className = 'tooltip';
+        tooltipSpan.innerHTML = '?<span class="tooltip-text">' + tooltip + '</span>';
+        element.parentNode.insertBefore(tooltipSpan, element.nextSibling);
+    }
+});
 
 // Validación en tiempo real para el número de empleados
 document.getElementById('num_employees').addEventListener('input', function(e) {
@@ -106,25 +252,3 @@ document.getElementById('company_type').addEventListener('change', function(e) {
         otherInput.value = '';
     }
 });
-
-// Función para mostrar errores de validación
-function showValidationError(message) {
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'error-message';
-    errorDiv.textContent = message;
-    
-    // Remover cualquier mensaje de error anterior
-    const existingError = document.querySelector('.error-message');
-    if (existingError) {
-        existingError.remove();
-    }
-    
-    // Insertar el nuevo mensaje de error después del formulario
-    const form = document.getElementById('createCompanyForm');
-    form.parentNode.insertBefore(errorDiv, form.nextSibling);
-    
-    // Remover el mensaje después de 5 segundos
-    setTimeout(() => {
-        errorDiv.remove();
-    }, 5000);
-}

@@ -2,9 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from utils.config.connection import get_db
-from utils.exec_any_SP_SQLServer import ejecutar_procedimiento, ejecutar_procedimiento_ingresos, ejecutar_procedimiento_read
+from utils.exec_any_SP_SQLServer import ejecutar_procedimiento, ejecutar_procedimiento_read
+from utils.exec_procedure_SQLServer import exec_sp_save_data 
 from typing import Optional, List
 from datetime import date
+from routes.users import create_user_from_company
 
 
 class CompanyBase(BaseModel):
@@ -30,44 +32,77 @@ companies_router = APIRouter()
 
 # Endpoints
 @companies_router.post("/companies")
-def create_company(
+async def create_company(
     request: CompanyBase,
     db: Session = Depends(get_db)
 ):
-    print("Recibida solicitud para crear compañía")  # Debug print
-    try:
-        params = {
-            'company_name': request.company_name,
-            'tax_identification_type': request.tax_identification_type,
-            'tax_id': request.tax_id,
-            'email': request.email,
-            'num_employees': request.num_employees,
-            'company_type': request.company_type,
-            'address': request.address,
-            'phone': request.phone,
-            'subscription_type': request.subscription_type,
-            'subscription_end_date': request.subscription_end_date
-        }
-        
-        result = ejecutar_procedimiento(
+    print("Recibida solicitud para crear compañía")
+    print("Datos recibidos:", request.dict())
+    try:                       
+        company_id = exec_sp_save_data(
             db,
             'admin.sp_CreateCompany',
-            params
+            return_scalar=True,
+            company_name=request.company_name,
+            tax_identification_type=request.tax_identification_type,
+            tax_id=request.tax_id,
+            email=request.email,
+            num_employees=request.num_employees,
+            company_type=request.company_type,
+            address=request.address,
+            phone=request.phone,
+            subscription_type=request.subscription_type,
+            subscription_end_date=request.subscription_end_date
         )
         
+        if company_id is None:
+            raise HTTPException(
+                status_code=500,
+                detail="No se recibió respuesta del procedimiento almacenado"
+            )
+        if company_id:
+            try:
+                print(f"Creando usuario para compañía ID: {company_id}")
+                user_response = await create_user_from_company(
+                    company_id=company_id,
+                    company_name=request.company_name,
+                    email=request.email,
+                    db=db
+                )
+                
+                return {
+                    "data": {
+                        "company_id": company_id
+                        #"user": user_response["data"]
+                    },
+                    "message": "Compañía y usuario creados exitosamente"
+                }
+            except Exception as user_error:
+                print(f"Error detallado al crear usuario: {str(user_error)}")
+                import traceback
+                print("Traceback de error de usuario:", traceback.format_exc())
+                return {
+                    "data": company_id,
+                    "message": "Compañía creada exitosamente, pero hubo un error al crear el usuario"
+                }
+        
         return {
-            "data": result,
-            "message": "Compañia creada exitosamente"
+            "data": company_id,
+            "message": 'Compañía creada exitosamente'
         }
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"Error en crear compañia: {str(e)}")
+        print(f"Error detallado en crear compañía: {str(e)}")
+        import traceback
+        print("Traceback completo:", traceback.format_exc())
         raise HTTPException(
             status_code=500, 
-            detail=f"Error al crear la compañia: {str(e)}"
+            detail=f"Error al crear la compañía: {str(e)}"
         )
 
 @companies_router.get("/companies")
-def get_companies(
+async def get_companies(
     company_id: Optional[int] = None,
     status: Optional[str] = None,
     subscription_type: Optional[str] = None,

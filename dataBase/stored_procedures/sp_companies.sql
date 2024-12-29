@@ -1,8 +1,6 @@
 USE ebr;
 GO
-
--- Procedimiento para crear una nueva empresa
-CREATE OR ALTER PROCEDURE admin.sp_CreateCompany
+ALTER PROCEDURE [admin].[sp_CreateCompany]
     @company_name NVARCHAR(100),
     @tax_identification_type NVARCHAR(10),
     @tax_id NVARCHAR(20),
@@ -16,12 +14,35 @@ CREATE OR ALTER PROCEDURE admin.sp_CreateCompany
 AS
 BEGIN
     SET NOCOUNT ON;
-    BEGIN TRY
-        IF EXISTS (SELECT 1 FROM admin.Companies 
-                  WHERE tax_identification_type = @tax_identification_type 
-                  AND tax_id = @tax_id)
-            THROW 50000, 'La combinación de tipo y número de identificación fiscal ya existe.', 1;
+    DECLARE @NewCompanyId INT;
 
+    BEGIN TRY
+        -- Verificar si ya existe la combinación de tipo y número de identificación fiscal
+        IF EXISTS (
+            SELECT 1 
+            FROM admin.Companies 
+            WHERE tax_identification_type = @tax_identification_type 
+            AND tax_id = @tax_id
+            AND active = 1
+        )
+        BEGIN
+            RAISERROR('La combinación de tipo y número de identificación fiscal ya existe.', 16, 1);
+            RETURN;
+        END
+
+        -- Verificar si ya existe el email
+        IF EXISTS (
+            SELECT 1 
+            FROM admin.Companies 
+            WHERE email = @email 
+            AND active = 1
+        )
+        BEGIN
+            RAISERROR('Ya existe una empresa con este correo electrónico.', 16, 1);
+            RETURN;
+        END
+
+        -- Insertar la nueva compañía
         INSERT INTO admin.Companies (
             company_name,
             tax_identification_type,
@@ -32,7 +53,9 @@ BEGIN
             address,
             phone,
             subscription_type,
-            subscription_end_date
+            subscription_end_date,
+            status,
+            active
         )
         VALUES (
             @company_name,
@@ -44,16 +67,31 @@ BEGIN
             @address,
             @phone,
             @subscription_type,
-            @subscription_end_date
+            @subscription_end_date,
+            'ACTIVE',
+            1
         );
 
-        --SELECT SCOPE_IDENTITY() as company_id;
+        SET @NewCompanyId = SCOPE_IDENTITY();
+        
+        -- Retornar solo el ID de la compañía
+        SELECT @NewCompanyId as company_id;
     END TRY
     BEGIN CATCH
-        THROW;
+        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+        RAISERROR(@ErrorMessage, 16, 1);
     END CATCH
 END;
-GO
+
+
+
+
+
+
+
+
+
+
 
 -- Procedimiento combinado para obtener empresas
 CREATE OR ALTER PROCEDURE admin.sp_GetCompanies

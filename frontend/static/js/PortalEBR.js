@@ -12,7 +12,13 @@ createApp({
             files: [],
             uploadComplete: false,
             presupuestoData: null,
-            presupuestoContent: '' // Nuevo
+            presupuestoContent: '',
+            
+            
+            successFiles: [], // archivos procesados exitosamente
+            errorFiles: [], // archivos con errores
+            isProcessing: false,
+            showSummary: false
         }
     },
     methods: {        
@@ -132,7 +138,6 @@ createApp({
                             <table id="detailed-table" class="w-full border-collapse border border-gray-300">
                                 <thead>
                                     <tr>
-                                        <th class="border border-gray-300 px-4 py-2">Código Cuenta</th>
                                         <th class="border border-gray-300 px-4 py-2">Nombre Cuenta</th>
                                         <th class="border border-gray-300 px-4 py-2">Año</th>
                                         <th class="border border-gray-300 px-4 py-2">Mes</th>
@@ -225,7 +230,6 @@ createApp({
             resultados.forEach(item => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td class="border border-gray-300 px-4 py-2">${item.CodigoCuenta}</td>
                     <td class="border border-gray-300 px-4 py-2">${item.NombreCuenta}</td>
                     <td class="border border-gray-300 px-4 py-2">${item.Anio}</td>
                     <td class="border border-gray-300 px-4 py-2">${item.Mes}</td>                    
@@ -369,7 +373,6 @@ createApp({
                         <table id="report-table-products" class="w-full">
                             <thead>
                                 <tr>
-                                    <th class="px-4 py-2">Codigo_Producto</th>
                                     <th class="px-4 py-2">Nombre_Producto</th>
                                     <th class="px-4 py-2">Año</th>
                                     <th class="px-4 py-2">Mes</th>
@@ -473,8 +476,9 @@ createApp({
                 alert('No hay archivos para procesar.');
                 return;
             }
-        
-            // Procesar todos los archivos seleccionados
+            this.isProcessing = true;
+            this.showSummary = true;
+            
             const promises = Array.from(this.files).map(async (file) => {
                 const formData = new FormData();
                 formData.append('file', file);
@@ -486,19 +490,27 @@ createApp({
                         },
                         onUploadProgress: progressEvent => {
                             this.uploadProgress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                        }
+                        }                        
                     });
-                    this.uploadComplete = true;
+                    this.successFiles.push(file.name);
+                    return { success: true, file: file.name };
                 } catch (error) {
-                    alert('Error al procesar el archivo: ' + error.response?.data?.detail || error.message);
-                    this.uploadProgress = 0;
-                    this.uploadComplete = false;
-                }
-                alert('Archivo procesado con éxito: ' + JSON.stringify(response.data));
+                    this.errorFiles.push({
+                        name: file.name,
+                        error: error.response?.data?.detail || error.message
+                    });
+                    return { success: false, file: file.name, error: error };
+                }              
             });
         
-            // Esperar a que todas las promesas se resuelvan            
-            await Promise.all(promises);            
-        }
+            try {
+                await Promise.all(promises);
+            } finally {
+                this.files = [];
+                this.isProcessing = false;
+                this.uploadProgress = 0;
+                this.uploadComplete = false; // Reset upload complete
+            }
+        },
     }
 }).mount('#app')

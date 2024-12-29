@@ -2,7 +2,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>AI & Data Science Portal</title>
+        <title>AI - Elterlich Portal</title>
         <!-- Vue.js CDN -->
         <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
         <!-- Tailwind CSS para estilos -->
@@ -30,7 +30,7 @@
                 :style="{width: isSidebarCollapsed ? '60px' : '250px'}">
                 <div class="p-4">
                     <div class="flex items-center justify-between">
-                        <h1 v-show="!isSidebarCollapsed" class="text-xl font-bold">AI Portal</h1>
+                        <h1 v-show="!isSidebarCollapsed" class="text-xl font-bold">Elterlich Portal</h1>
                         <button @click="toggleSidebar" class="text-white hover:text-[#4DD0E1]">
                             <i class="fas fa-bars"></i>
                         </button>
@@ -135,6 +135,46 @@
                             </button>
                         </div>
                     </div>
+
+
+  <!-- Resumen de procesamiento -->
+                    <div v-if="showSummary" class="mt-4">
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <h3 class="text-lg font-medium mb-4">
+                                {{ isProcessing ? 'Procesando archivos...' : 'Resumen de procesamiento' }}
+                            </h3>
+                            <!-- Archivos procesados exitosamente -->
+                            <div class="mb-4">
+                                <h4 class="font-medium text-green-600 flex items-center gap-2">
+                                    <i class="fas fa-check-circle"></i>
+                                    Archivos procesados exitosamente ({{ successFiles.length }})
+                                </h4>
+                                <ul class="mt-2 ml-6">
+                                    <li v-for="file in successFiles" :key="file" class="text-sm text-gray-600">
+                                        {{ file }}
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- Archivos con errores -->
+                            <div v-if="errorFiles.length > 0">
+                                <h4 class="font-medium text-red-600 flex items-center gap-2">
+                                    <i class="fas fa-times-circle"></i>
+                                    Archivos con errores ({{ errorFiles.length }})
+                                </h4>
+                                <ul class="mt-2 ml-6">
+                                    <li v-for="file in errorFiles" :key="file.name" class="mb-2">
+                                        <span class="text-sm text-gray-600">{{ file.name }}</span>
+                                        <p class="text-xs text-red-500 mt-1">{{ file.error }}</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+  <!-- FIN Resumen de procesamiento -->
+
+
+
+                    
                 </div>
 
                 <!-- Budget View -->
@@ -174,6 +214,9 @@
                             Guardar Prediccion
                         </button>
                     </div>
+
+                    
+
 
                 </div>
 

@@ -59,7 +59,6 @@ function renderTable_products(predicted, page = 1) {
     paginatedData.forEach(item => {
         const row = document.createElement("tr");
         row.innerHTML = `
-            <td class="px-4 py-2">${item.Codigo_Producto}</td>
             <td class="px-4 py-2">${item.Nombre_Producto}</td>
             <td class="px-4 py-2">${item.Año}</td>
             <td class="px-4 py-2">${getMonthName(item.Mes)}</td> <!-- Usar el nombre del mes -->

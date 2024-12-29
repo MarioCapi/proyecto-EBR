@@ -50,6 +50,7 @@ function renderPredictionsTable(data) {
                         ${valores.tendencia}
                     </td>
                     <td data-original-value="${valores.coeficiente}">${formatCurrency(valores.coeficiente)}</td>
+                    <td data-original-value="${valores.confianza}"></td>
                 `;
                 tbody.appendChild(row);
             });

@@ -57,7 +57,7 @@ createApp({
             }
         },
 
-        adjustTableValues(sliderValue) {
+    adjustTableValues(sliderValue) {
             const tbody = document.querySelector('#predictionsTable tbody');
             if (!tbody) {
                 console.error('No se encontró el elemento tbody');
@@ -279,6 +279,7 @@ createApp({
                                     <th>Valor Predicho</th>
                                     <th>Tendencia</th>
                                     <th>Coeficiente</th>
+                                    <th>Confianza</th>
                                 </tr>
                             </thead>
                             <tbody>

@@ -123,6 +123,8 @@ def getTot_prod_mes(nit, db: Session):
             try:
                 insertar_predicciones(nit, producto, productos_Nameunicos[0], predicciones_producto, usuario, db)
                 exitosas += 1  # Incrementar contador de exitosas
+                if exitosas == 7:
+                    print(f"solo capturando problema")
             except Exception as e:
                 errores.append(f"Error al insertar predicciones para {producto}: {str(e)}")
         

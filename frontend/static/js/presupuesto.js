@@ -83,8 +83,8 @@ async function initPresupuesto() {
         console.log('Datos recibidos:', result);
 
         if (result && result.data) {
-            const presupuestoData = result.data;
-            const predictionData = result.predictions; // Ajustar si las predicciones están estructuradas de otra manera
+            const presupuestoData = result.data;   // presupuesto actual consolidado para cada mes con la diferencia entre debito y credito
+            const predictionData = result.predictions; // las prediccioens del presupuesto para el año siguiente
 
             // Guardar predicciones en el sessionStorage
             sessionStorage.setItem('predictionData', JSON.stringify(predictionData.data));

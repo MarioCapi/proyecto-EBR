@@ -1,0 +1,30 @@
+flowchart TD
+    subgraph "Frontend"
+        A[App Service - Vue.js] --> B[Azure CDN]
+    end
+    
+    subgraph "Backend"
+        C[App Service - FastAPI]
+    end
+    
+    subgraph "Base de Datos"
+        D[(Azure SQL Database)]
+    end
+    
+    subgraph "CI/CD & Registry"
+        E[Azure DevOps]
+        F[Azure Container Registry]
+    end
+    
+    subgraph "Seguridad"
+        G[Azure AD B2C]
+        H[Key Vault]
+    end
+
+    B --> C
+    C --> D
+    E --> A
+    E --> C
+    F --> E
+    C --> G
+    C --> H

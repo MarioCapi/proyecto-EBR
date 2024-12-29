@@ -1,8 +1,6 @@
 USE ebr;
 GO
-
--- Procedimiento para crear una nueva empresa
-CREATE OR ALTER PROCEDURE admin.sp_CreateCompany
+ALTER PROCEDURE [admin].[sp_CreateCompany]
     @company_name NVARCHAR(100),
     @tax_identification_type NVARCHAR(10),
     @tax_id NVARCHAR(20),
@@ -12,11 +10,12 @@ CREATE OR ALTER PROCEDURE admin.sp_CreateCompany
     @address NVARCHAR(200) = NULL,
     @phone NVARCHAR(20) = NULL,
     @subscription_type NVARCHAR(20) = 'BASIC',
-    @subscription_end_date DATE = NULL,
-    @company_id INT OUTPUT  -- Parámetro de salida para el ID de la compañía
+    @subscription_end_date DATE = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
+    DECLARE @NewCompanyId INT;
+
     BEGIN TRY
         -- Verificar si ya existe la combinación de tipo y número de identificación fiscal
         IF EXISTS (
@@ -27,10 +26,7 @@ BEGIN
             AND active = 1
         )
         BEGIN
-            SET @company_id = NULL
-            SELECT 
-                0 as success,
-                'La combinación de tipo y número de identificación fiscal ya existe.' as message
+            RAISERROR('La combinación de tipo y número de identificación fiscal ya existe.', 16, 1);
             RETURN;
         END
 
@@ -42,13 +38,11 @@ BEGIN
             AND active = 1
         )
         BEGIN
-            SET @company_id = NULL
-            SELECT 
-                0 as success,
-                'Ya existe una empresa con este correo electrónico.' as message
+            RAISERROR('Ya existe una empresa con este correo electrónico.', 16, 1);
             RETURN;
         END
 
+        -- Insertar la nueva compañía
         INSERT INTO admin.Companies (
             company_name,
             tax_identification_type,
@@ -78,21 +72,26 @@ BEGIN
             1
         );
 
-        SET @company_id = SCOPE_IDENTITY()
-
-        SELECT 
-            1 as success,
-            'Compañía creada exitosamente' as message
-
+        SET @NewCompanyId = SCOPE_IDENTITY();
+        
+        -- Retornar solo el ID de la compañía
+        SELECT @NewCompanyId as company_id;
     END TRY
     BEGIN CATCH
-        SET @company_id = NULL
-        SELECT 
-            0 as success,
-            ERROR_MESSAGE() as message
+        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+        RAISERROR(@ErrorMessage, 16, 1);
     END CATCH
 END;
-GO
+
+
+
+
+
+
+
+
+
+
 
 -- Procedimiento combinado para obtener empresas
 CREATE OR ALTER PROCEDURE admin.sp_GetCompanies

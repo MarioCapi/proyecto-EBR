@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from utils.config.connection import get_db
-from utils.exec_any_SP_SQLServer import ejecutar_procedimiento, ejecutar_procedimiento_ingresos
+from utils.exec_any_SP_SQLServer import ejecutar_procedimiento, ejecutar_procedimiento_read
+from utils.exec_procedure_SQLServer import exec_sp_save_data 
 from typing import Optional, List
 from datetime import date
 from routes.users import create_user_from_company
@@ -37,45 +38,28 @@ async def create_company(
 ):
     print("Recibida solicitud para crear compañía")
     print("Datos recibidos:", request.dict())
-    try:
-        params = {
-            'company_name': request.company_name,
-            'tax_identification_type': request.tax_identification_type,
-            'tax_id': request.tax_id,
-            'email': request.email,
-            'num_employees': request.num_employees,
-            'company_type': request.company_type,
-            'address': request.address,
-            'phone': request.phone,
-            'subscription_type': request.subscription_type,
-            'subscription_end_date': request.subscription_end_date,
-            'company_id': None  # Parámetro de salida
-        }
-        
-        print("Ejecutando SP con parámetros:", params)
-        company_result = ejecutar_procedimiento_ingresos(
+    try:                       
+        company_id = exec_sp_save_data(
             db,
             'admin.sp_CreateCompany',
-            params,
-            output_params=['company_id']  # Indicar que company_id es parámetro de salida
+            return_scalar=True,
+            company_name=request.company_name,
+            tax_identification_type=request.tax_identification_type,
+            tax_id=request.tax_id,
+            email=request.email,
+            num_employees=request.num_employees,
+            company_type=request.company_type,
+            address=request.address,
+            phone=request.phone,
+            subscription_type=request.subscription_type,
+            subscription_end_date=request.subscription_end_date
         )
-        print("Resultado de crear compañía:", company_result)
-
-        if not company_result:
+        
+        if company_id is None:
             raise HTTPException(
                 status_code=500,
                 detail="No se recibió respuesta del procedimiento almacenado"
             )
-
-        # Verificar si la operación fue exitosa
-        if not company_result[0].get('success'):
-            raise HTTPException(
-                status_code=409,  # Conflict
-                detail=company_result[0].get('message', 'Error al crear la compañía')
-            )
-
-        # Obtener el company_id del parámetro de salida
-        company_id = params['company_id']
         if company_id:
             try:
                 print(f"Creando usuario para compañía ID: {company_id}")
@@ -85,13 +69,11 @@ async def create_company(
                     email=request.email,
                     db=db
                 )
-                print("Respuesta de crear usuario:", user_response)
                 
                 return {
                     "data": {
-                        "company_id": company_id,
-                        "company": company_result[0],
-                        "user": user_response["data"]
+                        "company_id": company_id
+                        #"user": user_response["data"]
                     },
                     "message": "Compañía y usuario creados exitosamente"
                 }
@@ -100,16 +82,13 @@ async def create_company(
                 import traceback
                 print("Traceback de error de usuario:", traceback.format_exc())
                 return {
-                    "data": {
-                        "company_id": company_id,
-                        "company": company_result[0]
-                    },
+                    "data": company_id,
                     "message": "Compañía creada exitosamente, pero hubo un error al crear el usuario"
                 }
         
         return {
-            "data": company_result[0],
-            "message": company_result[0].get('message', 'Compañía creada exitosamente')
+            "data": company_id,
+            "message": 'Compañía creada exitosamente'
         }
     except HTTPException:
         raise

@@ -1,56 +1,46 @@
 -- SP para crear un usuario
-CREATE OR ALTER PROCEDURE admin.CreateUser
-    @company_id INT,                  -- ID de la compañía
-    @first_name NVARCHAR(50),         -- Nombre del usuario
-    @last_name NVARCHAR(50),          -- Apellido del usuario
-    @email NVARCHAR(100),             -- Correo electrónico
-    @password_hash NVARCHAR(255),     -- Contraseña
-    @role_id INT,                     -- Relación con admin.Roles
-    @active BIT = 1                   -- Estado activo/inactivo
+ALTER PROCEDURE [admin].[CreateUser]
+    @company_id INT,
+    @first_name NVARCHAR(50),
+    @last_name NVARCHAR(50),
+    @email NVARCHAR(100),
+    @password_hash NVARCHAR(255),
+    @role_id INT,
+    @active BIT = 1
 AS
 BEGIN
     SET NOCOUNT ON;
+
     BEGIN TRY
         -- Validar si el company_id existe
         IF NOT EXISTS (SELECT 1 FROM admin.Companies WHERE company_id = @company_id AND active = 1)
         BEGIN
-            SELECT 
-                0 as success,
-                NULL as user_id,
-                'La compañía especificada no existe o no está activa.' as message
+            RAISERROR('La compañía especificada no existe o no está activa.', 16, 1);
             RETURN;
         END
 
         -- Validar si el role_id existe
         IF NOT EXISTS (SELECT 1 FROM admin.Roles WHERE role_id = @role_id)
         BEGIN
-            SELECT 
-                0 as success,
-                NULL as user_id,
-                'El rol especificado no existe.' as message
+            RAISERROR('El rol especificado no existe.', 16, 1);
             RETURN;
         END
 
         -- Validar si ya existe un usuario con ese email
         IF EXISTS (SELECT 1 FROM admin.Users WHERE email = @email AND active = 1)
         BEGIN
-            SELECT 
-                0 as success,
-                NULL as user_id,
-                'Ya existe un usuario con ese correo electrónico.' as message
+            RAISERROR('Ya existe un usuario con ese correo electrónico.', 16, 1);
             RETURN;
         END
 
-        DECLARE @NewUserId INT
-
         -- Insertar el nuevo usuario
         INSERT INTO admin.Users (
-            company_id, 
+            company_id,
             role_id,
-            email, 
+            email,
             password_hash,
-            first_name, 
-            last_name, 
+            first_name,
+            last_name,
             active,
             created_at,
             updated_at
@@ -66,23 +56,12 @@ BEGIN
             GETDATE(),
             GETDATE()
         );
-
-        SET @NewUserId = SCOPE_IDENTITY()
-
-        SELECT 
-            1 as success,
-            @NewUserId as user_id,
-            'Usuario creado exitosamente' as message
-
     END TRY
     BEGIN CATCH
-        SELECT 
-            0 as success,
-            NULL as user_id,
-            ERROR_MESSAGE() as message
+        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+        RAISERROR(@ErrorMessage, 16, 1);
     END CATCH
 END;
-GO
 
 -- SP para actualizar el usuario
 CREATE OR ALTER PROCEDURE admin.UpdateUser

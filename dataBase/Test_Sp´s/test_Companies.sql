@@ -2,32 +2,32 @@ USE ebr;
 GO
 
 -- Test para sp_CreateCompany
-PRINT 'Probando sp_CreateCompany con datos válidos'
+PRINT 'Probando sp_CreateCompany'
 BEGIN
     BEGIN TRY
-        -- Crear empresa con datos válidos
-        DECLARE @company_id INT
+        -- Test 1: Crear empresa con datos válidos
+        PRINT 'Test 1: Creando empresa'
+        DECLARE @result1 TABLE (
+            success BIT,
+            company_id INT,
+            message NVARCHAR(MAX)
+        )
         
+        INSERT INTO @result1
         EXEC admin.sp_CreateCompany 
-            @company_name = 'Empresa Test',
+            @company_name = 'Empresa Test 1',
             @tax_identification_type = 'NIT',
-            @tax_id = '900123456',
-            @email = 'contacto@empresatest.com',
+            @tax_id = '123456789',
+            @email = 'test1@empresa.com',
             @num_employees = 50,
             @company_type = 'TECNOLOGÍA',
             @address = 'Calle Test 123',
             @phone = '1234567890',
             @subscription_type = 'BASIC',
             @subscription_end_date = '2025-12-31'
-
-        IF @@ERROR = 0
-            PRINT 'Test completado exitosamente: Empresa creada'
-        ELSE
-            PRINT 'Error al crear la empresa'
-
     END TRY
     BEGIN CATCH
-        PRINT 'Error en test de sp_CreateCompany: ' + ERROR_MESSAGE()
+        PRINT 'Error en tests: ' + ERROR_MESSAGE()
     END CATCH
 END
 GO

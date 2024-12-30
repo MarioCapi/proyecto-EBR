@@ -1,5 +1,5 @@
 -- SP para crear un usuario
-ALTER PROCEDURE [admin].[CreateUser]
+create or ALTER PROCEDURE [admin].[CreateUser]
     @company_id INT,
     @first_name NVARCHAR(50),
     @last_name NVARCHAR(50),

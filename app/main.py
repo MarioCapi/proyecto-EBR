@@ -8,15 +8,16 @@ from routes.API_getTotales_x_Prod_mes import Tot_prod_mes_router as Tot_prod_mes
 #from routes.API_Pred_x_Prod import Tot_pred_prod_monthly_router as Tot_pred_prod_monthly_router
 from routes.API_get_Predicciones_Empresa_Producto import Get_pred_empresa_producto_router  as Get_pred_empresa_producto_router
 from routes.users import users_router
+from routes.API_registerLogs import Logsrouter as Logsrouter
 
 from utils.config.connection import test_database_connection
 from routes.companies import companies_router
 
 
 app = FastAPI(
-    title="API Carga Contable",
-    description="API para carga de archivos contables",
-    version="1.0.0"
+    title="API Gestion Contable",
+    description="API para gestion de carga de archivos contables y predicciones",
+    version="1.1.0"
 )
 
 app.add_middleware(
@@ -27,6 +28,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(Logsrouter)
 app.include_router(file_upload_router)
 app.include_router(presupuesto_router)
 app.include_router(PredicPres_x_empresa_router)

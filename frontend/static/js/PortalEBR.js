@@ -1,6 +1,7 @@
 const { createApp } = Vue
 const UrlAPIUpload = 'http://127.0.0.1:8080/upload/';
 const UrlAPI_tot_prod_mes = 'http://127.0.0.1:8080/getTot_x_prod_mes/';
+const UrlError_log = 'http://127.0.0.1:8080/registerlog/';
 
 
 createApp({
@@ -476,6 +477,7 @@ createApp({
                 alert('No hay archivos para procesar.');
                 return;
             }
+            const Nit_Empresa = '901292126'; // NIT de la empresa
             this.isProcessing = true;
             this.showSummary = true;
             
@@ -495,6 +497,24 @@ createApp({
                     this.successFiles.push(file.name);
                     return { success: true, file: file.name };
                 } catch (error) {
+
+                    const paramsLogError = {
+                        user_id: Nit_Empresa, // el userid
+                        action_type: "almacenando Archivo: metodo: processFiles",  //tipo de accion
+                        action_details: file.name,
+                        ip_address: "localhost", 
+                        user_agent: "navegador o dispositivo",
+                        error: 1, // quiere decir error
+                        error_details: error.response.data.detail || error.message
+                    };
+                    const responseError = await fetch(UrlError_log, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(paramsLogError)
+                    });
+
                     this.errorFiles.push({
                         name: file.name,
                         error: error.response?.data?.detail || error.message

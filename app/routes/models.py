@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, DateTime, Numeric, ForeignKey, Boolean
+from sqlalchemy import Column, Text, Integer, String, Date, DateTime, Numeric, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from utils.config.connection import Base
@@ -73,3 +73,16 @@ class ColumnMapping(BaseModel):
 class FileProcessor(BaseModel):
     metadata: FileMetadata
     datos: List[Dict]
+    
+
+class Log(Base):
+    __tablename__ = "logs"
+    id = Column(Integer, primary_key=True, index=True)
+    timestamp = Column(DateTime, server_default=func.getdate())
+    user_id = Column(Integer, nullable=True)
+    action_type = Column(String(50), nullable=False)
+    action_details = Column(Text, nullable=True)
+    ip_address = Column(String(45), nullable=True)
+    user_agent = Column(Text, nullable=True)
+    error = Column(Boolean, default=False)
+    error_details = Column(Text, nullable=True)

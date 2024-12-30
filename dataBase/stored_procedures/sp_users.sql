@@ -106,3 +106,94 @@ BEGIN
     END CATCH
 END;
 GO
+
+
+-- Procedimiento para verificar credenciales
+-- Procedimiento para verificar credenciales
+CREATE OR ALTER PROCEDURE [admin].[ValidateUserCredentials]
+    @email NVARCHAR(100),
+    @password NVARCHAR(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        -- Verificar si existe el usuario con las credenciales proporcionadas
+        IF NOT EXISTS (
+            SELECT 1 
+            FROM admin.Users 
+            WHERE email = @email 
+            AND password_hash = @password 
+            AND active = 1
+        )
+        BEGIN
+            -- Si no existe, lanzar error
+            THROW 50001, 'Credenciales inválidas', 1;
+            RETURN;
+        END
+
+        -- Si existe, retornar los datos del usuario
+        SELECT 
+            user_id,
+            email,
+            role_id,
+            company_id,
+            first_name,
+            last_name
+        FROM admin.Users 
+        WHERE email = @email 
+        AND active = 1;
+
+        -- Retornar código de éxito
+        RETURN 0;
+    END TRY
+    BEGIN CATCH
+        THROW;
+        RETURN -1;
+    END CATCH
+END;
+GO
+
+-- Procedimiento para obtener datos del usuario por ID
+CREATE OR ALTER PROCEDURE [admin].[GetUserById]
+    @user_id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        -- Verificar si existe el usuario
+        IF NOT EXISTS (
+            SELECT 1 
+            FROM admin.Users 
+            WHERE user_id = @user_id 
+            AND active = 1
+        )
+        BEGIN
+            THROW 50002, 'Usuario no encontrado', 1;
+            RETURN;
+        END
+
+        -- Retornar datos del usuario
+        SELECT 
+            u.user_id,
+            u.email,
+            u.first_name,
+            u.last_name,
+            u.role_id,
+            r.role_name,
+            u.company_id,
+            c.company_name
+        FROM admin.Users u
+        INNER JOIN admin.Roles r ON u.role_id = r.role_id
+        INNER JOIN admin.Companies c ON u.company_id = c.company_id
+        WHERE u.user_id = @user_id 
+        AND u.active = 1;
+
+        -- Retornar código de éxito
+        RETURN 0;
+    END TRY
+    BEGIN CATCH
+        THROW;
+        RETURN -1;
+    END CATCH
+END;
+GO

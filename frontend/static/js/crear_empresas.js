@@ -1,7 +1,5 @@
 document.getElementById('createCompanyForm').addEventListener('submit', async function(event) {
     event.preventDefault();
-    showLoader();
-    
     // Validaciones básicas
     const email = document.getElementById('email').value;
     const numEmployees = document.getElementById('num_employees').value;
@@ -192,14 +190,6 @@ function removeMessage(messageElement) {
     }, 300);
 }
 
-// Función para mostrar el loader
-function showLoader() {
-    const loader = document.createElement('div');
-    loader.className = 'loader';
-    loader.innerHTML = '<div class="loader-spinner"></div>';
-    document.body.appendChild(loader);
-    loader.style.display = 'flex';
-}
 
 function hideLoader() {
     const loader = document.querySelector('.loader');

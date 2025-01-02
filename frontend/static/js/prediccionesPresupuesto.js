@@ -1,8 +1,6 @@
 // predicciones.js
 let presupuestoData = null;
 function initPredictions(data) {
-    console.log('Iniciando renderizado de predicciones:', data);
-
     try {
         // Actualizar métricas
         if (data.metricas) {

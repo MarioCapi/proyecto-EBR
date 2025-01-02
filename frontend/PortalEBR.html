@@ -54,14 +54,14 @@
                             <a href="javascript:void(0)" @click="setActiveView('budgetPresu')" 
                             class="nav-item flex items-center space-x-3 p-2 rounded">
                                 <i class="fas fa-chart-pie"></i>
-                                <span v-show="!isSidebarCollapsed">Prediccion Presupuesto</span>
+                                <span v-show="!isSidebarCollapsed">Prediccion del Ingreso</span>
                             </a>
                         </li>
                         
                         <li>
                             <a href="javascript:void(0)" @click="setActiveView('budgetPresuXProduct')" 
                             class="nav-item flex items-center space-x-3 p-2 rounded">
-                                <i class="fas fa-chart-pie"></i>
+                            <i class="fas fa-chart-line"></i>
                                 <span v-show="!isSidebarCollapsed">Prediccion Presupuesto X Producto</span>
                             </a>
                         </li>
@@ -195,7 +195,7 @@
                 </div>
                 <!-- Prediccion Presupuesto View -->
                     <div v-if="activeView === 'budgetPresu'" class="space-y-6">
-                        <h2 class="text-2xl font-bold text-[#102A43]">Predicción de Presupuesto</h2>
+                        <h2 class="text-2xl font-bold text-[#102A43]">Predicción del Ingreso</h2>
                         <div id="contentPresu">
                             <!-- Aquí se cargará el contenido de presupuesto.html -->
                         </div>

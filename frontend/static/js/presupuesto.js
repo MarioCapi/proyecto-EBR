@@ -51,10 +51,10 @@ async function initPresupuesto() {
 
     // Mostrar spinner y mensaje
     const spinner = document.createElement('div');
-    spinner.className = 'spinner'; // Asegúrate de tener estilos CSS para '.spinner'
+    spinner.className = 'spinner'; // asegurar los estilos CSS para el  '.spinner'
     const message = document.createElement('p');
     message.textContent = "Estamos procesando las predicciones. Esto puede tomar algunos minutos...";
-    const container = document.getElementById('loading-container'); // Asegúrate de tener un contenedor en tu HTML
+    const container = document.getElementById('loading-container');
     if (!container) {
         console.error('El contenedor "loading-container" no existe en el DOM.');
         return;

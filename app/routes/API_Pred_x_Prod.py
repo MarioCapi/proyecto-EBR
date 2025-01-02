@@ -6,17 +6,19 @@ from sqlalchemy.orm import Session
 from utils.config.connection import get_db
 from utils.exec_any_SP_SQLServer import ejecutar_procedimiento_read, ejecutar_procedimiento_JSONParams
 
-
-from autots import AutoTS
 import pandas as pd
-import matplotlib.pyplot as plt
-
+import numpy as np
+from xgboost import XGBRegressor
+from sklearn.preprocessing import LabelEncoder
+from datetime import datetime, timedelta
 
 class ReportePredProdRequest(BaseModel):
     nit: str
+
 class ReporteForecastProd(BaseModel):
     nit: str
     codigoCuenta: str
+
 
 
 Tot_pred_prod_monthly_router = APIRouter()
@@ -59,96 +61,111 @@ async def get_all_list_Products(
 
 #@Tot_pred_prod_monthly_router.post("/get_for_Product_Prediction_monthly")
 #async def getTot_prod_mes(request: ReporteForecastProd,db: Session = Depends(get_db)):
+
 def getTot_prod_mes(nit, db: Session):
     try:
-        # quemamos un usuario
         usuario = 'genericoAPI'
         parametros = {"NIT": nit}
         resultados = ejecutar_procedimiento_read(
             db, 
             "Admin.sp_for_Product_Prediction_monthly",
             parametros
-        )   
-        # Cargar los datos
+        )
+        
         data = resultados
-        productos_unicos = set(item['CodigoCuenta'] for item in data)  # Usar un conjunto para obtener valores únicos
-        predicciones_totales = []  # Lista para almacenar las predicciones de todos los productos
-        exitosas = 0  # Contador de iteraciones exitosas
-        errores = []  # Lista para almacenar errores
+        productos_unicos = set(item['CodigoCuenta'] for item in data)
+        predicciones_totales = []
+        exitosas = 0
+        errores = []
         
         for producto in productos_unicos:
-            df_producto = [item for item in data if item["CodigoCuenta"] == producto]
-            df_producto = pd.DataFrame(df_producto)
-            
-            if df_producto.empty:
-                continue  # Saltar este producto si no hay datos
-            else:
-                productos_Nameunicos = df_producto['NombreCuenta'].unique()
-            
-            
-            # Asegurar que las columnas sean del tipo correcto
-            df_producto['Fecha'] = pd.to_datetime(df_producto['Anio'].astype(str) + "-" + df_producto['Mes'].astype(str) + "-01", errors='coerce')
-            df_producto['TotalIngreso'] = pd.to_numeric(df_producto['TotalIngreso'], errors='coerce')  # Asegurar que la columna de valores sea numérica
-            df_producto = df_producto.dropna() # Eliminar filas con NaN
-            # Verificar si hay suficientes datos
-            if len(df_producto) < 2:  # Necesitamos al menos 2 puntos para hacer una predicción
-                continue
-            
-            #Ajustar forecast_length basado en la cantidad de datos
-            if len(df_producto) < 5:
-                forecast_length = 1  # Si hay menos de 5 datos, predecir solo 1 mes
-            elif len(df_producto) < 10:
-                forecast_length = 3  # Si hay entre 5 y 10 datos, predecir 3 meses
-            else:
-                forecast_length = 12  # Si hay 10 o más datos, predecir 12 meses
-            # Configurar el modelo AutoTS
-            model = AutoTS(
-                forecast_length=forecast_length,
-                frequency='M',
-                ensemble='simple',
-                model_list="fast",
-                max_generations=5,
-                num_validations=2
-            )
-            # Entrenamiento
-            model = model.fit(df_producto, date_col="Fecha", value_col="TotalIngreso")  # Asegúrate de que "TotalIngreso" sea la columna correcta                        
-            prediction = model.predict()
-            forecast = prediction.forecast
-            
-            # Almacenar las predicciones en la lista total
-            predicciones_producto = forecast.reset_index().to_dict(orient='records')  # Convertir a lista de diccionarios
-            predicciones_totales.append({"CodigoCuenta": producto, "predicciones": predicciones_producto})
-            
-            # Insertar predicciones en la base de datos
             try:
+                df_producto = pd.DataFrame([item for item in data if item["CodigoCuenta"] == producto])
+                
+                if df_producto.empty or len(df_producto) < 2:
+                    continue
+                    
+                productos_Nameunicos = df_producto['NombreCuenta'].unique()
+                
+                # Preparar datos
+                df_producto['Fecha'] = pd.to_datetime(df_producto['Anio'].astype(str) + "-" + df_producto['Mes'].astype(str) + "-01")
+                df_producto['TotalIngreso'] = pd.to_numeric(df_producto['TotalIngreso'], errors='coerce')
+                df_producto = df_producto.dropna()
+                
+                # Crear características temporales
+                df_producto['mes'] = df_producto['Fecha'].dt.month
+                df_producto['anio'] = df_producto['Fecha'].dt.year
+                df_producto['tendencia'] = range(len(df_producto))
+                
+                # Definir número de meses a predecir
+                forecast_length = 12 if len(df_producto) >= 10 else (3 if len(df_producto) >= 5 else 1)
+                
+                # Preparar datos para XGBoost
+                X = df_producto[['mes', 'anio', 'tendencia']].values
+                y = df_producto['TotalIngreso'].values
+                
+                # Entrenar modelo
+                model = XGBRegressor(
+                    n_estimators=100,
+                    learning_rate=0.05,
+                    max_depth=4,
+                    random_state=31
+                )
+                model.fit(X, y)
+                
+                # Generar fechas futuras
+                ultima_fecha = df_producto['Fecha'].max()
+                fechas_futuras = pd.date_range(start=ultima_fecha + timedelta(days=32), periods=forecast_length, freq='M')
+                
+                # Preparar datos para predicción
+                X_future = pd.DataFrame({
+                    'mes': fechas_futuras.month,
+                    'anio': fechas_futuras.year,
+                    'tendencia': range(len(df_producto), len(df_producto) + forecast_length)
+                }).values
+                
+                # Realizar predicción
+                predicciones = model.predict(X_future)
+                
+                # Formatear predicciones
+                predicciones_producto = []
+                for i, fecha in enumerate(fechas_futuras):
+                    predicciones_producto.append({
+                        'Fecha': fecha.strftime('%Y-%m-%d'),
+                        'TotalIngreso': float(max(0, predicciones[i]))  # Evitar predicciones negativas
+                    })
+                
+                predicciones_totales.append({
+                    "CodigoCuenta": producto,
+                    "predicciones": predicciones_producto
+                })
+                
+                # Insertar predicciones
                 insertar_predicciones(nit, producto, productos_Nameunicos[0], predicciones_producto, usuario, db)
-                exitosas += 1  # Incrementar contador de exitosas
-                if exitosas == 7:
-                    print(f"solo capturando problema")
+                exitosas += 1
+                
             except Exception as e:
-                errores.append(f"Error al insertar predicciones para {producto}: {str(e)}")
+                errores.append(f"Error en producto {producto}: {str(e)}")
+                continue
         
         return {
             "mensaje": f"Insertadas exitosamente {exitosas} predicciones.",
             "errores": errores
         }
     
-    except HTTPException as he:
-        raise he
     except Exception as e:
-        print(f"Error en generar consulta de mes producto: {str(e)}")
         raise HTTPException(
-            status_code=500, 
+            status_code=500,
             detail=f"Error al generar consulta mes producto: {str(e)}"
         )
-
 
 def insertar_predicciones(nit_empresa, codigo_producto, NombreCuenta, predicciones, usuario, db: Session):
 # Método para invocar el procedimiento almacenado Admin.sp_InsertOrUpdatePredicciones_x_producto.
     try:
         predicciones_json = []
-        for prediccion in predicciones:  # Accede a la clave 'predicciones'
-            fecha = prediccion['index']  # Timestamp
+        for prediccion in predicciones:
+            # Convertir la fecha de cadena a un objeto datetime
+            fecha = datetime.strptime(prediccion['Fecha'], '%Y-%m-%d')
             valor = prediccion['TotalIngreso']  # Predicción
             predicciones_json.append({
                 "anio": fecha.year,

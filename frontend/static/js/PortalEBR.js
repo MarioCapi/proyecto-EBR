@@ -284,7 +284,6 @@ createApp({
                                     <th>Valor Predicho</th>
                                     <th>Tendencia</th>
                                     <th>Coeficiente</th>
-                                    <th>Confianza</th>
                                 </tr>
                             </thead>
                             <tbody>

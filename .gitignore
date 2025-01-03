@@ -40,3 +40,5 @@ Files for training
 # Ignorar archivos configuración SASS
 .sass-cache
 
+
+.codegpt

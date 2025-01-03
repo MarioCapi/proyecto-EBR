@@ -144,6 +144,96 @@ createApp({
                                 <tbody>
                                 </tbody>
                             </table>
+
+<div>
+</div>
+
+<div>
+</div>
+
+
+                            <h1>Dashboard Total Gastos</h1>
+                            <table id="report-table-final-presupuesto-gasto">
+                                <thead>
+                                    <tr>
+                                        <th>Productos</th>
+                                        <th>Enero</th>
+                                        <th>Febrero</th>
+                                        <th>Marzo</th>
+                                        <th>Abril</th>
+                                        <th>Mayo</th>
+                                        <th>Junio</th>
+                                        <th>Julio</th>
+                                        <th>Agosto</th>
+                                        <th>Septiembre</th>
+                                        <th>Octubre</th>
+                                        <th>Noviembre</th>
+                                        <th>Diciembre</th>
+                                        <th class="total-column">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+
+
+                            <div>
+</div>
+
+<div>
+</div>
+
+
+                            <h1>Dashboard Total Costos</h1>
+                            <table id="report-table-final-presupuesto-costo">
+                                <thead>
+                                    <tr>
+                                        <th>Productos</th>
+                                        <th>Enero</th>
+                                        <th>Febrero</th>
+                                        <th>Marzo</th>
+                                        <th>Abril</th>
+                                        <th>Mayo</th>
+                                        <th>Junio</th>
+                                        <th>Julio</th>
+                                        <th>Agosto</th>
+                                        <th>Septiembre</th>
+                                        <th>Octubre</th>
+                                        <th>Noviembre</th>
+                                        <th>Diciembre</th>
+                                        <th class="total-column">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+
+
+                            <h1>Dashboard Totales Presupuesto Sugerido</h1>
+                            <table id="report-table-final-presupuesto-sugerido">
+                                <thead>
+                                    <tr>
+                                        <th>Totales</th>
+                                        <th>Enero</th>
+                                        <th>Febrero</th>
+                                        <th>Marzo</th>
+                                        <th>Abril</th>
+                                        <th>Mayo</th>
+                                        <th>Junio</th>
+                                        <th>Julio</th>
+                                        <th>Agosto</th>
+                                        <th>Septiembre</th>
+                                        <th>Octubre</th>
+                                        <th>Noviembre</th>
+                                        <th>Diciembre</th>
+                                        <th class="total-column">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+
+
                         </div>
                     </div>
                 `;

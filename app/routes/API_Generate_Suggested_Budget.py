@@ -90,7 +90,7 @@ async def get_generate_suggested_budget(
                 'Mes':row['Mes'],
                 'TotalDebito': float(row['TotalDebito']),
                 'TotalCredito': float(row['TotalCredito']),
-                'Costo': float(row['Gasto'])
+                'Gasto': float(row['Gasto'])
             }
             for row in resultados
         ]

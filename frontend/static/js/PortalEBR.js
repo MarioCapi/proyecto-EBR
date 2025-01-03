@@ -104,7 +104,92 @@ createApp({
             if (view === 'budgetPresuXProduct') {
                 this.loadPredictionXProducto()
             }
+
+            if (view === 'PrediccionPresupuesto') {
+                this.loadPrediccionFinalPresupuesto()
+            }            
         },
+
+        async loadPrediccionFinalPresupuesto() {
+            try{
+                const nit_actual = '901292126'
+                await this.$nextTick();
+                const contentDiv = document.getElementById('contentPresupuestoFinal');
+                if (!contentDiv) {
+                    throw new Error('No se encontró el elemento con id "contentPresupuestoFinal"');
+                }        
+                contentDiv.innerHTML = `
+                    <div class="container">
+                        <h1>Dashboard de Ventas por Producto</h1>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Productos</th>
+                                        <th>Enero</th>
+                                        <th>Febrero</th>
+                                        <th>Marzo</th>
+                                        <th>Abril</th>
+                                        <th>Mayo</th>
+                                        <th>Junio</th>
+                                        <th>Julio</th>
+                                        <th>Agosto</th>
+                                        <th>Septiembre</th>
+                                        <th>Octubre</th>
+                                        <th>Noviembre</th>
+                                        <th>Diciembre</th>
+                                        <th class="total-column">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Producto A</td>
+                                        <td>1000</td>
+                                        <td class="total-column">29500</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Producto B</td>
+                                        <td>1500</td>
+                                        <td class="total-column">32800</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Producto C</td>
+                                        <td>1200</td>
+                                        <td class="total-column">28300</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+
+                const oldScript = document.getElementById('presupuesto-script_1');
+                if (oldScript) {
+                    oldScript.remove();
+                }        
+                // Cargar nuevo script
+                const script = document.createElement('script');
+                script.id = 'presupuestoFinal-script';
+                script.src = './static/js/calculoTotalPrediccionFinalPresupuesto.js';
+                script.onload = () => {
+                    if (window.initPresupuestoFinal) {
+                        window.initPresupuestoFinal();
+                    }
+                };
+                script.onerror = (error) => {
+                    console.error('Error al cargar el script de presupuesto final:', error);
+                };
+                document.body.appendChild(script);
+
+            }catch (error) {
+                console.error('Error al cargar el contenido final del presupuesto con costo y gasto:', error);
+            }
+
+        },
+
+
+
+        /*HTML que tiene la tabla detallada de los productos por mes*/
         async loadPresupuestoContent() {            
             try {
                 const nit_actual = '901292126'
@@ -243,6 +328,7 @@ createApp({
             document.getElementById('detailed-table-container').style.display = 'block';
         },
 
+        /*HTML de los botones con total de la prediccion, rango de años ymese analizados*/
         async loadPrediccionPresupuesto() {
             try {
                 await this.$nextTick();
@@ -343,7 +429,7 @@ createApp({
         },
 
 
-        async loadPredictionXProducto()
+        async loadPredictionXProducto()  /*HTML de Ingreso  x Producto*/
         {
             try {
                 const nit_actual = '901292126'

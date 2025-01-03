@@ -1,13 +1,14 @@
 USE [EBR]
 GO
-/****** Object:  StoredProcedure [Admin].[sp_for_Product_Prediction_monthly]    Script Date: 12/23/2024 2:06:29 PM ******/
+/****** Object:  StoredProcedure [Admin].[sp_for_Product_Prediction_monthly]    Script Date: 1/3/2025 10:03:25 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 ALTER PROCEDURE [Admin].[sp_for_Product_Prediction_monthly]    
-    @NIT NVARCHAR(50)   -- NIT de la empresa
+    @NIT NVARCHAR(50),   -- NIT de la empresa
+	@ultimoAnio BIT = 0  -- opcional para filtrar por el último año
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -30,6 +31,8 @@ BEGIN
 		  AND dat.CodigoCuenta NOT LIKE '4175%' -- Excluye valores que comiencen con 4175
 		  --AND dat.CodigoCuenta NOT LIKE '4180%' -- Excluye valores que comiencen con 4175
 		  AND dat.CodigoCuenta NOT LIKE '42%' -- Excluye valores que comiencen con 42
+		  AND (@ultimoAnio = 0 OR YEAR(arc.Periodo) = YEAR(GETDATE()) - 1) -- Condición para último año
+ 
 		GROUP BY 
 			dat.CodigoCuenta, 
 			dat.NombreCuenta, 

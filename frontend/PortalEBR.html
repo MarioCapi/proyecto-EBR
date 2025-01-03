@@ -20,6 +20,7 @@
         <link rel="stylesheet" href="./static/css/tabla_get_presu_prod_mes.css">
         <link rel="stylesheet" href="./static/css/report_table_products.css">
         <link rel="stylesheet" href="./static/css/spinner.css">
+        <link rel="stylesheet" href="./static/css/informeFinalPrediccionPresupuesto.css">
 
     </head>
 <body class="bg-[#E3F2FD]">
@@ -62,7 +63,15 @@
                             <a href="javascript:void(0)" @click="setActiveView('budgetPresuXProduct')" 
                             class="nav-item flex items-center space-x-3 p-2 rounded">
                             <i class="fas fa-chart-line"></i>
-                                <span v-show="!isSidebarCollapsed">Prediccion Presupuesto X Producto</span>
+                                <span v-show="!isSidebarCollapsed">Prediccion del Ingreso X Producto</span>
+                            </a>
+                        </li>
+
+                        <li></li>
+                            <a href="javascript:void(0)" @click="setActiveView('PrediccionPresupuesto')" 
+                            class="nav-item flex items-center space-x-3 p-2 rounded">
+                            <i class="fas fa-chart-line"></i>
+                                <span v-show="!isSidebarCollapsed">Generar Presupuesto Sugerido</span>
                             </a>
                         </li>
 
@@ -185,13 +194,6 @@
                     <div id="content">
                         <!-- Aquí se cargará el contenido de presupuesto.html -->
                     </div>
-                    <!-- Ícono de cerebro para IA -->
-                    <!--<div class="prediction-button-container">
-                        <button id="generatePredictionBtn" class="data-science-button">
-                            <i class="fas fa-brain"></i> 
-                            Generar Presupuesto
-                        </button>
-                    </div>-->
                 </div>
                 <!-- Prediccion Presupuesto View -->
                     <div v-if="activeView === 'budgetPresu'" class="space-y-6">
@@ -201,11 +203,19 @@
                         </div>
                     </div>
                     <div v-if="activeView === 'budgetPresuXProduct'" class="space-y-6">
-                        <h2 class="text-2xl font-bold text-[#102A43]">Predicción Presupuesto  x Producto</h2>
+                        <h2 class="text-2xl font-bold text-[#102A43]">Predicción del Ingreso x Producto</h2>
                         <div id="contentPresuXProduct">
                             <!-- Aquí se cargará el contenido de presupuesto. X PRODUCTO  -->
                         </div>
                     </div>
+
+                    <div v-if="activeView === 'PrediccionPresupuesto'" class="space-y-6">
+                        <h2 class="text-2xl font-bold text-[#102A43]">Generacion del Presupuesto Sugerido</h2>
+                        <div id="contentPresupuestoFinal">
+                            <!-- Aquí se cargará el contenido la prediccion final del presupuesto incluyendo costos y gastos  -->
+                        </div>
+                    </div>
+
 
 
                     <div id="savePredictionContainer"  class="hidden">

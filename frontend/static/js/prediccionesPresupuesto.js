@@ -71,20 +71,34 @@ function renderPredictionsChart(data) {
             console.error('No hay datos para el gráfico');
             return;
         }
-        
+
         const meses = Object.keys(data.predicciones_mensuales);
+        const valoresPredichos = meses.map(mes => data.predicciones_mensuales[mes].Diferencia.valor_predicho);
+        const valoresReales = meses.map(mes => data.predicciones_mensuales[mes].Diferencia.valor_anterior || 0); // Ejemplo: valores reales
+
         const datasets = [
             {
-                label: 'Total Ingreso',
-                data: meses.map(mes => data.predicciones_mensuales[mes].Diferencia.valor_predicho),
+                type: 'line', // Gráfico de línea
+                label: 'Total Ingreso (Predicción)',
+                data: valoresPredichos,
                 borderColor: '#5d7ec9',
                 backgroundColor: 'rgba(93, 126, 201, 0.1)',
-                tension: 0.4
+                tension: 0.4,
+                yAxisID: 'y',
+            },
+            {
+                type: 'bar', // Gráfico de barras
+                label: 'Total Ingreso (Real)',
+                data: valoresReales,
+                backgroundColor: 'rgba(201, 93, 126, 0.5)',
+                borderColor: '#c95d7e',
+                borderWidth: 1,
+                yAxisID: 'y',
             }
         ];
 
         new Chart(ctx, {
-            type: 'line',
+            type: 'bar', // Tipo base (necesario para el gráfico mixto)
             data: {
                 labels: meses,
                 datasets: datasets

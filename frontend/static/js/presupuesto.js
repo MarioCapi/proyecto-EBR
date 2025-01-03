@@ -142,9 +142,7 @@ function renderTable() {
             <td class="px-4 py-2">${item.Anio}</td>
             <td class="px-4 py-2">${item.Mes}</td>
             <td class="px-4 py-2">${item.NombreMes}</td>
-            <td class="px-4 py-2">${item.TotalDebito.toLocaleString('es-CO')}</td>
-            <td class="px-4 py-2">${item.TotalCredito.toLocaleString('es-CO')}</td>
-            <td class="px-4 py-2">${item.Diferencia.toLocaleString('es-CO')}</td>
+            <td class="px-4 py-2 text-center">${item.Diferencia.toLocaleString('es-CO')}</td>
         `;
         reportTableBody.appendChild(row);
     });

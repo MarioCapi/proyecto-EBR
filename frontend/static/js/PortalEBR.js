@@ -120,10 +120,8 @@ createApp({
                                 <tr>
                                     <th class="px-4 py-2">Año</th>
                                     <th class="px-4 py-2">Mes</th>
-                                    <th class="px-4 py-2">Nombre del Mes</th>
-                                    <th class="px-4 py-2">Total Débito</th>
-                                    <th class="px-4 py-2">Total Crédito</th>
-                                    <th class="px-4 py-2">Total Ingreso</th>
+                                    <th class="px-4 py-2">Mes</th>
+                                    <th class="px-4 py-2 text-center">Total Ingreso</th>
                                 </tr>
                             </thead>
                             <tbody>

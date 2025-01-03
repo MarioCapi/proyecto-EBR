@@ -51,10 +51,10 @@ async function initPresupuesto() {
 
     // Mostrar spinner y mensaje
     const spinner = document.createElement('div');
-    spinner.className = 'spinner'; // Asegúrate de tener estilos CSS para '.spinner'
+    spinner.className = 'spinner'; // asegurar los estilos CSS para el  '.spinner'
     const message = document.createElement('p');
     message.textContent = "Estamos procesando las predicciones. Esto puede tomar algunos minutos...";
-    const container = document.getElementById('loading-container'); // Asegúrate de tener un contenedor en tu HTML
+    const container = document.getElementById('loading-container');
     if (!container) {
         console.error('El contenedor "loading-container" no existe en el DOM.');
         return;
@@ -142,9 +142,7 @@ function renderTable() {
             <td class="px-4 py-2">${item.Anio}</td>
             <td class="px-4 py-2">${item.Mes}</td>
             <td class="px-4 py-2">${item.NombreMes}</td>
-            <td class="px-4 py-2">${item.TotalDebito.toLocaleString('es-CO')}</td>
-            <td class="px-4 py-2">${item.TotalCredito.toLocaleString('es-CO')}</td>
-            <td class="px-4 py-2">${item.Diferencia.toLocaleString('es-CO')}</td>
+            <td class="px-4 py-2 text-center">${item.Diferencia.toLocaleString('es-CO')}</td>
         `;
         reportTableBody.appendChild(row);
     });

@@ -59,7 +59,7 @@ async def generar_reporte_ingresos(
         predicciones = generateBudgetExpectationFull(request.anio, resultados)
         
         try:
-            resultado_predicciones = getTot_prod_mes(request.nit, db)
+            resultado_predicciones = getTot_prod_mes(request.nit, db) # generacion y almacenamiento de las predicciones por producto
             if resultado_predicciones["errores"]:
                 print("Errores en la inserción de predicciones:", resultado_predicciones["errores"])
         except Exception as e:        

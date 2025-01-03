@@ -14,7 +14,7 @@ class UserBase(BaseModel):
     email: str
     first_name: str
     last_name: str = ""  # Valor por defecto
-    role_id: int = 4  # ID del rol "Analista contable y financiero"
+    role_id: int  # ID del rol "Analista contable y financiero"
     #password_hash: str = "default_password_hash"  # Esto debería ser un hash real en producción
 
 users_router = APIRouter()
@@ -44,7 +44,7 @@ async def create_user_from_company(
             email=email,
             first_name=company_name,
             last_name="",  # Asignamos el valor por defecto
-            role_id=4
+            role_id=3
         )
         
         params = {

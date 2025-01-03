@@ -21,7 +21,7 @@
     background-color: #2c3e50;
     color: white;
     padding: 1rem;
-    text-align: left;
+    text-align: center;
     font-weight: 600;
     text-transform: uppercase;
     font-size: 0.9rem;
@@ -38,12 +38,24 @@
     transition: all 0.2s ease;
 }
 
+/*oculta el ide del mes de la tabla de reporte del ingreso*/
+#report-table td:nth-child(2), 
+#report-table th:nth-child(2) {
+    display: none;
+  }
+
+
 #report-table td:nth-child(4),
-#report-table td:nth-child(5),
-#report-table td:nth-child(6) {
-    text-align: right;
+#report-table td:nth-child(5){
+    text-align: center;
     font-family: monospace;
 }
+
+#report-table td:nth-child(6) {
+    text-align: center;
+    font-family: monospace;
+}
+
 
 /* Formato para números positivos y negativos */
 .positive-amount {

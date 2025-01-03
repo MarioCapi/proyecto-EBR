@@ -106,6 +106,19 @@ document.getElementById("next-page_products__predict").addEventListener("click",
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Función para poblar los filtros
 function populateFilters(predicted) {
     const codigoProductoSelect = document.getElementById("codigoProducto");
@@ -135,16 +148,27 @@ function populateFilters(predicted) {
     });
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
 // Función para renderizar la gráfica
 function renderChart(predicted, codigoProducto, anio) {
     const anioNumber = parseInt(anio, 10); // Convertir a número si es necesario
     const filteredData = predicted.data.filter(item => {
-    
-    const codigoMatch = codigoProducto ? item.Codigo_Producto.trim() === codigoProducto.trim() : true; // Comparar sin espacios
-    const anioMatch = anioNumber ? item.Año === anioNumber : true; // Comparar como número
-    console.log(`Comparando: ${item.Codigo_Producto} con ${codigoProducto}, ${item.Año} con ${anioNumber}`); // Verificar comparación
-    return codigoMatch && anioMatch; // Retornar verdadero si ambos coinciden
-});
+        const codigoMatch = codigoProducto ? item.Codigo_Producto.trim() === codigoProducto.trim() : true; // Comparar sin espacios
+        const anioMatch = anioNumber ? item.Año === anioNumber : true; // Comparar como número
+        console.log(`Comparando: ${item.Codigo_Producto} con ${codigoProducto}, ${item.Año} con ${anioNumber}`); // Verificar comparación
+        return codigoMatch && anioMatch; // Retornar verdadero si ambos coinciden
+    });
 
     if (filteredData.length === 0) {
         alert("No hay datos disponibles para el Código de Producto y Año seleccionados.");
@@ -157,8 +181,15 @@ function renderChart(predicted, codigoProducto, anio) {
 
     const ctx = document.getElementById('predictionsChart').getContext('2d');
 
-    // Asignar colores únicos a cada producto
-    const colors = filteredData.map(() => getRandomColor());
+    // Asignar colores únicos por Código_Producto
+    const colorMap = {};
+    filteredData.forEach(item => {
+        if (!colorMap[item.Codigo_Producto]) {
+            colorMap[item.Codigo_Producto] = getRandomColor(); // Generar un color nuevo si no existe
+        }
+    });
+
+    const colors = filteredData.map(item => colorMap[item.Codigo_Producto]);
 
     if (window.chart) {
         window.chart.destroy();
@@ -171,7 +202,7 @@ function renderChart(predicted, codigoProducto, anio) {
             datasets: [{
                 label: 'Presupuesto Predicho',
                 data: data,
-                backgroundColor: colors, // Colores únicos para cada barra
+                backgroundColor: colors, // Usar colores únicos por Código_Producto
                 borderColor: colors.map(color => color.replace(/0.5/, '1')), // Color del borde
                 borderWidth: 1
             }]
@@ -200,6 +231,23 @@ function renderChart(predicted, codigoProducto, anio) {
         }
     });
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

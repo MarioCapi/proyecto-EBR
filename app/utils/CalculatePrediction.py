@@ -82,12 +82,12 @@ def generateBudgetExpectation(dataFull: List[tuple]) -> Dict:
         # Crear y entrenar el modelo XGBoost con parámetros optimizados
         model = XGBRegressor(
             n_estimators=200,
-            learning_rate=0.05,
+            learning_rate=0.025,
             max_depth=4,
             min_child_weight=2,
             subsample=0.8,
             colsample_bytree=0.8,
-            random_state=42
+            random_state=84
         )
         # Entrenar el modelo con validación cruzada
         confidences = []

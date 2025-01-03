@@ -10,6 +10,7 @@ from routes.API_get_Predicciones_Empresa_Producto import Get_pred_empresa_produc
 from routes.users import users_router
 from routes.API_registerLogs import Logsrouter as Logsrouter
 from routes.authentication import auth_router
+from routes.API_Generate_Suggested_Budget import generate_suggested_budget_router as generate_suggested_budget_router
 
 from utils.config.connection import test_database_connection
 from routes.companies import companies_router
@@ -38,6 +39,7 @@ app.include_router(Get_pred_empresa_producto_router)
 app.include_router(companies_router, prefix="/api")
 app.include_router(users_router, prefix="/api")
 app.include_router(auth_router, prefix="/api")
+app.include_router(generate_suggested_budget_router)
 
 #@app.on_event("startup")
 #async def startup_event():

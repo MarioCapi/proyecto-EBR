@@ -105,3 +105,13 @@
             }
         }
     
+
+        /* Estilo para la fila del total de la prediccion de los Ingresos 
+        en el reporte presupuesto sugerido  
+        */
+        .total-row {
+            background-color: #eaf7e8; /* Fondo verde claro */
+            font-weight: bold; /* Texto en negrita */
+            color: #2c3e50; /* Texto en color gris oscuro */
+            border-top: 2px solid #95d79e; /* Línea superior */
+        }

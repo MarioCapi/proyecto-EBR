@@ -122,7 +122,7 @@ createApp({
                     <div class="container">
                         <h1>Dashboard de Ventas por Producto</h1>
                         <div class="table-container">
-                            <table>
+                            <table id="report-table-final-presupuesto-Ingreso">
                                 <thead>
                                     <tr>
                                         <th>Productos</th>
@@ -142,27 +142,11 @@ createApp({
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>Producto A</td>
-                                        <td>1000</td>
-                                        <td class="total-column">29500</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Producto B</td>
-                                        <td>1500</td>
-                                        <td class="total-column">32800</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Producto C</td>
-                                        <td>1200</td>
-                                        <td class="total-column">28300</td>
-                                    </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 `;
-
                 const oldScript = document.getElementById('presupuesto-script_1');
                 if (oldScript) {
                     oldScript.remove();
@@ -170,7 +154,7 @@ createApp({
                 // Cargar nuevo script
                 const script = document.createElement('script');
                 script.id = 'presupuestoFinal-script';
-                script.src = './static/js/calculoTotalPrediccionFinalPresupuesto.js';
+                script.src = './static/js/GenerateSuggestedBudget.js';
                 script.onload = () => {
                     if (window.initPresupuestoFinal) {
                         window.initPresupuestoFinal();
@@ -186,6 +170,7 @@ createApp({
             }
 
         },
+        // <td class="total-column">28300</td>
 
 
 
@@ -200,40 +185,42 @@ createApp({
                 }        
                 contentDiv.innerHTML = `
                     <div id="report-container">
-                        <table id="report-table" class="w-full">
-                            <thead>
-                                <tr>
-                                    <th class="px-4 py-2">Año</th>
-                                    <th class="px-4 py-2">Mes</th>
-                                    <th class="px-4 py-2">Mes</th>
-                                    <th class="px-4 py-2 text-center">Total Ingreso</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                        <div id="pagination-controls" class="mt-4">
-                            <button id="prev-page" class="px-4 py-2 bg-blue-500 text-white rounded" disabled><</button>
-                            <span id="page-info" class="mx-2"></span>
-                            <button id="next-page" class="px-4 py-2 bg-blue-500 text-white rounded">></button>
-                        </div>
-                        <div id="detailed-table-container" style="display: none;">
-                            <h3>Detalles de la Cuenta</h3>
-                            <table id="detailed-table" class="w-full border-collapse border border-gray-300">
+                        
+                            <table id="report-table">
                                 <thead>
                                     <tr>
-                                        <th class="border border-gray-300 px-4 py-2">Nombre Cuenta</th>
-                                        <th class="border border-gray-300 px-4 py-2">Año</th>
-                                        <th class="border border-gray-300 px-4 py-2">Mes</th>
-                                        <th class="border border-gray-300 px-4 py-2">Total Débito</th>
-                                        <th class="border border-gray-300 px-4 py-2">Total Crédito</th>
-                                        <th class="border border-gray-300 px-4 py-2">Total Ingreso</th>
+                                        <th>Año</th>
+                                        <th>Mes</th>
+                                        <th>Mes</th>
+                                        <th>Total Ingreso</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <!-- Aquí se llenarán los detalles -->
                                 </tbody>
                             </table>
+                        
+                            <div id="pagination-controls" class="mt-4">
+                                <button id="prev-page" class="px-4 py-2 bg-blue-500 text-white rounded" disabled><</button>
+                                <span id="page-info" class="mx-2"></span>
+                                <button id="next-page" class="px-4 py-2 bg-blue-500 text-white rounded">></button>
+                            </div>
+                            <div id="detailed-table-container" style="display: none;">
+                                <h3>Detalles de la Cuenta</h3>
+                                <table id="detailed-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nombre Cuenta</th>
+                                            <th>Año</th>
+                                            <th>Mes</th>
+                                            <th>Total Débito</th>
+                                            <th>Total Crédito</th>
+                                            <th>Total Ingreso</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Aquí se llenarán los detalles -->
+                                    </tbody>
+                                </table>
                         </div>
 
                         <div class="mt-8">

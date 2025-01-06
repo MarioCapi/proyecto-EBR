@@ -4,10 +4,12 @@ from sqlalchemy.orm import Session
 from utils.config.connection import get_db
 from utils.exec_any_SP_SQLServer import ejecutar_procedimiento, ejecutar_procedimiento_read
 from utils.exec_procedure_SQLServer import exec_sp_save_data 
-from typing import Optional, List
+from typing import Optional, List, Literal
 from datetime import date
 from routes.users import create_user_from_company
 
+# Definir los tipos de suscripción permitidos
+SubscriptionType = Literal['FREEMIUM', 'BASIC', 'PREMIUM', 'ENTERPRISE']
 
 class CompanyBase(BaseModel):
     company_name: str
@@ -18,7 +20,7 @@ class CompanyBase(BaseModel):
     company_type: Optional[str]
     address: Optional[str]
     phone: Optional[str]
-    subscription_type: Optional[str]
+    subscription_type: Optional[SubscriptionType]
     subscription_end_date: Optional[date]
 
 class CompanyUpdate(CompanyBase):

@@ -44,7 +44,7 @@ async def create_user_from_company(
             email=email,
             first_name=company_name,
             last_name="",  # Asignamos el valor por defecto
-            role_id=3
+            role_id=1
         )
         
         params = {

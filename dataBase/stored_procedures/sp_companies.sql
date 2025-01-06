@@ -1,6 +1,6 @@
 USE ebr;
 GO
-ALTER PROCEDURE [admin].[sp_CreateCompany]
+CREATE OR ALTER PROCEDURE [admin].[sp_CreateCompany]
     @company_name NVARCHAR(100),
     @tax_identification_type NVARCHAR(10),
     @tax_id NVARCHAR(20),
@@ -9,7 +9,8 @@ ALTER PROCEDURE [admin].[sp_CreateCompany]
     @company_type NVARCHAR(50) = NULL,
     @address NVARCHAR(200) = NULL,
     @phone NVARCHAR(20) = NULL,
-    @subscription_type NVARCHAR(20) = 'BASIC',
+    @subscription_type NVARCHAR(20),
+    @subscription_id INT = NULL,
     @subscription_end_date DATE = NULL
 AS
 BEGIN
@@ -30,8 +31,8 @@ BEGIN
             RETURN;
         END
 
-        -- Verificar si ya existe el email
-        IF EXISTS (
+        -- Verificar si ya existe el email (si no es nulo)
+        IF @email IS NOT NULL AND EXISTS (
             SELECT 1 
             FROM admin.Companies 
             WHERE email = @email 
@@ -53,6 +54,7 @@ BEGIN
             address,
             phone,
             subscription_type,
+            subscription_id,
             subscription_end_date,
             status,
             active
@@ -67,6 +69,7 @@ BEGIN
             @address,
             @phone,
             @subscription_type,
+            @subscription_id, 
             @subscription_end_date,
             'ACTIVE',
             1
@@ -82,12 +85,6 @@ BEGIN
         RAISERROR(@ErrorMessage, 16, 1);
     END CATCH
 END;
-
-
-
-
-
-
 
 
 

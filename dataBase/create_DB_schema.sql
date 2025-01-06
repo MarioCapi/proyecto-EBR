@@ -21,21 +21,6 @@ GO
 -- Crear esquema para administración
 CREATE SCHEMA admin;
 GO
-
--- Eliminar las restricciones de clave foránea si existen
-IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK__Users__company_i__*')
-    ALTER TABLE admin.Users DROP CONSTRAINT FK__Users__company_i__;
-IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK__AuditLog__user_i__*')
-    ALTER TABLE admin.AuditLog DROP CONSTRAINT FK__AuditLog__user_i__;
-
--- Eliminar las tablas si existen (en orden inverso a las dependencias)
-IF OBJECT_ID('admin.AuditLog', 'U') IS NOT NULL DROP TABLE admin.AuditLog;
-IF OBJECT_ID('admin.RolePermissions', 'U') IS NOT NULL DROP TABLE admin.RolePermissions;
-IF OBJECT_ID('admin.Permissions', 'U') IS NOT NULL DROP TABLE admin.Permissions;
-IF OBJECT_ID('admin.Roles', 'U') IS NOT NULL DROP TABLE admin.Roles;
-IF OBJECT_ID('admin.Users', 'U') IS NOT NULL DROP TABLE admin.Users;
-IF OBJECT_ID('admin.Companies', 'U') IS NOT NULL DROP TABLE admin.Companies;
-
 -- Crear las tablas
 CREATE TABLE admin.Companies (
     company_id INT IDENTITY(1,1) PRIMARY KEY,
@@ -47,19 +32,18 @@ CREATE TABLE admin.Companies (
     company_type NVARCHAR(50),
     address NVARCHAR(200),
     phone NVARCHAR(20),
-    status NVARCHAR(20) DEFAULT 'ACTIVE',  -- ACTIVE, SUSPENDED, CANCELLED
-    subscription_type NVARCHAR(20) DEFAULT 'BASIC',  -- BASIC, PREMIUM, ENTERPRISE
+    status NVARCHAR(20) DEFAULT 'ACTIVE',
+    subscription_type NVARCHAR(50) NOT NULL,
+    subscription_id INT, 
     subscription_end_date DATE,
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
     active BIT DEFAULT 1,
-    CONSTRAINT UQ_tax_id_type UNIQUE (tax_identification_type, tax_id)
+    CONSTRAINT UQ_tax_id_type UNIQUE (tax_identification_type, tax_id),
+    CONSTRAINT FK_Companies_Subscription FOREIGN KEY (subscription_id) 
+    REFERENCES admin.subscription(id_subscription)
 );
 
--- Crear un índice único en tax_id en admin.Companies
-CREATE UNIQUE INDEX IX_tax_id ON admin.Companies(tax_id);
-
--- Resto de las tablas con sus claves foráneas
 CREATE TABLE admin.Users (
     user_id INT IDENTITY(1,1) PRIMARY KEY,
     company_id INT NOT NULL,
@@ -75,8 +59,12 @@ CREATE TABLE admin.Users (
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
     active BIT DEFAULT 1,
-    CONSTRAINT FK_Users_Companies FOREIGN KEY (company_id) REFERENCES admin.Companies(company_id),
-    CONSTRAINT FK_Users_Roles FOREIGN KEY (role_id) REFERENCES admin.Roles(role_id)
+    CONSTRAINT FK_Users_Companies FOREIGN KEY (company_id) 
+    REFERENCES admin.Companies(company_id),
+    CONSTRAINT FK_Users_Roles FOREIGN KEY (role_id) 
+    REFERENCES admin.Roles(role_id),
+    CONSTRAINT FK_Users_Subscription FOREIGN KEY (role_id) 
+    REFERENCES admin.subscription(id_subscription)
 );
 
 -- Tabla de Permisos en esquema admin
@@ -118,6 +106,43 @@ CREATE TABLE admin.AuditLog (
     FOREIGN KEY (user_id) REFERENCES admin.Users(user_id)
 );
 
+CREATE TABLE admin.subscription (
+    id_subscription INT IDENTITY(1,1) PRIMARY KEY,
+    subscription_name NVARCHAR(20) NOT NULL,
+    description_time NVARCHAR(100),
+    created_at DATETIME DEFAULT GETDATE(),
+);
+
+-- Eliminar tablas en orden por dependencias
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[admin].[AuditLog]'))
+    DROP TABLE [admin].[AuditLog]
+
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[admin].[RolePermissions]'))
+    DROP TABLE [admin].[RolePermissions]
+
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[admin].[Permissions]'))
+    DROP TABLE [admin].[Permissions]
+
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[admin].[Users]'))
+    DROP TABLE [admin].[Users]
+
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[admin].[Companies]'))
+    DROP TABLE [admin].[Companies]
+
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[admin].[Roles]'))
+    DROP TABLE [admin].[Roles]
+
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[admin].[subscription]'))
+    DROP TABLE [admin].[subscription]
+
+--Insertar subscriptions 
+INSERT INTO admin.subscription (subscription_name, description_time)
+VALUES 
+	('FREMIUM', 'Suscripción demo'),
+    ('BASIC', 'Suscripción básica'),
+    ('PREMIUM', 'Suscripción premium'),
+    ('ENTERPRISE', 'Suscripción empresarial');
+
 -- Insertar roles básicos
 INSERT INTO admin.Roles (role_name, description)
 VALUES 
@@ -135,3 +160,4 @@ VALUES
     ('COMPANY_MANAGE', 'Gestionar empresas'),
     ('REPORTS_VIEW', 'Ver reportes'),
     ('SETTINGS_MANAGE', 'Gestionar configuraciones'); 
+

@@ -42,15 +42,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Mostrar mensaje de éxito
                 showNotification('¡Inicio de sesión exitoso! Redirigiendo...', 'success');
                 
-                // Guardar datos en localStorage
+                // Guardar token y datos del usuario en localStorage
                 localStorage.setItem('token', data.token);
-                localStorage.setItem('user_id', data.user_id);
-                localStorage.setItem('role_id', data.role_id);
+                localStorage.setItem('userData', JSON.stringify(data.user_data));
                 
-                // Esperar un momento antes de redireccionar
-                setTimeout(() => {
-                    window.location.href = './PortalEBR.html';
-                }, 1500);
+                // También guardar datos individuales para fácil acceso si los necesitas
+                const userData = data.user_data;
+                localStorage.setItem('user_id', userData.user_id);
+                localStorage.setItem('role_id', userData.role_id);
+                localStorage.setItem('email', userData.email);
+                localStorage.setItem('company_id', userData.company_id);
+                localStorage.setItem('company_name', userData.company_name);
+                localStorage.setItem('subscription_type', userData.subscription_type);
+                localStorage.setItem('subscription_id', userData.subscription_id);
+                
+                // Verificar la sesión antes de redireccionar
+                const token = localStorage.getItem('token');
+                if (token) {
+                    // Esperar un momento antes de redireccionar
+                    setTimeout(() => {
+                        window.location.href = './PortalEBR.html';
+                    }, 1500);
+                } else {
+                    showNotification('Error al guardar la sesión', 'error');
+                }
             } else {
                 const error = await response.json();
                 let errorMessage = 'Error al iniciar sesión';
@@ -76,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalBtnText;
         }
-    });
+});
 
     // Error handling
     function showError(message) {

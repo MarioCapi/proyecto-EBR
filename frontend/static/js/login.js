@@ -42,24 +42,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Mostrar mensaje de éxito
                 showNotification('¡Inicio de sesión exitoso! Redirigiendo...', 'success');
                 
-                // Guardar token y datos del usuario en localStorage
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('userData', JSON.stringify(data.user_data));
+                // Guardar token y datos del usuario en sessionStorage 
+                sessionStorage.setItem('token', data.token);
+                sessionStorage.setItem('userData', JSON.stringify(data.user_data));
                 
                 // También guardar datos individuales para fácil acceso si los necesitas
                 const userData = data.user_data;
-                localStorage.setItem('user_id', userData.user_id);
-                localStorage.setItem('role_id', userData.role_id);
-                localStorage.setItem('email', userData.email);
-                localStorage.setItem('company_id', userData.company_id);
-                localStorage.setItem('company_name', userData.company_name);
-                localStorage.setItem('subscription_type', userData.subscription_type);
-                localStorage.setItem('subscription_id', userData.subscription_id);
+                sessionStorage.setItem('user_id', userData.user_id);
+                sessionStorage.setItem('role_id', userData.role_id);
+                sessionStorage.setItem('email', userData.email);
+                sessionStorage.setItem('company_id', userData.company_id);
+                sessionStorage.setItem('company_name', userData.company_name);
+                sessionStorage.setItem('subscription_type', userData.subscription_type);
+                sessionStorage.setItem('subscription_id', userData.subscription_id);
+                sessionStorage.setItem('tax_id', userData.tax_id);
+                sessionStorage.setItem('created_at', userData.created_at);
+
                 
                 // Verificar la sesión antes de redireccionar
-                const token = localStorage.getItem('token');
+                const token = sessionStorage.getItem('token');
                 if (token) {
-                    // Esperar un momento antes de redireccionar
                     setTimeout(() => {
                         window.location.href = './PortalEBR.html';
                     }, 1500);
@@ -70,7 +72,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const error = await response.json();
                 let errorMessage = 'Error al iniciar sesión';
                 
-                // Mensajes personalizados según el error
                 switch(error.detail) {
                     case 'Credenciales inválidas':
                         errorMessage = 'El correo o la contraseña son incorrectos';
@@ -87,11 +88,10 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             showNotification('No se pudo conectar con el servidor. Por favor, intenta más tarde.', 'error');
         } finally {
-            // Restaurar botón
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalBtnText;
         }
-});
+    });
 
     // Error handling
     function showError(message) {
@@ -168,3 +168,47 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
 });
+
+const AuthUtils = {
+    // Verificar si hay una sesión activa
+    checkSession: () => {
+        const token = sessionStorage.getItem('token');
+        if (!token) {
+            window.location.href = './login.html';
+            return false;
+        }
+        return true;
+    },
+
+    // Obtener datos del usuario
+    getUserData: () => {
+        const userData = sessionStorage.getItem('userData');
+        return userData ? JSON.parse(userData) : null;
+    },
+
+    // Obtener token
+    getToken: () => {
+        return sessionStorage.getItem('token');
+    },
+
+    // Cerrar sesión
+    logout: () => {
+        sessionStorage.clear();
+        window.location.href = './login.html';
+    },
+
+    // Verificar rol de usuario
+    hasRole: (allowedRoles) => {
+        const roleId = sessionStorage.getItem('role_id');
+        return allowedRoles.includes(parseInt(roleId));
+    },
+
+    // Obtener headers para peticiones autenticadas
+    getAuthHeaders: () => {
+        const token = sessionStorage.getItem('token');
+        return {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        };
+    }
+};

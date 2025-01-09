@@ -244,7 +244,7 @@ createApp({
             }catch (error) {
                 //console.error('Error al cargar el contenido final del presupuesto con costo y gasto:', error);
                 const paramsLogError = {
-                    user_id: Nit_Empresa, // el userid
+                    user_id: nit_actual, // el userid
                     action_type: "loadPrediccionFinalPresupuesto",  //tipo de accion
                     action_details: "Error al cargar el contenido final del presupuesto con costo y gasto",
                     ip_address: "localhost", 

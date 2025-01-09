@@ -118,6 +118,17 @@ createApp({
                     throw new Error('No se encontró el elemento con id "contentPresupuestoFinal"');
                 }        
                 contentDiv.innerHTML = `
+                            </br>                                
+                                <!-- Botón para descargar PDF -->
+                                <button id="download-btn" class="btn btn-primary" title="Descargar presupuesto sugerido">
+                                    <i class="fas fa-file-pdf"></i> Descargar PDF
+                                </button>
+
+                                <!-- Botón para descargar Excel -->
+                                <button id="download-excel-btn" class="btn btn-success" title="Descargar presupuesto en formato Excel">
+                                    <i class="fas fa-file-excel"></i> Descargar Excel
+                                </button>
+                            </br>
                         </br>
                         <h1>Ingresos</h1>
                         </br>
@@ -146,8 +157,6 @@ createApp({
                             </table>
                             </br>
                             <h1>Gastos</h1>
-                            </br>
-                                <button id="download-btn" class="btn btn-primary">Descargar</button>
                             </br>
                             <table id="report-table-final-presupuesto-gasto">
                                 <thead>
@@ -249,8 +258,19 @@ createApp({
                         window.initDescargarGastoPDF();
                     }
                 };                
+
+                const scriptXLSX = document.createElement('script');
+                scriptXLSX.id = 'downloadInfoXLSX-script';
+                scriptXLSX.src = './static/js/downloadXLSX_presupuesto.js';
+                scriptXLSX.onload = () => {
+                    if (window.initDescargarPresupuestoXLSX) {
+                        window.initDescargarPresupuestoXLSX();
+                    }
+                };
+
                 document.body.appendChild(script);
                 document.body.appendChild(scriptpdf);
+                document.body.appendChild(scriptXLSX);
 
             }catch (error) {
                 //console.error('Error al cargar el contenido final del presupuesto con costo y gasto:', error);

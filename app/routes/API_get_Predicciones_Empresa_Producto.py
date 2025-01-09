@@ -59,7 +59,21 @@ async def get_all_predictions_Emp_Products(
     except HTTPException as he:
         raise he
     except Exception as e:
-        print(f"Error en consultar predicciones: {str(e)}")
+        #print(f"Error en consultar predicciones: {str(e)}")
+        import inspect
+        parametros = {
+            "user_id": request.nit,
+            "action_type": inspect.currentframe().f_code.co_name,
+            "action_details": "intenta obtener todas las predicciones",
+            "error" : 1,
+            "error_details" : str(e)
+        }
+        ejecutar_procedimiento(
+            db, 
+            "Admin.SaveLogBakend", 
+            parametros
+        )
+        
         raise HTTPException(
             status_code=500, 
             detail=f"Error al consultar predicciones: {str(e)}"

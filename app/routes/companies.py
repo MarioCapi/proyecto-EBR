@@ -7,6 +7,7 @@ from utils.exec_procedure_SQLServer import exec_sp_save_data
 from typing import Optional, List, Literal
 from datetime import date
 from routes.users import create_user_from_company
+import inspect
 
 # Definir los tipos de suscripción permitidos
 SubscriptionType = Literal['FREEMIUM', 'BASIC', 'PREMIUM', 'ENTERPRISE']
@@ -95,12 +96,9 @@ async def create_company(
     except HTTPException:
         raise
     except Exception as e:
-        #print(f"Error detallado en crear compañía: {str(e)}")
-        import traceback
-        #print("Traceback completo:", traceback.format_exc())        
         parametros = {
             "user_id": request.tax_id,
-            "action_type": "create_company",
+            "action_type": inspect.currentframe().f_code.co_name,
             "action_details": "intenta crear compañia en el backend",
             "error" : 1,
             "error_details" : str(e)

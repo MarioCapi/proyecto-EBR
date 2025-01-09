@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from decimal import Decimal
 from sqlalchemy.orm import Session
 from utils.config.connection import get_db
-from utils.exec_any_SP_SQLServer import ejecutar_procedimiento_ingresos
+from utils.exec_any_SP_SQLServer import ejecutar_procedimiento_ingresos, ejecutar_procedimiento
 from utils.CalculatePrediction import generateBudgetExpectation
 from routes.API_Pred_x_Prod import getTot_prod_mes
 from typing import List, Dict
@@ -74,7 +74,19 @@ async def generar_reporte_ingresos(
     except HTTPException as he:
         raise he
     except Exception as e:
-        print(f"Error en generar_reporte_ingresos: {str(e)}")
+        import inspect
+        parametros = {
+            "user_id": request.nit,
+            "action_type": inspect.currentframe().f_code.co_name,
+            "action_details": "intenta obtener toda la lista de los productos",
+            "error" : 1,
+            "error_details" : str(e)
+        }
+        ejecutar_procedimiento(
+            db, 
+            "Admin.SaveLogBakend", 
+            parametros
+        )
         raise HTTPException(
             status_code=500, 
             detail=f"Error al generar el reporte: {str(e)}",

@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from decimal import Decimal
 from sqlalchemy.orm import Session
 from utils.config.connection import get_db
-from utils.exec_any_SP_SQLServer import ejecutar_procedimiento_read, ejecutar_procedimiento_JSONParams
+from utils.exec_any_SP_SQLServer import ejecutar_procedimiento_read, ejecutar_procedimiento_JSONParams, ejecutar_procedimiento
 
 import pandas as pd
 import numpy as np
@@ -36,7 +36,7 @@ async def get_all_list_Products(
         )
         #productos_unicos = set(item['CodigoCuenta'] for item in resultados)  # Usar un conjunto para obtener valores únicos        
         
-         # Crear un diccionario para almacenar CodigoCuenta y NombreCuenta únicos
+        # Crear un diccionario para almacenar CodigoCuenta y NombreCuenta únicos
         productos_unicos = {}
         
         for item in resultados:
@@ -52,10 +52,22 @@ async def get_all_list_Products(
     except HTTPException as he:
         raise he
     except Exception as e:
-        print(f"Error en generar consulta de mes producto: {str(e)}")
+        import inspect
+        parametros = {
+            "user_id": request.nit,
+            "action_type": inspect.currentframe().f_code.co_name,
+            "action_details": "intenta obtener toda la lista de los productos",
+            "error" : 1,
+            "error_details" : str(e)
+        }
+        ejecutar_procedimiento(
+            db, 
+            "Admin.SaveLogBakend", 
+            parametros
+        )
         raise HTTPException(
-            status_code=500, 
-            detail=f"Error al generar consulta mes producto: {str(e)}"
+            status_code=500,
+            detail=f"Error al obtener consulta mes producto: {str(e)}"
         )
 
 
@@ -154,6 +166,19 @@ def getTot_prod_mes(nit, db: Session):
         }
     
     except Exception as e:
+        import inspect
+        parametros = {
+            "user_id": nit,
+            "action_type": inspect.currentframe().f_code.co_name,
+            "action_details": "intenta obtener total x producto x mensual",
+            "error" : 1,
+            "error_details" : str(e)
+        }
+        ejecutar_procedimiento(
+            db, 
+            "Admin.SaveLogBakend", 
+            parametros
+        )
         raise HTTPException(
             status_code=500,
             detail=f"Error al generar consulta mes producto: {str(e)}"
@@ -191,6 +216,19 @@ def insertar_predicciones(nit_empresa, codigo_producto, NombreCuenta, prediccion
     except HTTPException as he:
         raise he
     except Exception as e:
+        import inspect
+        parametros = {
+            "user_id": nit_empresa,
+            "action_type": inspect.currentframe().f_code.co_name,
+            "action_details": "intenta insertar todas las predicciones",
+            "error" : 1,
+            "error_details" : str(e)
+        }
+        ejecutar_procedimiento(
+            db, 
+            "Admin.SaveLogBakend", 
+            parametros
+        )
         raise HTTPException(
             status_code=500, 
             detail=f"Error al generar insertar_predicciones: {str(e)}"

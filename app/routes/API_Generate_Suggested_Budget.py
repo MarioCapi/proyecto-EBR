@@ -3,10 +3,11 @@ from pydantic import BaseModel
 from decimal import Decimal
 from sqlalchemy.orm import Session
 from utils.config.connection import get_db
-from utils.exec_any_SP_SQLServer import ejecutar_procedimiento_read
+from utils.exec_any_SP_SQLServer import ejecutar_procedimiento_read, ejecutar_procedimiento
 
 import pandas as pd
 import matplotlib.pyplot as plt
+
 
 class Reporte(BaseModel):
     NIT_Empresa: str
@@ -112,7 +113,20 @@ async def get_generate_suggested_budget(
     except HTTPException as he:
         raise he
     except Exception as e:
-        print(f"Error en consultar costos: {str(e)}")
+        import inspect
+        parametros = {
+            "user_id": request.NIT_Empresa,
+            "action_type": inspect.currentframe().f_code.co_name,
+            "action_details": "intenta obtener el presupuesto sugerido",
+            "error" : 1,
+            "error_details" : str(e)
+        }
+        ejecutar_procedimiento(
+            db, 
+            "Admin.SaveLogBakend", 
+            parametros
+        )
+        
         raise HTTPException(
             status_code=500, 
             detail=f"Error al consultar costos: {str(e)}"

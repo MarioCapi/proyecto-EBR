@@ -5,6 +5,7 @@ from routes.models import FileMetadata, FileProcessor
 import re
 from datetime import datetime
 from .exec_procedure_SQLServer import sp_save_empresa, sp_save_archivo, sp_save_dato_contable
+from .exec_any_SP_SQLServer import ejecutar_procedimiento
 
 async def process_excel_file(contents: bytes, filename: str, db_session) -> FileProcessor:
     """
@@ -36,6 +37,20 @@ async def process_excel_file(contents: bytes, filename: str, db_session) -> File
             datos=datos
         )
     except Exception as e:
+        import inspect
+        parametros = {
+            "user_id": 999999999,
+            "action_type": inspect.currentframe().f_code.co_name,
+            "action_details": "intenta obtener toda la lista de los productos",
+            "error" : 1,
+            "error_details" : str(e)
+        }
+        ejecutar_procedimiento(
+            db_session, 
+            "Admin.SaveLogBakend", 
+            parametros
+        )
+        
         db_session.rollback()
         raise Exception(f"Error ejecutando: {str(e)}")
 

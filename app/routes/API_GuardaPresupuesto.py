@@ -43,10 +43,7 @@ async def GuardaPrediPresupuesto(
             return {
                 "data": [],
                 "message": f"No se encontraron datos para el año {request.anio}"
-            }
-        
-        
-        
+            }        
         return {
             "data": resultados,
             "message": f"Datos guardados exitosamente"
@@ -55,7 +52,21 @@ async def GuardaPrediPresupuesto(
     except HTTPException as he:
         raise he
     except Exception as e:
-        print(f"Error en GuardaPrediccionPresupuesto_x_empresa: {str(e)}")
+        #print(f"Error en GuardaPrediccionPresupuesto_x_empresa: {str(e)}")
+        import inspect
+        parametros = {
+            "user_id": request.Nit_Empresa,
+            "action_type": inspect.currentframe().f_code.co_name,
+            "action_details": "intenta guardar el presupuesto",
+            "error" : 1,
+            "error_details" : str(e)
+        }
+        ejecutar_procedimiento(
+            db, 
+            "Admin.SaveLogBakend", 
+            parametros
+        )
+        
         raise HTTPException(
             status_code=500, 
             detail=f"Error al generar el GuardaPrediccionPresupuesto_x_empresa: {str(e)}"

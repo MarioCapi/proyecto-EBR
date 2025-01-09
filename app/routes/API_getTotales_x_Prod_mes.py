@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from decimal import Decimal
 from sqlalchemy.orm import Session
 from utils.config.connection import get_db
-from utils.exec_any_SP_SQLServer import ejecutar_procedimiento_read
+from utils.exec_any_SP_SQLServer import ejecutar_procedimiento_read, ejecutar_procedimiento
 from typing import List, Dict
 
 
@@ -57,7 +57,20 @@ async def getTot_prod_mes(
     except HTTPException as he:
         raise he
     except Exception as e:
-        print(f"Error en generar consulta de mes producto: {str(e)}")
+        #print(f"Error en generar consulta de mes producto: {str(e)}")
+        import inspect
+        parametros = {
+            "user_id": request.nit,
+            "action_type": inspect.currentframe().f_code.co_name,
+            "action_details": "intenta obtener total producto mes",
+            "error" : 1,
+            "error_details" : str(e)
+        }
+        ejecutar_procedimiento(
+            db, 
+            "Admin.SaveLogBakend", 
+            parametros
+        )
         raise HTTPException(
             status_code=500, 
             detail=f"Error al generar consulta mes producto: {str(e)}"

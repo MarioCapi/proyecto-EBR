@@ -283,7 +283,6 @@ function populateTable(data) {
         grandTotalCell.textContent = grandTotal.toLocaleString(); // Formato numérico con separador de miles
         grandTotalCell.style.fontWeight = 'bold';
         totalRow.appendChild(grandTotalCell);
-
         // Agregar la fila de totales al cuerpo de la tabla
         tableBody.appendChild(totalRow);
     } catch (error) {
@@ -291,7 +290,6 @@ function populateTable(data) {
         container.removeChild(spinner); // Ocultar spinner
     }
 }
-
 function calculateResultTotals() {
     if (
         monthlyTotalsIngresos.length !== monthlyTotalsCostos.length || 
@@ -300,14 +298,12 @@ function calculateResultTotals() {
         console.error("Las longitudes no coinciden.");
         return;
     }
-
     // Realizar la resta: (Ingresos - Costos - Gastos) para cada mes
     const resultTotals = monthlyTotalsIngresos.map(
         (ingreso, index) => ingreso - monthlyTotalsCostos[index] - monthlyTotalsGastos[index]
     );
 
-    console.log(resultTotals); // Muestra los resultados en consola
-
+    //console.log(resultTotals); // Muestra los resultados en consola
     // Calcular el total anual
     const totalAnual = resultTotals.reduce((sum, value) => sum + value, 0);
 
@@ -328,13 +324,15 @@ function calculateResultTotals() {
     resultTotals.forEach((total) => {
         const cell = document.createElement("td");
         cell.textContent = total.toFixed(2); // Redondear a dos decimales
+        cell.textContent = total.toLocaleString(); // Redondear a dos decimales
         newRow.appendChild(cell);
     });
 
     // Agregar la celda del total anual
     const totalCell = document.createElement("td");
-    totalCell.textContent = totalAnual.toFixed(2); // Redondear a dos decimales
+    totalCell.textContent = totalAnual.toFixed(2); // Redondear a dos decimales    
     totalCell.classList.add("total-column"); // Añadir clase para estilos específicos
+    totalCell.textContent = totalAnual.toLocaleString();
     newRow.appendChild(totalCell);
 
     // Agregar la nueva fila al cuerpo de la tabla

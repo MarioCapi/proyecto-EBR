@@ -67,7 +67,6 @@ createApp({
     adjustTableValues(sliderValue) {
             const tbody = document.querySelector('#predictionsTable tbody');
             if (!tbody) {
-                console.error('No se encontró el elemento tbody');
                 return;
             }
     
@@ -119,8 +118,9 @@ createApp({
                     throw new Error('No se encontró el elemento con id "contentPresupuestoFinal"');
                 }        
                 contentDiv.innerHTML = `
-                    <div class="container">
-                        <h1>Dashboard de Ventas por Producto</h1>
+                        </br>
+                        <h1>Ingresos</h1>
+                        </br>
                         <div class="table-container">
                             <table id="report-table-final-presupuesto-Ingreso">
                                 <thead>
@@ -144,15 +144,9 @@ createApp({
                                 <tbody>
                                 </tbody>
                             </table>
-
-<div>
-</div>
-
-<div>
-</div>
-
-
-                            <h1>Dashboard Total Gastos</h1>
+                            </br>
+                            <h1>Gastos</h1>
+                            </br>
                             <table id="report-table-final-presupuesto-gasto">
                                 <thead>
                                     <tr>
@@ -175,16 +169,9 @@ createApp({
                                 <tbody>
                                 </tbody>
                             </table>
-
-
-                            <div>
-</div>
-
-<div>
-</div>
-
-
-                            <h1>Dashboard Total Costos</h1>
+                            </br>                            
+                            <h1>Costos</h1>
+                            </br>
                             <table id="report-table-final-presupuesto-costo">
                                 <thead>
                                     <tr>
@@ -209,7 +196,9 @@ createApp({
                             </table>
 
 
-                            <h1>Dashboard Totales Presupuesto Sugerido</h1>
+                            </br>
+                            <h1>Utilidad Proyectada</h1>
+                            </br>
                             <table id="report-table-final-presupuesto-sugerido">
                                 <thead>
                                     <tr>
@@ -232,10 +221,7 @@ createApp({
                                 <tbody>
                                 </tbody>
                             </table>
-
-
                         </div>
-                    </div>
                 `;
                 const oldScript = document.getElementById('presupuesto-script_1');
                 if (oldScript) {
@@ -251,14 +237,29 @@ createApp({
                     }
                 };
                 script.onerror = (error) => {
-                    console.error('Error al cargar el script de presupuesto final:', error);
+                    //console.error('Error al cargar el script de presupuesto final:', error);
                 };
                 document.body.appendChild(script);
 
             }catch (error) {
-                console.error('Error al cargar el contenido final del presupuesto con costo y gasto:', error);
+                //console.error('Error al cargar el contenido final del presupuesto con costo y gasto:', error);
+                const paramsLogError = {
+                    user_id: Nit_Empresa, // el userid
+                    action_type: "loadPrediccionFinalPresupuesto",  //tipo de accion
+                    action_details: "Error al cargar el contenido final del presupuesto con costo y gasto",
+                    ip_address: "localhost", 
+                    user_agent: "navegador o dispositivo",
+                    error: 1, // quiere decir error
+                    error_details: error.response.data.detail || error.message
+                };
+                await fetch(UrlError_log, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(paramsLogError)
+                });
             }
-
         },
         // <td class="total-column">28300</td>
 
@@ -334,13 +335,28 @@ createApp({
                     this.agregarEventosClick(nit_actual);
                 };
                 script.onerror = (error) => {
-                    console.error('Error al cargar el script de presupuesto:', error);
+                    //console.error('Error al cargar el script de presupuesto:', error);
                 };
                 document.body.appendChild(script);
                 
         
             } catch (error) {
-                console.error('Error al cargar el contenido de presupuesto:', error);
+                const paramsLogError = {
+                    user_id: Nit_Empresa, // el userid
+                    action_type: "loadPresupuestoContent",  //tipo de accion
+                    action_details: "Error al cargar el contenido de presupuesto",
+                    ip_address: "localhost", 
+                    user_agent: "navegador o dispositivo",
+                    error: 1, // quiere decir error
+                    error_details: error.response.data.detail || error.message
+                };
+                await fetch(UrlError_log, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(paramsLogError)
+                });
             }
         },
 
@@ -353,9 +369,7 @@ createApp({
                     const anio = row.cells[0].textContent.trim(); // Año
                     const mes = row.cells[1].textContent.trim(); // Mes
                     const nit = nit_actual;
-        
-                    console.log(`Fila clickeada: Año: ${anio}, Mes: ${mes}, NIT: ${nit}`); // Para depuración
-        
+                    //console.log(`Fila clickeada: Año: ${anio}, Mes: ${mes}, NIT: ${nit}`); // Para depuración
                     // Llamar a la función para enviar los datos a la API
                     this.enviarDatosANuevaAPI(anio, mes, nit);
                 }
@@ -372,16 +386,32 @@ createApp({
             axios.post(UrlAPI_tot_prod_mes, data)
                 .then(response => {
                     const resultados = response.data.data;
-                    console.log('Datos obtenidos:', resultados); // Para depuración
+                    //console.log('Datos obtenidos:', resultados); // Para depuración
                     if (resultados.length > 0) {
                         this.mostrarTablaDetallada(resultados);
                     } else {
-                        console.log('No se encontraron datos.');
+                        //console.log('No se encontraron datos.');
                     }
                 })
                 .catch(error => {
-                    console.error('Error al obtener datos:', error);
+                    //console.error('Error al obtener datos:', error);
                     alert('Error al obtener datos. Intenta nuevamente.');
+                    const paramsLogError = {
+                        user_id: Nit_Empresa, // el userid
+                        action_type: "enviarDatosANuevaAPI",  //tipo de accion
+                        action_details: "Error al obtener datos",
+                        ip_address: "localhost", 
+                        user_agent: "navegador o dispositivo",
+                        error: 1, // quiere decir error
+                        error_details: error.response.data.detail || error.message
+                    };
+                    fetch(UrlError_log, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(paramsLogError)
+                    });
                 });
         },
 
@@ -464,7 +494,7 @@ createApp({
                 script.id = 'presupuesto-script_2';
                 script.src = './static/js/prediccionesPresupuesto.js';
                 script.onload = () => {
-                    console.log('Script de predicciones cargado correctamente');
+                    //console.log('Script de predicciones cargado correctamente');
                     const predictionData = JSON.parse(sessionStorage.getItem('predictionData'));
                     if (window.initPredictions && predictionData) {
                         window.initPredictions(predictionData);
@@ -477,7 +507,7 @@ createApp({
 
                 };
                 script.onerror = (error) => {
-                    console.error('Error al cargar el script de predicciones:', error);
+                    //console.error('Error al cargar el script de predicciones:', error);
                 };
                 document.body.appendChild(script);
 
@@ -501,7 +531,22 @@ createApp({
             
         
             } catch (error) {
-                console.error('Error al cargar el contenido de predicciones:', error);
+                const paramsLogError = {
+                    user_id: Nit_Empresa, // el userid
+                    action_type: "loadPrediccionPresupuesto",  //tipo de accion
+                    action_details: "Error al cargar el contenido de predicciones de presupuesto",
+                    ip_address: "localhost", 
+                    user_agent: "navegador o dispositivo",
+                    error: 1, // quiere decir error
+                    error_details: error.response.data.detail || error.message
+                };
+                fetch(UrlError_log, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(paramsLogError)                
+                });
             }
         },
 
@@ -569,24 +614,30 @@ createApp({
                     //this.agregarEventosClick(nit_actual);
                 };
                 script.onerror = (error) => {
-                    console.error('Error al cargar el script de presupuesto:', error);
+                    //console.error('Error al cargar el script de presupuesto:', error);
                 };
                 document.body.appendChild(script);
                 
         
             } catch (error) {
-                console.error('Error al cargar el contenido de presupuesto:', error);
+                const paramsLogError = {
+                    user_id: Nit_Empresa, // el userid
+                    action_type: "loadPredictionXProducto",  //tipo de accion
+                    action_details: "error ejecutando la carga de la prediccion pro producto",
+                    ip_address: "localhost", 
+                    user_agent: "navegador o dispositivo",
+                    error: 1, // quiere decir error
+                    error_details: error.response.data.detail || error.message
+                };
+                const responseError = await fetch(UrlError_log, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(paramsLogError)
+                });
             }
         },
-
-
-
-
-
-
-
-
-
 
         handleFileDrop(e) {
             const droppedFiles = Array.from(e.dataTransfer.files)
@@ -657,7 +708,10 @@ createApp({
                     this.successFiles.push(file.name);
                     return { success: true, file: file.name };
                 } catch (error) {
-
+                    this.errorFiles.push({
+                        name: file.name,
+                        error: error.response?.data?.detail || error.message
+                    });                    
                     const paramsLogError = {
                         user_id: Nit_Empresa, // el userid
                         action_type: "almacenando Archivo: metodo: processFiles",  //tipo de accion
@@ -674,13 +728,8 @@ createApp({
                         },
                         body: JSON.stringify(paramsLogError)
                     });
-
-                    this.errorFiles.push({
-                        name: file.name,
-                        error: error.response?.data?.detail || error.message
-                    });
                     return { success: false, file: file.name, error: error };
-                }              
+                }
             });
         
             try {

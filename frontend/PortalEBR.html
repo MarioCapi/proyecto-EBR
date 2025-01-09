@@ -76,7 +76,7 @@
                         </li>
 
 
-
+<!--
                         <li>
                             <a href="javascript:void(0)" @click="setActiveView('analytics')" 
                             class="nav-item flex items-center space-x-3 p-2 rounded">
@@ -84,6 +84,7 @@
                                 <span v-show="!isSidebarCollapsed">Analítica</span>
                             </a>
                         </li>
+                    -->
                     </ul>
                 </div>
             </nav>
@@ -210,8 +211,8 @@
                     </div>
 
                     <div v-if="activeView === 'PrediccionPresupuesto'" class="space-y-6">
-                        <h2 class="text-2xl font-bold text-[#102A43]">Generacion del Presupuesto Sugerido</h2>
-                        <div id="contentPresupuestoFinal">
+                        <h2 class="text-2xl font-bold text-[#102A43]">Generacion del Presupuesto Sugerido Detallado</h2>
+                        <div id="contentPresupuestoFinal"  class="table-container">
                             <!-- Aquí se cargará el contenido la prediccion final del presupuesto incluyendo costos y gastos  -->
                         </div>
                     </div>

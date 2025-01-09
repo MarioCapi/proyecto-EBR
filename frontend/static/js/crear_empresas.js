@@ -1,3 +1,6 @@
+
+const UrlError_log = 'http://127.0.0.1:8080/registerlog/';
+
 document.getElementById('createCompanyForm').addEventListener('submit', async function(event) {
     event.preventDefault();
     // Validaciones básicas
@@ -42,6 +45,10 @@ document.getElementById('createCompanyForm').addEventListener('submit', async fu
     }
 
     // Preparar los datos
+    const direccion = document.getElementById('address').value || null;
+    const telefonoCompany = document.getElementById('phone').value || null;
+    const subscription_type = document.getElementById('subscription_type').value;
+    const subscription_end_date = document.getElementById('subscription_end_date').value || null;
     const formData = {
         company_name: companyName,
         tax_identification_type: taxIdType,
@@ -49,14 +56,38 @@ document.getElementById('createCompanyForm').addEventListener('submit', async fu
         email: email,
         num_employees: numEmployees ? parseInt(numEmployees) : null,
         company_type: companyType === 'OTROS' ? otherCompanyType : companyType,
-        address: document.getElementById('address').value || null,
-        phone: document.getElementById('phone').value || null,
-        subscription_type: document.getElementById('subscription_type').value,
-        subscription_end_date: document.getElementById('subscription_end_date').value || null
+        address: direccion,
+        phone: telefonoCompany,
+        subscription_type: subscription_type,
+        subscription_end_date: subscription_end_date
     };
 
     try {
-        console.log('Enviando datos:', formData);
+        //console.log('Enviando datos:', formData);
+
+        const paramsLogTrace = {
+            user_id: taxId, // el userid
+            action_type: "creando Compañia",  //tipo de accion
+            action_details: "datos enviados al intentar crear compañia",
+            ip_address: "localhost", 
+            user_agent: "navegador o dispositivo",
+            error: 0, // quiere decir log de trazabilidad
+            error_details: "parametros enviados: " + "Nombre Company: " + companyName + " - " +  "taxId: " + taxId + " - " +
+            "tipo ID: " + taxIdType + " - " + "cantidad Empleados: " + numEmployees  + " - " +  
+            "tipo company: " + companyType + " - " + "direccion: " + direccion  + " - " +  
+            "telefonoCompany: " + telefonoCompany + " - " + "subscription_type: " + subscription_type  + " - " + 
+            "subscription_end_date: " + subscription_end_date
+        };
+        fetch(UrlError_log, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(paramsLogTrace)
+        });
+
+
+        
         const API_URL = 'http://localhost:8080/api/companies';
         
         const response = await fetch(API_URL, {
@@ -69,13 +100,14 @@ document.getElementById('createCompanyForm').addEventListener('submit', async fu
         });
 
         const result = await response.json();
-        console.log('Respuesta del servidor:', result);
+        //console.log('Respuesta del servidor:', result);
 
         if (!response.ok) {
             // Manejar diferentes tipos de errores
-            if (response.status === 409) {
+            if (response.status === 405) {
                 showValidationError('Ya existe una empresa con este número de identificación fiscal');
-            } else if (response.status === 400) {
+            }
+            else if (response.status === 400) {
                 showValidationError(result.detail || 'Datos inválidos. Por favor verifique la información');
             } else if (response.status === 500) {
                 showValidationError('Error interno del servidor. Por favor intente más tarde');
@@ -95,7 +127,23 @@ document.getElementById('createCompanyForm').addEventListener('submit', async fu
         otherContainer.style.display = 'none';
         
     } catch (error) {
-        console.error('Error completo:', error);
+        //console.error('Error completo:', error);        
+            const paramsLogError = {
+                user_id: taxId, // el userid
+                action_type: "createCompanyForm",  //tipo de accion
+                action_details: "Error al intentar crear compañia",
+                ip_address: "localhost", 
+                user_agent: "navegador o dispositivo",
+                error: 1, // quiere decir error
+                error_details: error.detail || error.message
+            };
+            fetch(UrlError_log, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(paramsLogError)
+            });
         showValidationError('Error de conexión: No se pudo conectar con el servidor');
     } finally {
         hideLoader();

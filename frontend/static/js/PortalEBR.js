@@ -147,6 +147,8 @@ createApp({
                             </br>
                             <h1>Gastos</h1>
                             </br>
+                                <button id="download-btn" class="btn btn-primary">Descargar</button>
+                            </br>
                             <table id="report-table-final-presupuesto-gasto">
                                 <thead>
                                     <tr>
@@ -239,7 +241,16 @@ createApp({
                 script.onerror = (error) => {
                     //console.error('Error al cargar el script de presupuesto final:', error);
                 };
+                const scriptpdf = document.createElement('script');
+                scriptpdf.id = 'downloadInfoPDF-script';
+                scriptpdf.src = './static/js/downloadPDF.js';
+                scriptpdf.onload = () => {
+                    if (window.initDescargarGastoPDF) {
+                        window.initDescargarGastoPDF();
+                    }
+                };                
                 document.body.appendChild(script);
+                document.body.appendChild(scriptpdf);
 
             }catch (error) {
                 //console.error('Error al cargar el contenido final del presupuesto con costo y gasto:', error);

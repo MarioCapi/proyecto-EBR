@@ -6,9 +6,7 @@ let resultTotals = []; // Aquí se guardarán los resultados de la resta
 
 
 async function initPresupuestoFinal() {
-    console.log('Iniciando carga de datos de presupuesto...');
-    
-
+    //console.log('Iniciando carga de datos de presupuesto...');
     try {
         const params = {
             NIT_Empresa: "901292126" // Reemplaza con el valor real
@@ -23,11 +21,11 @@ async function initPresupuestoFinal() {
         });
 
         if (!response.ok) {
-            console.error('Error en la respuesta de la API:', response.status, response.statusText);
+            //console.error('Error en la respuesta de la API:', response.status, response.statusText);
             return;
         }
         const result = await response.json();
-        console.log('Datos recibidos:', result);
+        //console.log('Datos recibidos:', result);
 
         if (result && result.dataIngresos) {            
             const Costos = result.dataCosto;
@@ -37,7 +35,7 @@ async function initPresupuestoFinal() {
             calculateResultTotals();
         }
     } catch (error) {
-        console.error('Error al obtener datos:', error);
+        //console.error('Error al obtener datos:', error);
         container.removeChild(spinner); // Ocultar spinner
     }
 }
@@ -130,51 +128,46 @@ function populateTableCostos(data) {
 /*Poblar los Gastos*/
 function populateTableGastos(data) {
     const tableBody = document.querySelector('#report-table-final-presupuesto-gasto tbody');
-
-    // Agrupar los datos por Nombre_Producto
+    // Agrupar los datos por Nombre_Producto    
     const groupedData = data.reduce((acc, item) => {
-        if (!acc[item.NombreCuenta]) {
-            acc[item.NombreCuenta] = Array(12).fill(0); // Inicializar con 12 ceros
+        if (!acc[item.CodigoCuenta]) {
+            acc[item.CodigoCuenta] = {
+                NombreCuenta: item.NombreCuenta, // Almacenar el NombreCuenta
+                GastosMensuales: Array(12).fill(0), // Inicializar los gastos mensuales con 12 ceros
+            };
         }
-        acc[item.NombreCuenta][item.Mes - 1] = item.Gasto; // Mes en base 0
+        acc[item.CodigoCuenta].GastosMensuales[item.Mes - 1] = item.Gasto; // Mes en base 0
         return acc;
     }, {});
-
      // Inicializar una fila para los totales de cada mes
     const monthlyTotals = Array(12).fill(0);
     let grandTotal = 0;
-
     // Poblar la tabla
-    for (const [productName, monthlyValues] of Object.entries(groupedData)) {
-        const total = monthlyValues.reduce((sum, val) => sum + val, 0);
-
-         // Sumar los valores de cada mes a los totales generales
-         monthlyValues.forEach((value, index) => {
+    for (const [codigoCuenta, dataItem] of Object.entries(groupedData)) {
+        const { NombreCuenta, GastosMensuales } = dataItem; // Extraer NombreCuenta y GastosMensuales
+        const total = GastosMensuales.reduce((sum, val) => sum + val, 0);
+        // Sumar los valores de cada mes a los totales generales
+        GastosMensuales.forEach((value, index) => {
             monthlyTotals[index] += value;
         });
         grandTotal += total;
-
         // Crear una nueva fila
         const row = document.createElement('tr');
-        
-        // Celda para Nombre_Producto
+        // Celda para NombreCuenta
         const productCell = document.createElement('td');
-        productCell.textContent = productName;
+        productCell.textContent = NombreCuenta; // Mostrar NombreCuenta en lugar de CodigoCuenta
         row.appendChild(productCell);
-
         // Celdas para cada mes
-        monthlyValues.forEach(value => {
+        GastosMensuales.forEach(value => {
             const cell = document.createElement('td');
             cell.textContent = value.toLocaleString(); // Formato numérico con separador de miles
             row.appendChild(cell);
         });
-
         // Celda para Total
-       const totalCell = document.createElement('td');
-       totalCell.className = 'total-column';
-       totalCell.textContent = total.toLocaleString(); // Formato numérico con separador de miles
-       row.appendChild(totalCell);
-
+        const totalCell = document.createElement('td');
+        totalCell.className = 'total-column';
+        totalCell.textContent = total.toLocaleString(); // Formato numérico con separador de miles
+        row.appendChild(totalCell);    
         // Agregar la fila al cuerpo de la tabla
         tableBody.appendChild(row);
     }
@@ -201,7 +194,6 @@ function populateTableGastos(data) {
     grandTotalCell.textContent = grandTotal.toLocaleString(); // Formato numérico con separador de miles
     grandTotalCell.style.fontWeight = 'bold';
     totalRow.appendChild(grandTotalCell);
-
     // Agregar la fila de totales al cuerpo de la tabla
     tableBody.appendChild(totalRow);
 }

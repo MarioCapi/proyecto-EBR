@@ -95,9 +95,21 @@ async def create_company(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error detallado en crear compañía: {str(e)}")
+        #print(f"Error detallado en crear compañía: {str(e)}")
         import traceback
-        print("Traceback completo:", traceback.format_exc())
+        #print("Traceback completo:", traceback.format_exc())        
+        parametros = {
+            "user_id": request.tax_id,
+            "action_type": "create_company",
+            "action_details": "intenta crear compañia en el backend",
+            "error" : 1,
+            "error_details" : str(e)
+        }
+        ejecutar_procedimiento(
+            db, 
+            "Admin.SaveLogBakend", 
+            parametros
+        )
         raise HTTPException(
             status_code=500, 
             detail=f"Error al crear la compañía: {str(e)}"

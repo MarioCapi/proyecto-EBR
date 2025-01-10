@@ -64,30 +64,30 @@ createApp({
             }
         },
 
-    adjustTableValues(sliderValue) {
-            const tbody = document.querySelector('#predictionsTable tbody');
-            if (!tbody) {
-                return;
-            }
-    
-            const rows = tbody.querySelectorAll('tr');
-            rows.forEach(row => {
-            const valorPredichoCell = row.cells[1]; // Suponiendo que el valor predicho está en la segunda celda
-            const coeficienteCell = row.cells[3]; // Suponiendo que el coeficiente está en la cuarta celda
+        adjustTableValues(sliderValue) {
+                const tbody = document.querySelector('#predictionsTable tbody');
+                if (!tbody) {
+                    return;
+                }
+        
+                const rows = tbody.querySelectorAll('tr');
+                rows.forEach(row => {
+                const valorPredichoCell = row.cells[1]; // Suponiendo que el valor predicho está en la segunda celda
+                const coeficienteCell = row.cells[3]; // Suponiendo que el coeficiente está en la cuarta celda
 
-            // Obtener los valores originales
-            const originalValorPredicho = parseFloat(valorPredichoCell.getAttribute('data-original-value'));
-            const originalCoeficiente = parseFloat(coeficienteCell.getAttribute('data-original-value'));
+                // Obtener los valores originales
+                const originalValorPredicho = parseFloat(valorPredichoCell.getAttribute('data-original-value'));
+                const originalCoeficiente = parseFloat(coeficienteCell.getAttribute('data-original-value'));
 
-            // Calcular el nuevo valor basado en el porcentaje del slider
-            const newValorPredicho = originalValorPredicho * (1 + (sliderValue / 100));
-            const newCoeficiente = originalCoeficiente * (1 + (sliderValue / 100));
+                // Calcular el nuevo valor basado en el porcentaje del slider
+                const newValorPredicho = originalValorPredicho * (1 + (sliderValue / 100));
+                const newCoeficiente = originalCoeficiente * (1 + (sliderValue / 100));
 
-            // Actualizar las celdas con el nuevo valor
-            valorPredichoCell.textContent = formatCurrency(newValorPredicho);
-            coeficienteCell.textContent = formatCurrency(newCoeficiente);
-        });
-    },
+                // Actualizar las celdas con el nuevo valor
+                valorPredichoCell.textContent = formatCurrency(newValorPredicho);
+                coeficienteCell.textContent = formatCurrency(newCoeficiente);
+            });
+        },
 
         toggleSidebar() {
             this.isSidebarCollapsed = !this.isSidebarCollapsed
@@ -111,7 +111,14 @@ createApp({
 
         async loadPrediccionFinalPresupuesto() {
             try{
-                const nit_actual = '901292126'
+                // Recuperar tax_id desde sessionStorage
+                const userData = JSON.parse(sessionStorage.getItem("userData"));
+                if (!userData || !userData.tax_id) {
+                    throw new Error("No se encontró el usuario o el tax_id en sessionStorage");
+                }
+
+                const nit_actual = userData.tax_id;
+
                 await this.$nextTick();
                 const contentDiv = document.getElementById('contentPresupuestoFinal');
                 if (!contentDiv) {
@@ -242,6 +249,10 @@ createApp({
                 document.body.appendChild(script);
 
             }catch (error) {
+
+                const userData = JSON.parse(sessionStorage.getItem("userData")) || {};
+                const nit_actual = userData.tax_id || "Desconocido";
+
                 //console.error('Error al cargar el contenido final del presupuesto con costo y gasto:', error);
                 const paramsLogError = {
                     user_id: nit_actual, // el userid
@@ -268,7 +279,12 @@ createApp({
         /*HTML que tiene la tabla detallada de los productos por mes*/
         async loadPresupuestoContent() {            
             try {
-                const nit_actual = '901292126'
+                // Recuperar tax_id desde sessionStorage
+                const userData = JSON.parse(sessionStorage.getItem("userData"));
+                if (!userData || !userData.tax_id) {
+                    throw new Error("No se encontró el usuario o el tax_id en sessionStorage");
+                }
+                const nit_actual = userData.tax_id;
                 await this.$nextTick();
                 const contentDiv = document.getElementById('content');
                 if (!contentDiv) {
@@ -341,6 +357,9 @@ createApp({
                 
         
             } catch (error) {
+                const userData = JSON.parse(sessionStorage.getItem("userData")) || {};
+                const nit_actual = userData.tax_id || "Desconocido";
+                
                 const paramsLogError = {
                     user_id: Nit_Empresa, // el userid
                     action_type: "loadPresupuestoContent",  //tipo de accion
@@ -361,6 +380,7 @@ createApp({
         },
 
         /*eventos para seleccionar valores de la tabla*/ 
+
         agregarEventosClick(nit_actual) {
             const tbody = document.querySelector('#report-table tbody');
             tbody.addEventListener('click', (event) => {

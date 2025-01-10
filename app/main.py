@@ -11,6 +11,7 @@ from routes.users import users_router
 from routes.API_registerLogs import Logsrouter as Logsrouter
 from routes.authentication import auth_router
 from routes.API_Generate_Suggested_Budget import generate_suggested_budget_router as generate_suggested_budget_router
+from routes.API_guarda_presupuesto_sugerido_final import Presupuesto_sugerido_router as Presupuesto_sugerido_router
 
 from utils.config.connection import test_database_connection
 from routes.companies import companies_router
@@ -40,6 +41,7 @@ app.include_router(companies_router, prefix="/api")
 app.include_router(users_router, prefix="/api")
 app.include_router(auth_router, prefix="/api")
 app.include_router(generate_suggested_budget_router)
+app.include_router(Presupuesto_sugerido_router)
 
 #@app.on_event("startup")
 #async def startup_event():

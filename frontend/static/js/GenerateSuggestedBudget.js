@@ -121,10 +121,6 @@ function populateTableCostos(data) {
     tableBody.appendChild(totalRow);
 }
 
-
-
-
-
 /*Poblar los Gastos*/
 function populateTableGastos(data) {
     const tableBody = document.querySelector('#report-table-final-presupuesto-gasto tbody');
@@ -197,7 +193,6 @@ function populateTableGastos(data) {
     // Agregar la fila de totales al cuerpo de la tabla
     tableBody.appendChild(totalRow);
 }
-
 
 
 /*Poblar los Ingresos*/ 
@@ -331,4 +326,115 @@ function calculateResultTotals() {
     tbody.appendChild(newRow);
 
     return resultTotals; // Opcional, devolver resultados para uso adicional
+}
+
+
+async function guardarPresupuestoSugerido() {
+    // Leer las tablas y convertirlas a JSON
+    const ingresoData = leerTablaComoJSON("report-table-final-presupuesto-Ingreso");
+    const costoData = leerTablaComoJSON("report-table-final-presupuesto-costo");    
+    const gastoData = leerTablaComoJSON("report-table-final-presupuesto-gasto");
+    const sugeridoData = leerTablaComoJSON("report-table-final-presupuesto-sugerido");
+
+    // Calcular el total general
+    const totalIngreso = ingresoData.reduce((acc, item) => acc + item.Total, 0);
+    const totalCosto = costoData.reduce((acc, item) => acc + item.Total, 0);
+    const totalGasto = gastoData.reduce((acc, item) => acc + item.Total, 0);
+    const totalSugerido = sugeridoData.reduce((acc, item) => acc + item.Total, 0);
+    const totalGeneral = totalSugerido;
+
+    // Datos adicionales
+    const Nit_Empresa = "901292126" // TODO sessionStorage.getItem("Nit_Empresa");
+    const UsuarioInsercion = "usuario generico" // TODO sessionStorage.getItem("UsuarioInsercion");
+    const Anio_Presupuesto = "2025" //TODO  document.getElementById("anioPresupuesto").value; // Suponiendo que tienes un input con este ID
+
+    // Crear el objeto para enviar al API
+    const payload = {
+        Nit_Empresa: Nit_Empresa,
+        Anio_Presupuesto:Anio_Presupuesto,
+        Total: totalGeneral,
+        UsuarioInsercion: UsuarioInsercion,
+        JsonCosto: costoData,
+        JsonGasto: gastoData,
+        JsonIngreso: ingresoData,
+        JsonSugerido: sugeridoData,
+    };
+    const payloadTransformado = transformarPayload(payload);
+    // Enviar al API
+    try {        
+        const API_URL_SAVE = "http://127.0.0.1:8080/GuardaPresupuestoSugeridoFinal";
+        const response = await fetch(API_URL_SAVE, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payloadTransformado)
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            alert(result.message || "Datos guardados exitosamente");
+        } else {
+            const error = await response.json();
+            alert(error.error || "Error al guardar los datos");
+        }
+    } catch (error) {
+        console.error("Error al guardar los datos:", error);
+        alert("Hubo un error al comunicarse con el servidor");
+    }
+}
+
+function leerTablaComoJSON(tableId) {
+    const table = document.getElementById(tableId);
+    const rows = table.querySelectorAll("tbody tr");
+    const data = [];
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll("td");
+        const nombreCuenta = cells[0].textContent.trim();
+        const valoresMensuales = Array.from(cells).slice(1, 13).map(cell => parseFloat(cell.textContent.replace(/,/g, "")) || 0);
+        const total = parseFloat(cells[13].textContent.replace(/,/g, "")) || 0;
+
+        data.push({
+            NombreCuenta: nombreCuenta,
+            Meses: valoresMensuales,
+            Total: total,
+        });
+    });
+
+    return data;
+}
+
+function transformarPayload(payload) {
+    const transformarMeses = (detalle) => {
+        const meses = detalle.Meses;
+        return {
+            Nit_Empresa: payload.Nit_Empresa,
+            Producto: detalle.NombreCuenta,
+            enero: meses[0],
+            febrero: meses[1],
+            marzo: meses[2],
+            abril: meses[3],
+            mayo: meses[4],
+            junio: meses[5],
+            julio: meses[6],
+            agosto: meses[7],
+            septiembre: meses[8],
+            octubre: meses[9],
+            noviembre: meses[10],
+            diciembre: meses[11],
+            total: detalle.Total,
+        };
+    };
+
+    return {
+        Nit_Empresa: payload.Nit_Empresa,
+        Anio_Presupuesto: parseInt(payload.Anio_Presupuesto),
+        Total: payload.Total,
+        UsuarioInsercion: payload.UsuarioInsercion,
+        JsonCosto: payload.JsonCosto.map(transformarMeses),
+        JsonGasto: payload.JsonGasto.map(transformarMeses),
+        JsonIngreso: payload.JsonIngreso.map(transformarMeses),
+        JsonSugerido: payload.JsonSugerido.map(transformarMeses),
+    };
 }

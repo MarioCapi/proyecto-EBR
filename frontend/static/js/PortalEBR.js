@@ -118,15 +118,17 @@ createApp({
                     throw new Error('No se encontró el elemento con id "contentPresupuestoFinal"');
                 }        
                 contentDiv.innerHTML = `
-                            </br>                                
+                            </br> 
+                                <button onclick="guardarPresupuestoSugerido()">Guardar Presupuesto</button>
+
                                 <!-- Botón para descargar PDF -->
                                 <button id="download-btn" class="btn btn-primary" title="Descargar presupuesto sugerido">
-                                    <i class="fas fa-file-pdf"></i> Descargar PDF
+                                    <i class="fas fa-file-pdf"></i>  PDF
                                 </button>
 
                                 <!-- Botón para descargar Excel -->
                                 <button id="download-excel-btn" class="btn btn-success" title="Descargar presupuesto en formato Excel">
-                                    <i class="fas fa-file-excel"></i> Descargar Excel
+                                    <i class="fas fa-file-excel"></i>  Excel
                                 </button>
                             </br>
                         </br>

@@ -3,8 +3,9 @@ from pydantic import BaseModel
 from decimal import Decimal
 from sqlalchemy.orm import Session
 from utils.config.connection import get_db
-from utils.exec_any_SP_SQLServer import ejecutar_procedimiento
+from utils.exec_any_SP_SQLServer import ejecutar_procedimiento, ejecutar_procedimiento_JSONParams
 from typing import List
+import json
 
 
 class PresupuestoDetalle(BaseModel):    
@@ -43,22 +44,31 @@ async def GuardaPresupuestoSugeridoFinal(
 ):
     try:
         # Convertir las listas de detalles en JSON
-        json_costo = [detalle.model_dump() for detalle in request.JsonCosto]
-        json_gasto = [detalle.model_dump() for detalle in request.JsonGasto]
-        json_ingreso = [detalle.model_dump() for detalle in request.JsonIngreso]
-        json_sugerido = [detalle.model_dump() for detalle in request.JsonSugerido]
+        
+        #json_costo = [detalle.model_dump() for detalle in request.JsonCosto]        
+        #json_gasto = [detalle.model_dump() for detalle in request.JsonGasto]
+        #json_ingreso = [detalle.model_dump() for detalle in request.JsonIngreso]
+        #json_sugerido = [detalle.model_dump() for detalle in request.JsonSugerido]
+
+
+        json_costo = json.dumps([detalle.model_dump() for detalle in request.JsonCosto])
+        json_gasto = json.dumps([detalle.model_dump() for detalle in request.JsonGasto])
+        json_ingreso = json.dumps([detalle.model_dump() for detalle in request.JsonIngreso])
+        json_sugerido = json.dumps([detalle.model_dump() for detalle in request.JsonSugerido])
 
         # Preparar los parámetros para el procedimiento almacenado
+        import traceback        
         parametros = {
             "AnioPresupuesto": request.Anio_Presupuesto,
             "NIT": request.Nit_Empresa,
             "Total": request.Total,
-            "UsuarioInsercion": request.UsuarioInsercion,
+            "UsuarioInsercion": request.UsuarioInsercion,        
             "JsonCosto": str(json_costo),  # Convertir a string para enviar al SP
             "JsonGasto": str(json_gasto),
             "JsonIngreso": str(json_ingreso),
             "JsonSugerido": str(json_sugerido)
         }
+        #parametros["error_details"] = traceback.format_exc()
         # Ejecutar el procedimiento almacenado
         ejecutar_procedimiento(
             db,

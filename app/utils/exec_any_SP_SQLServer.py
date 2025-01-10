@@ -27,7 +27,7 @@ def ejecutar_procedimiento(db: Session, sp_name: str, parametros: dict):
             return {"message": "Operación completada exitosamente."}
             
     except Exception as e:
-        print(f"Error ejecutando procedimiento {sp_name}: {str(e)}")
+        #print(f"Error ejecutando procedimiento {sp_name}: {str(e)}")
         raise Exception(f"Error ejecutando procedimiento almacenado: {str(e)}")
     
 

@@ -41,7 +41,7 @@ async def registrar_log_error(
         if not resultados:
             return {
                 "data": [],
-                "message": f"No se encontraron datos para el año {request.anio}"
+                "message": f"No se pudo registar log"
             }
         return {
             "data": resultados,

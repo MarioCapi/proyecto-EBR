@@ -125,6 +125,19 @@ createApp({
                     throw new Error('No se encontró el elemento con id "contentPresupuestoFinal"');
                 }        
                 contentDiv.innerHTML = `
+                            </br> 
+                                <button onclick="guardarPresupuestoSugerido()">Guardar Presupuesto</button>
+
+                                <!-- Botón para descargar PDF -->
+                                <button id="download-btn" class="btn btn-primary" title="Descargar presupuesto sugerido">
+                                    <i class="fas fa-file-pdf"></i>  PDF
+                                </button>
+
+                                <!-- Botón para descargar Excel -->
+                                <button id="download-excel-btn" class="btn btn-success" title="Descargar presupuesto en formato Excel">
+                                    <i class="fas fa-file-excel"></i>  Excel
+                                </button>
+                            </br>
                         </br>
                         <h1>Ingresos</h1>
                         </br>
@@ -246,7 +259,27 @@ createApp({
                 script.onerror = (error) => {
                     //console.error('Error al cargar el script de presupuesto final:', error);
                 };
+                const scriptpdf = document.createElement('script');
+                scriptpdf.id = 'downloadInfoPDF-script';
+                scriptpdf.src = './static/js/downloadPDF.js';
+                scriptpdf.onload = () => {
+                    if (window.initDescargarGastoPDF) {
+                        window.initDescargarGastoPDF();
+                    }
+                };                
+
+                const scriptXLSX = document.createElement('script');
+                scriptXLSX.id = 'downloadInfoXLSX-script';
+                scriptXLSX.src = './static/js/downloadXLSX_presupuesto.js';
+                scriptXLSX.onload = () => {
+                    if (window.initDescargarPresupuestoXLSX) {
+                        window.initDescargarPresupuestoXLSX();
+                    }
+                };
+
                 document.body.appendChild(script);
+                document.body.appendChild(scriptpdf);
+                document.body.appendChild(scriptXLSX);
 
             }catch (error) {
 

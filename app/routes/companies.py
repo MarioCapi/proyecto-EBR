@@ -39,8 +39,8 @@ async def create_company(
     request: CompanyBase,
     db: Session = Depends(get_db)
 ):
-    print("Recibida solicitud para crear compañía")
-    print("Datos recibidos:", request.dict())
+    #print("Recibida solicitud para crear compañía")
+    #print("Datos recibidos:", request.dict())
     try:                       
         company_id = exec_sp_save_data(
             db,
@@ -65,8 +65,9 @@ async def create_company(
             )
         if company_id:
             try:
-                print(f"Creando usuario para compañía ID: {company_id}")
+                #print(f"Creando usuario para compañía ID: {company_id}")
                 user_response = await create_user_from_company(
+                    tax_id = request.tax_id,
                     company_id=company_id,
                     company_name=request.company_name,
                     email=request.email,

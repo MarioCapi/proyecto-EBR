@@ -21,6 +21,16 @@ GO
 -- Crear esquema para administración
 CREATE SCHEMA admin;
 GO
+
+
+CREATE TABLE admin.subscription (
+    id_subscription INT IDENTITY(1,1) PRIMARY KEY,
+    subscription_name NVARCHAR(20) NOT NULL,
+    description_time NVARCHAR(100),
+    created_at DATETIME DEFAULT GETDATE(),
+);
+
+
 -- Crear las tablas
 CREATE TABLE admin.Companies (
     company_id INT IDENTITY(1,1) PRIMARY KEY,
@@ -42,6 +52,17 @@ CREATE TABLE admin.Companies (
     CONSTRAINT UQ_tax_id_type UNIQUE (tax_identification_type, tax_id),
     CONSTRAINT FK_Companies_Subscription FOREIGN KEY (subscription_id) 
     REFERENCES admin.subscription(id_subscription)
+);
+ALTER TABLE admin.Companies
+ADD CONSTRAINT UQ_tax_id UNIQUE (tax_id);
+
+
+-- Tabla de Roles en esquema admin
+CREATE TABLE admin.Roles (
+    role_id INT IDENTITY(1,1) PRIMARY KEY, -- Identificador único para cada rol
+    role_name NVARCHAR(50) NOT NULL UNIQUE, -- Nombre del rol único
+    description NVARCHAR(200), -- Descripción del rol
+    created_at DATETIME DEFAULT GETDATE() -- Fecha de creación
 );
 
 CREATE TABLE admin.Users (
@@ -75,13 +96,6 @@ CREATE TABLE admin.Permissions (
     created_at DATETIME DEFAULT GETDATE()
 );
 
--- Tabla de Roles en esquema admin
-CREATE TABLE admin.Roles (
-    role_id INT IDENTITY(1,1) PRIMARY KEY, -- Identificador único para cada rol
-    role_name NVARCHAR(50) NOT NULL UNIQUE, -- Nombre del rol único
-    description NVARCHAR(200), -- Descripción del rol
-    created_at DATETIME DEFAULT GETDATE() -- Fecha de creación
-);
 -- Tabla de relación Roles-Permisos en esquema admin
 CREATE TABLE admin.RolePermissions (
     role_id INT,
@@ -106,12 +120,9 @@ CREATE TABLE admin.AuditLog (
     FOREIGN KEY (user_id) REFERENCES admin.Users(user_id)
 );
 
-CREATE TABLE admin.subscription (
-    id_subscription INT IDENTITY(1,1) PRIMARY KEY,
-    subscription_name NVARCHAR(20) NOT NULL,
-    description_time NVARCHAR(100),
-    created_at DATETIME DEFAULT GETDATE(),
-);
+
+
+
 
 -- Eliminar tablas en orden por dependencias
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[admin].[AuditLog]'))

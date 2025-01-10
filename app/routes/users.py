@@ -26,6 +26,7 @@ def generate_secure_password(length=8):
 
 #@users_router.post("/users/create-from-company")
 async def create_user_from_company(
+    tax_id: str,
     company_id: int,
     company_name: str,
     email: str,
@@ -57,7 +58,7 @@ async def create_user_from_company(
             'active': 1
         }
         
-        print("Ejecutando SP CreateUser con parámetros:", params)
+        #print("Ejecutando SP CreateUser con parámetros:", params)
         result = ejecutar_procedimiento(
             db,
             'admin.CreateUser',
@@ -76,10 +77,21 @@ async def create_user_from_company(
             "temporary_password": password
         }
     except Exception as e:
-        print(f"Error detallado en crear usuario: {str(e)}")
-        import traceback
-        print("Traceback completo:", traceback.format_exc())
+        import inspect
+        parametros = {
+            "user_id": tax_id,
+            "action_type": inspect.currentframe().f_code.co_name,
+            "action_details": "intenta crear el usuario para la compañia",
+            "error" : 1,
+            "error_details" : str(e)
+        }
+        ejecutar_procedimiento(
+            db, 
+            "Admin.SaveLogBakend", 
+            parametros
+        )
+        
         raise HTTPException(
-            status_code=500,
-            detail=f"Error al crear el usuario: {str(e)}"
+            status_code=500, 
+            detail=f"Error al consultar costos: {str(e)}"
         )

@@ -1,5 +1,5 @@
-
 const UrlError_log = 'http://127.0.0.1:8080/registerlog/';
+const API_URL = 'http://localhost:8080/api';
 
 document.getElementById('createCompanyForm').addEventListener('submit', async function(event) {
     event.preventDefault();
@@ -44,10 +44,15 @@ document.getElementById('createCompanyForm').addEventListener('submit', async fu
         return;
     }
 
+    const subscription_type = document.getElementById('subscription_type').value;
+    if (!subscription_type) {
+        showValidationError('Por favor seleccione un tipo de suscripción');
+        return;
+    }
+
     // Preparar los datos
     const direccion = document.getElementById('address').value || null;
     const telefonoCompany = document.getElementById('phone').value || null;
-    const subscription_type = document.getElementById('subscription_type').value;
     const subscription_end_date = document.getElementById('subscription_end_date').value || null;
     const formData = {
         company_name: companyName,
@@ -289,4 +294,56 @@ document.getElementById('company_type').addEventListener('change', function(e) {
         otherInput.required = false;
         otherInput.value = '';
     }
+});
+
+// Función para cargar las suscripciones
+async function loadSubscriptions() {
+    try {
+        const response = await fetch(`${API_URL}/subscriptions`);
+        const result = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(result.detail || 'Error al cargar las suscripciones');
+        }
+
+        const subscriptionSelect = document.getElementById('subscription_type');
+        subscriptionSelect.innerHTML = '<option value="">Seleccione una suscripción</option>';
+        
+        // Verificamos que result.data existe y es un array
+        if (Array.isArray(result.data)) {
+            result.data.forEach(subscription => {
+                const option = document.createElement('option');
+                option.value = subscription.subscription_name;
+                option.textContent = subscription.subscription_name;
+                subscriptionSelect.appendChild(option);
+            });
+        } else {
+            console.error('La respuesta no contiene un array de suscripciones:', result);
+        }
+    } catch (error) {
+        console.error('Error al cargar las suscripciones:', error);
+        const paramsLogError = {
+            user_id: 'SYSTEM',
+            action_type: "loadSubscriptions",
+            action_details: "Error al cargar las suscripciones",
+            ip_address: "localhost",
+            user_agent: navigator.userAgent,
+            error: 1,
+            error_details: error.message
+        };
+        
+        await fetch(UrlError_log, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(paramsLogError)
+        });
+    }
+}
+
+// Agregar este evento al final del archivo
+document.addEventListener('DOMContentLoaded', function() {
+    loadSubscriptions();
+    // ... otros eventos existentes
 });

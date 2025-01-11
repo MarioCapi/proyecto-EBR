@@ -27,6 +27,8 @@ class CompanyBase(BaseModel):
 class CompanyUpdate(CompanyBase):
     status: Optional[str]
 
+    
+
 ##class CompanyStatusUpdate(BaseModel):
 ##    status: str
 
@@ -113,6 +115,31 @@ async def create_company(
             status_code=500, 
             detail=f"Error al crear la compañía: {str(e)}"
         )
+
+@companies_router.get("/subscriptions")
+async def get_subscriptions(db: Session = Depends(get_db)):
+    try:
+        result = ejecutar_procedimiento_read(
+            db,
+            'admin.sp_GetSubscriptionNames',
+            {}
+        )
+        
+        return {
+            "data": result,
+            "message": "Subscriptions retrieved successfully"
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error retrieving subscriptions: {str(e)}"
+        )
+
+
+#######################################
+#######################################
+#######################################
+## estas apis de abajo no se estan usando, son para futuros desarrollos
 
 @companies_router.get("/companies")
 async def get_companies(
@@ -216,5 +243,7 @@ async def update_company(
             status_code=500,
             detail=f"Error updating company status: {str(e)}"
         )
+
+
 
 

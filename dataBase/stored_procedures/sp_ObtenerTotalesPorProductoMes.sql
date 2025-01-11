@@ -6,7 +6,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-Alter PROCEDURE [Admin].[sp_ObtenerTotalesPorProductoMes]
+CREATE OR Alter PROCEDURE [Admin].[sp_ObtenerTotalesPorProductoMes]
     @AnioBase INT,      -- Año base
 	@Periodo INT,      -- Mes base 
     @NIT NVARCHAR(50)   -- NIT de la empresa
@@ -23,10 +23,10 @@ BEGIN
 			SUM(dat.debito) AS TotalDebito,
 			SUM(dat.credito) AS TotalCredito,
 			SUM(dat.credito) - SUM(dat.debito) AS TotalIngreso
-		FROM admin.empresas emp
-		INNER JOIN admin.Archivos arc ON emp.empresaId = arc.empresaId
+		FROM admin.companies emp
+		INNER JOIN admin.Archivos arc ON emp.company_id = arc.empresaId
 		INNER JOIN admin.DatosContables dat ON dat.ArchivoID = arc.archivoId
-		WHERE emp.nit = @NIT
+		WHERE emp.tax_id = @NIT
 		  AND dat.CodigoCuenta LIKE '4%'
 		  AND LEN(dat.CodigoCuenta) >= 7
 		  AND YEAR(arc.Periodo) = @AnioBase

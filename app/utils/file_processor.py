@@ -4,7 +4,7 @@ from typing import List, Dict
 from routes.models import FileMetadata, FileProcessor
 import re
 from datetime import datetime
-from .exec_procedure_SQLServer import sp_save_empresa, sp_save_archivo, sp_save_dato_contable
+from .exec_procedure_SQLServer import sp_save_archivo, sp_save_dato_contable
 from .exec_any_SP_SQLServer import ejecutar_procedimiento
 
 async def process_excel_file(contents: bytes, filename: str, db_session) -> FileProcessor:
@@ -20,7 +20,7 @@ async def process_excel_file(contents: bytes, filename: str, db_session) -> File
         
         # Guardar metadata en la base de datos
         empresa = save_empresa(db_session, metadata)
-        archivo = save_archivo(db_session, metadata, empresa.EmpresaID)
+        archivo = save_archivo(db_session, metadata, empresa)
         
         # Encontrar donde empiezan los datos y obtener mapeo de columnas
         start_row, mapeo_columnas = find_table_start(df) ##### apartir de aqui revisar
@@ -235,21 +235,25 @@ def process_main_data(df: pd.DataFrame, start_row: int, mapeo_columnas: dict) ->
 
 
 def save_empresa(db_session, metadata: FileMetadata):
+    from sqlalchemy.exc import SQLAlchemyError
+    from sqlalchemy import text
     try:
-        result = sp_save_empresa(
-            db_session,
-            nombre_empresa=metadata.nombre_empresa,
-            nit=metadata.codigo_nit
-        )
-        # Consultar la empresa recién insertada o actualizada
-        from routes.models import Empresa
-        empresa = db_session.query(Empresa).filter_by(NIT=metadata.codigo_nit).first()
-        if not empresa:
-            raise Exception("No se pudo obtener la empresa después de guardarla")
+        query = text("""
+        SELECT company_id
+        FROM admin.companies
+        WHERE tax_id = :tax_id
+        """)
+        result = db_session.execute(query, {"tax_id": metadata.codigo_nit}).fetchone()        
+        
+        if not result:
+            raise Exception(f"No se encontró ningún registro en 'admin.companies' con tax_id={metadata.codigo_nit}")
+        
+        empresa = result[0]  # Extraer el company_id del resultado
         return empresa
-    except Exception as e:
+    
+    except SQLAlchemyError as e:
         db_session.rollback()
-        raise Exception(f"Error al guardar empresa: {str(e)}")
+        raise Exception(f"Error al consultar la empresa: {str(e)}")
 
 def save_archivo(db_session, metadata: FileMetadata, empresa_id: int):
     try:

@@ -10,7 +10,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-ALTER PROCEDURE [Admin].[sp_ObtenerTotalesDebitoCreditoPorMesAnio]
+CREATE OR ALTER PROCEDURE [Admin].[sp_ObtenerTotalesDebitoCreditoPorMesAnio]
     @AnioBase INT,      -- Año base actual para calcular los últimos tres años
     @NIT NVARCHAR(50)   -- NIT de la empresa
 AS
@@ -48,10 +48,10 @@ BEGIN
                 END) AS Diferencia
 
         FROM 
-            admin.empresas emp
-            INNER JOIN admin.Archivos arc ON emp.empresaId = arc.empresaId
+            admin.companies emp
+            INNER JOIN admin.Archivos arc ON emp.company_id = arc.empresaId
             INNER JOIN admin.DatosContables dat ON dat.ArchivoID = arc.archivoId
-        WHERE emp.nit = @NIT
+        WHERE emp.tax_id = @NIT
             AND dat.CodigoCuenta LIKE '4%'
             AND YEAR(arc.Periodo) BETWEEN @AnioBase - 2 AND @AnioBase
         GROUP BY 

@@ -1,4 +1,11 @@
-CREATE PROCEDURE [Admin].[InsertarArchivo]
+USE [EBR]
+GO
+/****** Object:  StoredProcedure [Admin].[InsertarArchivo]    Script Date: 1/10/2025 6:53:37 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE OR ALTER PROCEDURE [Admin].[InsertarArchivo]
     @NombreArchivo NVARCHAR(255),
     @EmpresaID INT,
     @Periodo DATE
@@ -11,13 +18,7 @@ BEGIN
     DECLARE @ErrorState INT;
     DECLARE @ArchivoID INT;
 
-    BEGIN TRY
-        -- Validar que el EmpresaID exista
-        IF NOT EXISTS (SELECT 1 FROM Admin.Empresas WHERE EmpresaID = @EmpresaID)
-        BEGIN
-            RAISERROR('La empresa especificada no existe.', 16, 1);
-        END
-
+    BEGIN TRY        
         -- Validar que el NombreArchivo no esté vacío
         IF @NombreArchivo IS NULL OR LTRIM(RTRIM(@NombreArchivo)) = ''
         BEGIN
@@ -56,4 +57,3 @@ BEGIN
         RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState);
     END CATCH
 END
-GO

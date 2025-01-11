@@ -14,8 +14,8 @@ def exec_sp_save_data(db_session, sp_name: str, return_scalar: bool = False, **p
             sp_params.append(f"@{key}=:{key}")
         
         sp_call += ", ".join(sp_params)
-        print(f"SQL Query: {sp_call}")  # Para debug
-        print(f"Params: {params}")      # Para debug
+        #print(f"SQL Query: {sp_call}")  # Para debug
+        #print(f"Params: {params}")      # Para debug
         
         # Ejecutar el SP
         result = db_session.execute(text(sp_call), params)

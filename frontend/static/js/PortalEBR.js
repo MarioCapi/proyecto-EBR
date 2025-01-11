@@ -763,7 +763,7 @@ createApp({
                 } catch (error) {
                     this.errorFiles.push({
                         name: file.name,
-                        error: error.response?.data?.detail || error.message
+                        error: "hubo problemas con el archivo por favor revisar"
                     });                    
                     const paramsLogError = {
                         user_id: Nit_Empresa, // el userid

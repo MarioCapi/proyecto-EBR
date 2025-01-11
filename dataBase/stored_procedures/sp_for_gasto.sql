@@ -6,7 +6,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-ALTER   PROCEDURE [Admin].[sp_for_Gasto]    
+create or ALTER   PROCEDURE [Admin].[sp_for_Gasto]    
     @NIT_Empresa NVARCHAR(50)   -- NIT de la empresa
 AS
 BEGIN
@@ -33,13 +33,13 @@ BEGIN
 					ELSE SUM(dat.debito) - SUM(dat.credito)
 				END AS Gasto
 			FROM 
-				admin.empresas emp
+				admin.companies emp
 			INNER JOIN 
-				admin.Archivos arc ON emp.empresaId = arc.empresaId
+				admin.Archivos arc ON emp.company_id = arc.empresaId
 			INNER JOIN 
 				admin.DatosContables dat ON dat.ArchivoID = arc.archivoId
 			WHERE 
-				emp.nit = @NIT_Empresa
+				emp.tax_id = @NIT_Empresa
 				AND YEAR(arc.Periodo) = YEAR(GETDATE()) - 1
 				AND (
 					(LEN(dat.CodigoCuenta) = 6 AND (dat.CodigoCuenta LIKE '5105%')) -- Incluye valores 

@@ -7,5 +7,5 @@ CREATE TABLE Admin.Archivos (
     EmpresaID INT NOT NULL,
     Periodo DATE NOT NULL,
     FechaCarga DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (EmpresaID) REFERENCES Admin.Empresas(EmpresaID)
+    FOREIGN KEY (EmpresaID) REFERENCES Admin.companies(company_id)
 );

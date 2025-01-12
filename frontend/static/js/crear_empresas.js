@@ -46,7 +46,7 @@ document.getElementById('createCompanyForm').addEventListener('submit', async fu
 
     const subscription_type = document.getElementById('subscription_type').value;
     if (!subscription_type) {
-        showValidationError('Por favor seleccione un tipo de suscripción');
+        showValidationError('El tipo de suscripción es obligatorio');
         return;
     }
 
@@ -64,7 +64,7 @@ document.getElementById('createCompanyForm').addEventListener('submit', async fu
         address: direccion,
         phone: telefonoCompany,
         subscription_type: subscription_type,
-        subscription_end_date: subscription_end_date
+        subscription_end_date: subscription_end_date || null
     };
 
     try {
@@ -109,10 +109,13 @@ document.getElementById('createCompanyForm').addEventListener('submit', async fu
 
         if (!response.ok) {
             // Manejar diferentes tipos de errores
-            if (response.status === 405) {
+            if (response.status === 400 && result.detail.includes('tipo de suscripción')) {
+                showValidationError('El tipo de suscripción seleccionado no es válido');
+            } else if (response.status === 400 && result.detail.includes('subscription_type')) {
+                showValidationError('El tipo de suscripción es obligatorio');
+            } else if (response.status === 405) {
                 showValidationError('Ya existe una empresa con este número de identificación fiscal');
-            }
-            else if (response.status === 400) {
+            } else if (response.status === 400) {
                 showValidationError(result.detail || 'Datos inválidos. Por favor verifique la información');
             } else if (response.status === 500) {
                 showValidationError('Error interno del servidor. Por favor intente más tarde');
@@ -307,9 +310,8 @@ async function loadSubscriptions() {
         }
 
         const subscriptionSelect = document.getElementById('subscription_type');
-        subscriptionSelect.innerHTML = '<option value="">Seleccione una suscripción</option>';
+        subscriptionSelect.innerHTML = '<option value="">Seleccione una suscripción *</option>';
         
-        // Verificamos que result.data existe y es un array
         if (Array.isArray(result.data)) {
             result.data.forEach(subscription => {
                 const option = document.createElement('option');
@@ -318,27 +320,15 @@ async function loadSubscriptions() {
                 subscriptionSelect.appendChild(option);
             });
         } else {
-            console.error('La respuesta no contiene un array de suscripciones:', result);
+            throw new Error('La respuesta no contiene un array de suscripciones');
         }
     } catch (error) {
         console.error('Error al cargar las suscripciones:', error);
-        const paramsLogError = {
-            user_id: 'SYSTEM',
-            action_type: "loadSubscriptions",
-            action_details: "Error al cargar las suscripciones",
-            ip_address: "localhost",
-            user_agent: navigator.userAgent,
-            error: 1,
-            error_details: error.message
-        };
+        const subscriptionSelect = document.getElementById('subscription_type');
+        subscriptionSelect.innerHTML = '<option value="">Error al cargar suscripciones</option>';
+        subscriptionSelect.disabled = true;
         
-        await fetch(UrlError_log, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(paramsLogError)
-        });
+        showValidationError('Error al cargar las suscripciones. Por favor recargue la página.');
     }
 }
 

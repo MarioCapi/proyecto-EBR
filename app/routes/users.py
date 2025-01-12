@@ -13,9 +13,10 @@ class UserBase(BaseModel):
     company_id: int
     email: str
     first_name: str
-    last_name: str = ""  # Valor por defecto
-    role_id: int  # ID del rol "Analista contable y financiero"
-    #password_hash: str = "default_password_hash"  # Esto debería ser un hash real en producción
+    last_name: str = ""
+    role_id: int
+    subscription_id: int
+    #password_hash: str = "default_password_hash"  
 
 users_router = APIRouter()
 
@@ -30,13 +31,10 @@ async def create_user_from_company(
     company_id: int,
     company_name: str,
     email: str,
+    subscription_id: int,  
     db):
-    print(f"Iniciando creación de usuario para compañía {company_id}")
     try:
-        # Generar una única contraseña
         password = generate_secure_password()
-        
-        # Crear el hash de la misma contraseña
         salt = bcrypt.gensalt()
         password_hash = bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
@@ -44,8 +42,9 @@ async def create_user_from_company(
             company_id=company_id,
             email=email,
             first_name=company_name,
-            last_name="",  # Asignamos el valor por defecto
-            role_id=1
+            last_name="",
+            role_id=1,
+            subscription_id=subscription_id  
         )
         
         params = {
@@ -55,10 +54,10 @@ async def create_user_from_company(
             'email': user_data.email,
             'password_hash': password,
             'role_id': user_data.role_id,
+            'subscription_id': user_data.subscription_id,  
             'active': 1
         }
         
-        #print("Ejecutando SP CreateUser con parámetros:", params)
         result = ejecutar_procedimiento(
             db,
             'admin.CreateUser',

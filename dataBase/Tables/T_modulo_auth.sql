@@ -31,6 +31,16 @@ CREATE TABLE admin.subscription (
     description_time NVARCHAR(100),
     created_at DATETIME DEFAULT GETDATE()
 );
+-- Tabla de Roles en esquema admin
+CREATE TABLE admin.Roles (
+    role_id INT IDENTITY(1,1) PRIMARY KEY,
+    role_name NVARCHAR(50) NOT NULL UNIQUE,
+    description NVARCHAR(200),
+    id_subscription INT,
+    created_at DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_Roles_Subscription FOREIGN KEY (id_subscription) 
+    REFERENCES admin.subscription(id_subscription)
+);
 
 -- Tabla de compañías con referencia a suscripción
 CREATE TABLE admin.Companies (
@@ -53,14 +63,6 @@ CREATE TABLE admin.Companies (
     CONSTRAINT UQ_tax_id_type UNIQUE (tax_identification_type, tax_id),
     CONSTRAINT FK_Companies_Subscription FOREIGN KEY (subscription_id) 
     REFERENCES admin.subscription(id_subscription)
-);
-
--- Tabla de Roles en esquema admin
-CREATE TABLE admin.Roles (
-    role_id INT IDENTITY(1,1) PRIMARY KEY, -- Identificador único para cada rol
-    role_name NVARCHAR(50) NOT NULL UNIQUE, -- Nombre del rol único
-    description NVARCHAR(200), -- Descripción del rol
-    created_at DATETIME DEFAULT GETDATE() -- Fecha de creación
 );
 
 -- Tabla de usuarios con referencias a compañías y suscripción
@@ -165,13 +167,22 @@ VALUES
     ('Premium', 'Suscripción premium'),
     ('Enterprise', 'Suscripción empresarial');
 
--- Insertar roles básicos
-INSERT INTO admin.Roles (role_name, description)
-VALUES 
-    ('Admin', 'Administrador del sistema con acceso total'),
-    ('Gerente', 'Administrador del sistema con acceso total'),
-    ('Contador', 'Administrador de empresa cliente'),
-    ('Analista contable y financiero', 'Usuario regular del sistema');
+-- Insertar roles con sus respectivas subscripciones
+INSERT INTO admin.Roles (role_name, description, id_subscription)
+SELECT 'Admin', 'Rol por defecto para usuario freemium', id_subscription
+FROM admin.subscription WHERE subscription_name = 'Freemium';
+
+INSERT INTO admin.Roles (role_name, description, id_subscription)
+SELECT 'Gerente', 'Administrador del sistema con acceso total', id_subscription
+FROM admin.subscription WHERE subscription_name = 'Premium';
+
+INSERT INTO admin.Roles (role_name, description, id_subscription)
+SELECT 'Contador', 'Administrador de empresa cliente', id_subscription
+FROM admin.subscription WHERE subscription_name = 'Premium';
+
+INSERT INTO admin.Roles (role_name, description, id_subscription)
+SELECT 'Analista contable y financiero', 'Usuario regular del sistema', id_subscription
+FROM admin.subscription WHERE subscription_name = 'Premium';
 
 -- Insertar permisos básicos
 INSERT INTO admin.Permissions (permission_name, description)

@@ -34,6 +34,23 @@ async def create_user_from_company(
     subscription_id: int,  
     db):
     try:
+         # Obtener el role_id basado en la subscription
+        role_result = ejecutar_procedimiento_read(
+            db,
+            'admin.GetRoles',
+            {'id_subscription': subscription_id}
+        )
+        
+        if not role_result:
+            raise HTTPException(
+                status_code=404,
+                detail="No se pudo obtener el rol para la subscripción especificada"
+            )
+        
+        # Extraer el role_id del resultado
+        role_id = role_result[0]['role_id']
+
+        #se genera contraseña automatica y cifrada
         password = generate_secure_password()
         salt = bcrypt.gensalt()
         password_hash = bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
@@ -43,7 +60,7 @@ async def create_user_from_company(
             email=email,
             first_name=company_name,
             last_name="",
-            role_id=1,
+            role_id=role_id,
             subscription_id=subscription_id  
         )
         

@@ -4,13 +4,15 @@ from decimal import Decimal
 from sqlalchemy.orm import Session
 from utils.config.connection import get_db
 from utils.exec_any_SP_SQLServer import ejecutar_procedimiento, ejecutar_procedimiento_JSONParams
-from typing import List
+from typing import List, Optional
 import json
 
 
 class PresupuestoDetalle(BaseModel):    
     Nit_Empresa: str
     Producto: str
+    CodigoProducto: str
+    #CodigoProducto: Optional[str] = None  # Hacer el campo opcional
     enero: float
     febrero: float
     marzo: float
@@ -50,7 +52,7 @@ async def GuardaPresupuestoSugeridoFinal(
         #json_ingreso = [detalle.model_dump() for detalle in request.JsonIngreso]
         #json_sugerido = [detalle.model_dump() for detalle in request.JsonSugerido]
 
-
+                
         json_costo = json.dumps([detalle.model_dump() for detalle in request.JsonCosto])
         json_gasto = json.dumps([detalle.model_dump() for detalle in request.JsonGasto])
         json_ingreso = json.dumps([detalle.model_dump() for detalle in request.JsonIngreso])

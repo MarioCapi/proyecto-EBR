@@ -34,7 +34,8 @@ CREATE TABLE admin.PresupuestoSugerido_anual (
 CREATE TABLE admin.PresupuestoIngreso (
     ID INT PRIMARY KEY IDENTITY(1,1),  
     NIT NVARCHAR(20) NOT NULL,
-    Producto NVARCHAR(50),           
+    Producto NVARCHAR(50),
+    CodigoProducto NVARCHAR(20),
     Enero DECIMAL(18,2),                 
     Febrero DECIMAL(18,2),               
     Marzo DECIMAL(18,2),                 
@@ -58,6 +59,7 @@ CREATE TABLE admin.PresupuestoGasto (
     ID INT PRIMARY KEY IDENTITY(1,1),
     NIT NVARCHAR(20) NOT NULL,    
     Producto NVARCHAR(50),       
+    CodigoProducto NVARCHAR(20),
     Enero DECIMAL(18,2),
     Febrero DECIMAL(18,2),
     Marzo DECIMAL(18,2),
@@ -80,7 +82,8 @@ CREATE TABLE admin.PresupuestoGasto (
 CREATE TABLE admin.PresupuestoCosto (
     ID INT PRIMARY KEY IDENTITY(1,1),
     NIT NVARCHAR(20) NOT NULL,    
-    Producto NVARCHAR(50),       
+    Producto NVARCHAR(50), 
+    CodigoProducto NVARCHAR(20),      
     Enero DECIMAL(18,2),
     Febrero DECIMAL(18,2),
     Marzo DECIMAL(18,2),

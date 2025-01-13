@@ -22,7 +22,12 @@ createApp({
             showSummary: false
         }
     },
-    methods: {        
+    methods: { 
+        get_current_year() {
+            var  d = new  Date();
+            var  n = d.getFullYear();
+            return  n;
+        },
         parseCurrency(value) {
             // Eliminar caracteres no numéricos, excepto el punto y la coma
             value = value.replace(/[$\s]/g, ''); // Eliminar el símbolo de la moneda y espacios
@@ -103,10 +108,12 @@ createApp({
             if (view === 'budgetPresuXProduct') {
                 this.loadPredictionXProducto()
             }
-
             if (view === 'PrediccionPresupuesto') {
                 this.loadPrediccionFinalPresupuesto()
-            }            
+            }
+            if (view === 'ConciliacionPresupuesto') {
+                this.ConciliationMonthlyBudget()
+            }
         },
 
         async loadPrediccionFinalPresupuesto() {
@@ -116,9 +123,7 @@ createApp({
                 if (!userData || !userData.tax_id) {
                     throw new Error("No se encontró el usuario o el tax_id en sessionStorage");
                 }
-
                 const nit_actual = userData.tax_id;
-
                 await this.$nextTick();
                 const contentDiv = document.getElementById('contentPresupuestoFinal');
                 if (!contentDiv) {
@@ -145,7 +150,7 @@ createApp({
                             <table id="report-table-final-presupuesto-Ingreso">
                                 <thead>
                                     <tr>
-                                        <th>Productos</th>
+                                        <th>Ingreso</th>
                                         <th>Enero</th>
                                         <th>Febrero</th>
                                         <th>Marzo</th>
@@ -158,6 +163,7 @@ createApp({
                                         <th>Octubre</th>
                                         <th>Noviembre</th>
                                         <th>Diciembre</th>
+                                        <th class="hidden-column">codigoIngreso</th>
                                         <th class="total-column">Total</th>
                                     </tr>
                                 </thead>
@@ -170,7 +176,7 @@ createApp({
                             <table id="report-table-final-presupuesto-gasto">
                                 <thead>
                                     <tr>
-                                        <th>Productos</th>
+                                        <th>Gasto</th>
                                         <th>Enero</th>
                                         <th>Febrero</th>
                                         <th>Marzo</th>
@@ -183,6 +189,7 @@ createApp({
                                         <th>Octubre</th>
                                         <th>Noviembre</th>
                                         <th>Diciembre</th>
+                                        <th class="hidden-column">codigoGasto</th>
                                         <th class="total-column">Total</th>
                                     </tr>
                                 </thead>
@@ -195,7 +202,7 @@ createApp({
                             <table id="report-table-final-presupuesto-costo">
                                 <thead>
                                     <tr>
-                                        <th>Productos</th>
+                                        <th>Costo</th>
                                         <th>Enero</th>
                                         <th>Febrero</th>
                                         <th>Marzo</th>
@@ -208,6 +215,7 @@ createApp({
                                         <th>Octubre</th>
                                         <th>Noviembre</th>
                                         <th>Diciembre</th>
+                                        <th class="hidden-column">codigoCosto</th>
                                         <th class="total-column">Total</th>
                                     </tr>
                                 </thead>
@@ -692,6 +700,107 @@ createApp({
             }
         },
 
+        
+
+        async ConciliationMonthlyBudget()  /*HTML Conciliation*/
+        {
+            let nit_actual;
+            const userData = JSON.parse(sessionStorage.getItem("userData"));
+            if (!userData || !userData.tax_id) {
+                throw new Error("No se encontró el usuario o el tax_id en sessionStorage");
+            }
+            nit_actual = userData.tax_id;
+            await this.$nextTick();
+
+            
+            try {
+                const anioActual=this.get_current_year();
+                const params = {
+                    NIT_Empresa: nit_actual,
+                    anio: anioActual
+                };
+                const API_URL = "http://127.0.0.1:8080/Consulta_si_Presu_Sugerido_Anual";
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(params)
+                });
+                if (!response.ok) {
+                    alert(result.message || "Aun no se ha generado presupuesto para este año");
+                    return;
+                }
+               // Parsear la respuesta a JSON
+                const result = await response.json();
+
+                // Manejar la respuesta
+                if (result.data && result.data.length > 0) {
+                    const contentDiv = document.getElementById('contentConciliacionPresupuesto');
+                    if (!contentDiv) {
+                        throw new Error('No se encontró el elemento con id "content"');
+                    }        
+                    contentDiv.innerHTML = `
+                        </br>
+                        <h1>Comparativo de Conciliacion</h1>
+                        </br>                        
+                        <div class="table-container">
+                            <table id="ComparativeMonthlyConciliation">
+                                <thead>
+                                    <tr>
+                                        <th>Codigo Cuenta</th>
+                                        <th>Nombre Cuenta</th>
+                                        <th>Valor Presupuestado</th>
+                                        <th>Valor Mes Actual</th>
+                                        <th>Diferencia</th>
+                                        <th>Porcentaje </th>
+                                        <th>Resultado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Se llenará dinámicamente -->
+                                </tbody>
+                            </table>
+                        </div>                            
+                `;
+                const oldScript = document.getElementById('presupuesto-script_conciliation');
+                if (oldScript) {
+                    oldScript.remove();
+                }                        
+                const scriptConciliation = document.createElement('script');
+                scriptConciliation.id = 'presupuesto-script_conciliation';
+                scriptConciliation.src = './static/js/conciliacion_mensual_Presupuesto.js';
+                scriptConciliation.onload = () => {
+                    if (window.initConciliation) {
+                        window.initConciliation(nit_actual);
+                    }
+                };
+                scriptConciliation.onerror = (error) => {};
+                document.body.appendChild(scriptConciliation);
+                    
+                } else {
+                    alert("Aun no se ha generado presupuesto para este año");
+                }
+            }catch (error) {
+                const paramsLogError = {
+                    user_id: nit_actual, 
+                    action_type: "ConciliationMonthlyBudget",  
+                    action_details: "error ejecutando la conciliacion",
+                    ip_address: "localhost", 
+                    user_agent: "navegador o dispositivo",
+                    error: 1, // quiere decir error
+                    error_details: error.response.data.detail || error.message
+                };
+                const responseError = await fetch(UrlError_log, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(paramsLogError)
+                });
+            }
+        },
+
         handleFileDrop(e) {
             const droppedFiles = Array.from(e.dataTransfer.files)
             this.validateAndAddFiles(droppedFiles)
@@ -795,4 +904,5 @@ createApp({
             }
         },
     }
+    
 }).mount('#app')

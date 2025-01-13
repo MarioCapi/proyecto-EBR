@@ -159,4 +159,8 @@
             margin-top: 10px;
             font-size: 18px;
         }
-        
+                
+    /* Ocultar las columnas con la clase hidden-column */
+    .hidden-column {
+        display: none;
+    }

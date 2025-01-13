@@ -45,6 +45,7 @@
                             <i class="fas fa-bars"></i>
                         </button>
                     </div>
+                    <!--Opciones del MENU-->
                     <ul class="mt-8 space-y-4">
                         <li>
                             <a href="javascript:void(0)" @click="setActiveView('upload')" 
@@ -84,7 +85,13 @@
                             </a>
                         </li>
 
-
+                        <li></li>
+                            <a href="javascript:void(0)" @click="setActiveView('ConciliacionPresupuesto')" 
+                            class="nav-item flex items-center space-x-3 p-2 rounded">
+                            <i class="fas fa-chart-line"></i>
+                                <span v-show="!isSidebarCollapsed">Conciliacion del Presupuesto</span>
+                            </a>
+                        </li>
 <!--
                         <li>
                             <a href="javascript:void(0)" @click="setActiveView('analytics')" 
@@ -95,11 +102,12 @@
                         </li>
                     -->
                     </ul>
+                    <!--FINAL Opciones del menu-->
                 </div>
             </nav>
 
             <!-- Content Area -->
-            <div class="flex-1 p-8" :style="{marginLeft: isSidebarCollapsed ? '60px' : '250px'}">
+            <div class="flex-1 p-8" :style="{marginLeft: isSidebarCollapsed ? '10px' : '250px'}">
                 <!-- Upload View -->
                 <div v-if="activeView === 'upload'" class="space-y-6">
                     <h2 class="text-2xl font-bold text-[#102A43]">Carga de Archivos</h2>
@@ -222,6 +230,12 @@
                     <div v-if="activeView === 'PrediccionPresupuesto'" class="space-y-6">
                         <h2 class="text-2xl font-bold text-[#102A43]">Generacion del Presupuesto Sugerido Detallado</h2>
                         <div id="contentPresupuestoFinal"  class="table-container">
+                            <!-- Aquí se cargará el contenido la prediccion final del presupuesto incluyendo costos y gastos  -->
+                        </div>
+                    </div>
+                    <div v-if="activeView === 'ConciliacionPresupuesto'" class="space-y-6">
+                        <h2 class="text-2xl font-bold text-[#102A43]">Conciliacion Presupuesto Mensual</h2>                        
+                        <div id="contentConciliacionPresupuesto" class="table-container">
                             <!-- Aquí se cargará el contenido la prediccion final del presupuesto incluyendo costos y gastos  -->
                         </div>
                     </div>

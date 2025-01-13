@@ -1,4 +1,11 @@
-CREATE or alter PROCEDURE admin.SP_guardar_presupuesto_sugerido_anual
+USE [EBR]
+GO
+/****** Object:  StoredProcedure [Admin].[SP_guardar_presupuesto_sugerido_anual]    Script Date: 1/12/2025 9:06:00 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create or ALTER   PROCEDURE [Admin].[SP_guardar_presupuesto_sugerido_anual]
     @AnioPresupuesto INT,
     @NIT NVARCHAR(20),
     @Total DECIMAL(18,2),
@@ -9,18 +16,21 @@ CREATE or alter PROCEDURE admin.SP_guardar_presupuesto_sugerido_anual
     @JsonSugerido NVARCHAR(MAX)
 AS
 BEGIN
-    BEGIN TRY
-        BEGIN TRANSACTION;
+SET NOCOUNT ON;
+    BEGIN TRY        
 
         -- Insertar en la tabla PresupuestoSugerido_anual
         INSERT INTO admin.PresupuestoSugerido_anual (NIT, AnioPresupuesto, Total, usuario_insercion, fecha_insercion)
         VALUES (@NIT, @AnioPresupuesto, @Total, @UsuarioInsercion, GETDATE());
-
+		
+		
+		BEGIN TRANSACTION;
         -- Procesar JSON para PresupuestoCosto
-        INSERT INTO admin.PresupuestoCosto (NIT, Producto, Enero, Febrero, Marzo, Abril, Mayo, Junio, Julio, Agosto, Septiembre, Octubre, Noviembre, Diciembre, Total, usuario_insercion, fecha_insercion, AnioPresupuesto)
+        INSERT INTO admin.PresupuestoCosto (NIT, Producto, CodigoProducto, Enero, Febrero, Marzo, Abril, Mayo, Junio, Julio, Agosto, Septiembre, Octubre, Noviembre, Diciembre, Total, usuario_insercion, fecha_insercion, AnioPresupuesto)
         SELECT 
             JSON_VALUE(value, '$.Nit_Empresa') AS NIT,
             JSON_VALUE(value, '$.Producto') AS Producto,
+			JSON_VALUE(value, '$.CodigoProducto') AS CodigoProducto,
             JSON_VALUE(value, '$.enero') AS Enero,
             JSON_VALUE(value, '$.febrero') AS Febrero,
             JSON_VALUE(value, '$.marzo') AS Marzo,
@@ -40,10 +50,11 @@ BEGIN
         FROM OPENJSON(@JsonCosto);
 
         -- Procesar JSON para PresupuestoGasto
-        INSERT INTO admin.PresupuestoGasto (NIT, Producto, Enero, Febrero, Marzo, Abril, Mayo, Junio, Julio, Agosto, Septiembre, Octubre, Noviembre, Diciembre, Total, usuario_insercion, fecha_insercion, AnioPresupuesto)
+        INSERT INTO admin.PresupuestoGasto (NIT, Producto, CodigoProducto, Enero, Febrero, Marzo, Abril, Mayo, Junio, Julio, Agosto, Septiembre, Octubre, Noviembre, Diciembre, Total, usuario_insercion, fecha_insercion, AnioPresupuesto)
         SELECT 
             JSON_VALUE(value, '$.Nit_Empresa') AS NIT,
             JSON_VALUE(value, '$.Producto') AS Producto,
+			JSON_VALUE(value, '$.CodigoProducto') AS CodigoProducto,
             JSON_VALUE(value, '$.enero') AS Enero,
             JSON_VALUE(value, '$.febrero') AS Febrero,
             JSON_VALUE(value, '$.marzo') AS Marzo,
@@ -63,10 +74,11 @@ BEGIN
         FROM OPENJSON(@JsonGasto);
 
         -- Procesar JSON para PresupuestoIngreso
-        INSERT INTO admin.PresupuestoIngreso (NIT, Producto, Enero, Febrero, Marzo, Abril, Mayo, Junio, Julio, Agosto, Septiembre, Octubre, Noviembre, Diciembre, Total, usuario_insercion, fecha_insercion, AnioPresupuesto)
+        INSERT INTO admin.PresupuestoIngreso (NIT, Producto, CodigoProducto, Enero, Febrero, Marzo, Abril, Mayo, Junio, Julio, Agosto, Septiembre, Octubre, Noviembre, Diciembre, Total, usuario_insercion, fecha_insercion, AnioPresupuesto)
         SELECT 
             JSON_VALUE(value, '$.Nit_Empresa') AS NIT,
             JSON_VALUE(value, '$.Producto') AS Producto,
+			JSON_VALUE(value, '$.CodigoProducto') AS CodigoProducto,
             JSON_VALUE(value, '$.enero') AS Enero,
             JSON_VALUE(value, '$.febrero') AS Febrero,
             JSON_VALUE(value, '$.marzo') AS Marzo,
@@ -107,10 +119,25 @@ BEGIN
             GETDATE() AS fecha_insercion,
             @AnioPresupuesto AS AnioPresupuesto
         FROM OPENJSON(@JsonSugerido);
-
+		
         COMMIT TRANSACTION;
     END TRY
     BEGIN CATCH
+		-- Capturar detalles del error
+        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+        DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
+        DECLARE @ErrorState INT = ERROR_STATE();
+
+        -- Opcional: Insertar en una tabla de errores (Admin.error_logs)
+        --IF OBJECT_ID('Admin.error_logs') IS NOT NULL
+        BEGIN
+            INSERT INTO Admin.error_logs (error_message, error_severity, error_state, timestamp)
+            VALUES (@ErrorMessage, @ErrorSeverity, @ErrorState, GETDATE());
+        END
+
+        -- Lanzar el error capturado
+        RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState);
+
         ROLLBACK TRANSACTION;
         THROW;
     END CATCH

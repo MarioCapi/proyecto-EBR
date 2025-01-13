@@ -10,14 +10,32 @@ CREATE OR ALTER PROCEDURE [admin].[sp_CreateCompany]
     @address NVARCHAR(200) = NULL,
     @phone NVARCHAR(20) = NULL,
     @subscription_type NVARCHAR(20),
-    @subscription_id INT = NULL,
+    @subscription_id INT,
     @subscription_end_date DATE = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
     DECLARE @NewCompanyId INT;
-
+    
     BEGIN TRY
+        -- Validar que subscription_id no sea nulo
+        IF @subscription_id IS NULL
+        BEGIN
+            RAISERROR('El ID de suscripción es obligatorio.', 16, 1);
+            RETURN;
+        END
+
+        -- Validar que el subscription_id exista en la tabla subscription
+        IF NOT EXISTS (
+            SELECT 1 
+            FROM admin.subscription 
+            WHERE id_subscription = @subscription_id
+        )
+        BEGIN
+            RAISERROR('El ID de suscripción proporcionado no existe.', 16, 1);
+            RETURN;
+        END
+
         -- Verificar si ya existe la combinación de tipo y número de identificación fiscal
         IF EXISTS (
             SELECT 1 
@@ -77,8 +95,10 @@ BEGIN
 
         SET @NewCompanyId = SCOPE_IDENTITY();
         
-        -- Retornar solo el ID de la compañía
-        SELECT @NewCompanyId as company_id;
+        -- Retornar el ID de la compañía y el subscription_id
+        SELECT 
+            @NewCompanyId as company_id,
+            @subscription_id as subscription_id;
     END TRY
     BEGIN CATCH
         DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();

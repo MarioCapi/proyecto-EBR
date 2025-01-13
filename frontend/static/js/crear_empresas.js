@@ -1,5 +1,5 @@
-
 const UrlError_log = 'http://127.0.0.1:8080/registerlog/';
+const API_URL = 'http://localhost:8080/api';
 
 document.getElementById('createCompanyForm').addEventListener('submit', async function(event) {
     event.preventDefault();
@@ -44,10 +44,15 @@ document.getElementById('createCompanyForm').addEventListener('submit', async fu
         return;
     }
 
+    const subscription_type = document.getElementById('subscription_type').value;
+    if (!subscription_type) {
+        showValidationError('El tipo de suscripción es obligatorio');
+        return;
+    }
+
     // Preparar los datos
     const direccion = document.getElementById('address').value || null;
     const telefonoCompany = document.getElementById('phone').value || null;
-    const subscription_type = document.getElementById('subscription_type').value;
     const subscription_end_date = document.getElementById('subscription_end_date').value || null;
     const formData = {
         company_name: companyName,
@@ -59,7 +64,7 @@ document.getElementById('createCompanyForm').addEventListener('submit', async fu
         address: direccion,
         phone: telefonoCompany,
         subscription_type: subscription_type,
-        subscription_end_date: subscription_end_date
+        subscription_end_date: subscription_end_date || null
     };
 
     try {
@@ -104,10 +109,13 @@ document.getElementById('createCompanyForm').addEventListener('submit', async fu
 
         if (!response.ok) {
             // Manejar diferentes tipos de errores
-            if (response.status === 405) {
+            if (response.status === 400 && result.detail.includes('tipo de suscripción')) {
+                showValidationError('El tipo de suscripción seleccionado no es válido');
+            } else if (response.status === 400 && result.detail.includes('subscription_type')) {
+                showValidationError('El tipo de suscripción es obligatorio');
+            } else if (response.status === 405) {
                 showValidationError('Ya existe una empresa con este número de identificación fiscal');
-            }
-            else if (response.status === 400) {
+            } else if (response.status === 400) {
                 showValidationError(result.detail || 'Datos inválidos. Por favor verifique la información');
             } else if (response.status === 500) {
                 showValidationError('Error interno del servidor. Por favor intente más tarde');
@@ -289,4 +297,43 @@ document.getElementById('company_type').addEventListener('change', function(e) {
         otherInput.required = false;
         otherInput.value = '';
     }
+});
+
+// Función para cargar las suscripciones
+async function loadSubscriptions() {
+    try {
+        const response = await fetch(`${API_URL}/subscriptions`);
+        const result = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(result.detail || 'Error al cargar las suscripciones');
+        }
+
+        const subscriptionSelect = document.getElementById('subscription_type');
+        subscriptionSelect.innerHTML = '<option value="">Seleccione una suscripción *</option>';
+        
+        if (Array.isArray(result.data)) {
+            result.data.forEach(subscription => {
+                const option = document.createElement('option');
+                option.value = subscription.subscription_name;
+                option.textContent = subscription.subscription_name;
+                subscriptionSelect.appendChild(option);
+            });
+        } else {
+            throw new Error('La respuesta no contiene un array de suscripciones');
+        }
+    } catch (error) {
+        console.error('Error al cargar las suscripciones:', error);
+        const subscriptionSelect = document.getElementById('subscription_type');
+        subscriptionSelect.innerHTML = '<option value="">Error al cargar suscripciones</option>';
+        subscriptionSelect.disabled = true;
+        
+        showValidationError('Error al cargar las suscripciones. Por favor recargue la página.');
+    }
+}
+
+// Agregar este evento al final del archivo
+document.addEventListener('DOMContentLoaded', function() {
+    loadSubscriptions();
+    // ... otros eventos existentes
 });

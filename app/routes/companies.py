@@ -21,11 +21,13 @@ class CompanyBase(BaseModel):
     company_type: Optional[str]
     address: Optional[str]
     phone: Optional[str]
-    subscription_type: Optional[SubscriptionType]
+    subscription_type: str
     subscription_end_date: Optional[date]
 
 class CompanyUpdate(CompanyBase):
     status: Optional[str]
+
+    
 
 ##class CompanyStatusUpdate(BaseModel):
 ##    status: str
@@ -39,9 +41,22 @@ async def create_company(
     request: CompanyBase,
     db: Session = Depends(get_db)
 ):
-    #print("Recibida solicitud para crear compañía")
-    #print("Datos recibidos:", request.dict())
-    try:                       
+    try:
+        # Primero obtenemos el subscription_id basado en el subscription_type
+        subscription_result = ejecutar_procedimiento_read(
+            db,
+            'admin.sp_GetSubscriptionByName',
+            {'subscription_name': request.subscription_type.upper()}  # Convertimos a mayúsculas para consistencia
+        )
+        
+        if not subscription_result:
+            raise HTTPException(
+                status_code=400,
+                detail=f"El tipo de suscripción '{request.subscription_type}' no es válido"
+            )
+            
+        subscription_id = subscription_result[0]['id_subscription']
+                       
         company_id = exec_sp_save_data(
             db,
             'admin.sp_CreateCompany',
@@ -55,29 +70,24 @@ async def create_company(
             address=request.address,
             phone=request.phone,
             subscription_type=request.subscription_type,
+            subscription_id=subscription_id,  # Agregamos el subscription_id
             subscription_end_date=request.subscription_end_date
         )
         
-        if company_id is None:
-            raise HTTPException(
-                status_code=500,
-                detail="No se recibió respuesta del procedimiento almacenado"
-            )
         if company_id:
             try:
-                #print(f"Creando usuario para compañía ID: {company_id}")
                 user_response = await create_user_from_company(
-                    tax_id = request.tax_id,
+                    tax_id=request.tax_id,
                     company_id=company_id,
                     company_name=request.company_name,
                     email=request.email,
+                    subscription_id=subscription_id,
                     db=db
                 )
                 
                 return {
                     "data": {
                         "company_id": company_id
-                        #"user": user_response["data"]
                     },
                     "message": "Compañía y usuario creados exitosamente"
                 }
@@ -94,8 +104,6 @@ async def create_company(
             "data": company_id,
             "message": 'Compañía creada exitosamente'
         }
-    except HTTPException:
-        raise
     except Exception as e:
         parametros = {
             "user_id": request.tax_id,
@@ -113,6 +121,33 @@ async def create_company(
             status_code=500, 
             detail=f"Error al crear la compañía: {str(e)}"
         )
+    
+
+#Metodo para traer los nombres de las subscripciones para el front desde la base de datos
+@companies_router.get("/subscriptions")
+async def get_subscriptions(db: Session = Depends(get_db)):
+    try:
+        result = ejecutar_procedimiento_read(
+            db,
+            'admin.sp_GetSubscriptionNames',
+            {}
+        )
+        
+        return {
+            "data": result,
+            "message": "Subscriptions retrieved successfully"
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error retrieving subscriptions: {str(e)}"
+        )
+
+
+#######################################
+#######################################
+#######################################
+## estas apis de abajo no se estan usando, son para futuros desarrollos
 
 @companies_router.get("/companies")
 async def get_companies(
@@ -216,5 +251,7 @@ async def update_company(
             status_code=500,
             detail=f"Error updating company status: {str(e)}"
         )
+
+
 
 

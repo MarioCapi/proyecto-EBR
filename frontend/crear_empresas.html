@@ -55,13 +55,13 @@
             <label for="phone">Phone:</label>
             <input type="text" id="phone" name="phone">
 
-            <label for="subscription_type">Subscription Type:</label>
-            <select id="subscription_type" name="subscription_type">
-                <option value="FREEMIUM">FREEMIUM</option>
-                <option value="BASIC">BASIC</option>
-                <option value="PREMIUM">PREMIUM</option>
-                <option value="ENTERPRISE">ENTERPRISE</option>
-            </select>
+            <div class="form-group">
+                <label for="subscription_type">Tipo de Suscripción *</label>
+                <select id="subscription_type" name="subscription_type" required>
+                    <option value="">Seleccione una suscripción</option>
+                </select>
+                <span class="required-field">*</span>
+            </div>
 
             <label for="subscription_end_date">Subscription End Date:</label>
             <input type="date" id="subscription_end_date" name="subscription_end_date">

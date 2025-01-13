@@ -22,16 +22,27 @@ GO
 CREATE SCHEMA admin;
 GO
 
+-- Crear las tablas
 
+-- Tabla principal de suscripciones
 CREATE TABLE admin.subscription (
     id_subscription INT IDENTITY(1,1) PRIMARY KEY,
     subscription_name NVARCHAR(20) NOT NULL,
     description_time NVARCHAR(100),
+    created_at DATETIME DEFAULT GETDATE()
+);
+-- Tabla de Roles en esquema admin
+CREATE TABLE admin.Roles (
+    role_id INT IDENTITY(1,1) PRIMARY KEY,
+    role_name NVARCHAR(50) NOT NULL UNIQUE,
+    description NVARCHAR(200),
+    id_subscription INT,
     created_at DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_Roles_Subscription FOREIGN KEY (id_subscription) 
+    REFERENCES admin.subscription(id_subscription)
 );
 
-
--- Crear las tablas
+-- Tabla de compañías con referencia a suscripción
 CREATE TABLE admin.Companies (
     company_id INT IDENTITY(1,1) PRIMARY KEY,
     company_name NVARCHAR(100) NOT NULL,
@@ -44,7 +55,7 @@ CREATE TABLE admin.Companies (
     phone NVARCHAR(20),
     status NVARCHAR(20) DEFAULT 'ACTIVE',
     subscription_type NVARCHAR(50) NOT NULL,
-    subscription_id INT, 
+    subscription_id INT NOT NULL, -- Hacemos obligatoria la referencia
     subscription_end_date DATE,
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
@@ -53,22 +64,13 @@ CREATE TABLE admin.Companies (
     CONSTRAINT FK_Companies_Subscription FOREIGN KEY (subscription_id) 
     REFERENCES admin.subscription(id_subscription)
 );
-ALTER TABLE admin.Companies
-ADD CONSTRAINT UQ_tax_id UNIQUE (tax_id);
 
-
--- Tabla de Roles en esquema admin
-CREATE TABLE admin.Roles (
-    role_id INT IDENTITY(1,1) PRIMARY KEY, -- Identificador único para cada rol
-    role_name NVARCHAR(50) NOT NULL UNIQUE, -- Nombre del rol único
-    description NVARCHAR(200), -- Descripción del rol
-    created_at DATETIME DEFAULT GETDATE() -- Fecha de creación
-);
-
+-- Tabla de usuarios con referencias a compañías y suscripción
 CREATE TABLE admin.Users (
     user_id INT IDENTITY(1,1) PRIMARY KEY,
     company_id INT NOT NULL,
     role_id INT NOT NULL,
+    subscription_id INT NOT NULL, -- Agregamos referencia a suscripción
     email NVARCHAR(100) NOT NULL UNIQUE,
     password_hash NVARCHAR(255) NOT NULL,
     first_name NVARCHAR(50),
@@ -84,7 +86,7 @@ CREATE TABLE admin.Users (
     REFERENCES admin.Companies(company_id),
     CONSTRAINT FK_Users_Roles FOREIGN KEY (role_id) 
     REFERENCES admin.Roles(role_id),
-    CONSTRAINT FK_Users_Subscription FOREIGN KEY (role_id) 
+    CONSTRAINT FK_Users_Subscription FOREIGN KEY (subscription_id) 
     REFERENCES admin.subscription(id_subscription)
 );
 
@@ -120,46 +122,67 @@ CREATE TABLE admin.AuditLog (
     FOREIGN KEY (user_id) REFERENCES admin.Users(user_id)
 );
 
+-- 1. Primero eliminamos las tablas que dependen de PresupuestoSugerido_anual
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[admin].[PresupuestoIngreso]'))
+    DROP TABLE [admin].[PresupuestoIngreso];
 
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[admin].[PresupuestoGasto]'))
+    DROP TABLE [admin].[PresupuestoGasto];
 
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[admin].[PresupuestoCosto]'))
+    DROP TABLE [admin].[PresupuestoCosto];
 
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[admin].[PresupuestoSugerido]'))
+    DROP TABLE [admin].[PresupuestoSugerido];
 
--- Eliminar tablas en orden por dependencias
+-- 2. Eliminamos PresupuestoSugerido_anual que tiene FK a Companies
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[admin].[PresupuestoSugerido_anual]'))
+    DROP TABLE [admin].[PresupuestoSugerido_anual];
+
+-- 3. Eliminamos DatosContables que depende de Archivos
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[Admin].[DatosContables]'))
+    DROP TABLE [Admin].[DatosContables];
+
+-- 4. Eliminamos Archivos que tiene FK a Companies
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[Admin].[Archivos]'))
+    DROP TABLE [Admin].[Archivos];
+
+-- 5. Eliminamos AuditLog que depende de Users
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[admin].[AuditLog]'))
-    DROP TABLE [admin].[AuditLog]
+    DROP TABLE [admin].[AuditLog];
 
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[admin].[RolePermissions]'))
-    DROP TABLE [admin].[RolePermissions]
-
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[admin].[Permissions]'))
-    DROP TABLE [admin].[Permissions]
-
+-- 6. Eliminamos Users que tiene FK a Companies
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[admin].[Users]'))
-    DROP TABLE [admin].[Users]
+    DROP TABLE [admin].[Users];
 
+-- 7. Finalmente podemos eliminar Companies
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[admin].[Companies]'))
-    DROP TABLE [admin].[Companies]
-
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[admin].[Roles]'))
-    DROP TABLE [admin].[Roles]
-
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[admin].[subscription]'))
-    DROP TABLE [admin].[subscription]
+    DROP TABLE [admin].[Companies];
 
 --Insertar subscriptions 
 INSERT INTO admin.subscription (subscription_name, description_time)
 VALUES 
-	('FREMIUM', 'Suscripción demo'),
-    ('BASIC', 'Suscripción básica'),
-    ('PREMIUM', 'Suscripción premium'),
-    ('ENTERPRISE', 'Suscripción empresarial');
+	('freemium', 'Suscripción demo'),
+    ('Basic', 'Suscripción básica'),
+    ('Premium', 'Suscripción premium'),
+    ('Enterprise', 'Suscripción empresarial');
 
--- Insertar roles básicos
-INSERT INTO admin.Roles (role_name, description)
-VALUES 
-    ('Gerente', 'Administrador del sistema con acceso total'),
-    ('Contador', 'Administrador de empresa cliente'),
-    ('Analista contable y financiero', 'Usuario regular del sistema');
+-- Insertar roles con sus respectivas subscripciones
+INSERT INTO admin.Roles (role_name, description, id_subscription)
+SELECT 'Admin', 'Rol por defecto para usuario freemium', id_subscription
+FROM admin.subscription WHERE subscription_name = 'Freemium';
+
+INSERT INTO admin.Roles (role_name, description, id_subscription)
+SELECT 'Gerente', 'Administrador del sistema con acceso total', id_subscription
+FROM admin.subscription WHERE subscription_name = 'Premium';
+
+INSERT INTO admin.Roles (role_name, description, id_subscription)
+SELECT 'Contador', 'Administrador de empresa cliente', id_subscription
+FROM admin.subscription WHERE subscription_name = 'Premium';
+
+INSERT INTO admin.Roles (role_name, description, id_subscription)
+SELECT 'Analista contable y financiero', 'Usuario regular del sistema', id_subscription
+FROM admin.subscription WHERE subscription_name = 'Premium';
 
 -- Insertar permisos básicos
 INSERT INTO admin.Permissions (permission_name, description)

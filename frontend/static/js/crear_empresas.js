@@ -63,8 +63,8 @@ document.getElementById('createCompanyForm').addEventListener('submit', async fu
         company_type: companyType === 'OTROS' ? otherCompanyType : companyType,
         address: direccion,
         phone: telefonoCompany,
-        subscription_type: subscription_type,
-        subscription_end_date: subscription_end_date || null
+        status: '1',
+        subscription_id: parseInt(subscription_type)
     };
 
     try {
@@ -315,7 +315,7 @@ async function loadSubscriptions() {
         if (Array.isArray(result.data)) {
             result.data.forEach(subscription => {
                 const option = document.createElement('option');
-                option.value = subscription.subscription_name;
+                option.value = subscription.id_subscription;
                 option.textContent = subscription.subscription_name;
                 subscriptionSelect.appendChild(option);
             });
@@ -323,7 +323,7 @@ async function loadSubscriptions() {
             throw new Error('La respuesta no contiene un array de suscripciones');
         }
     } catch (error) {
-        console.error('Error al cargar las suscripciones:', error);
+        //console.error('Error al cargar las suscripciones:', error);
         const subscriptionSelect = document.getElementById('subscription_type');
         subscriptionSelect.innerHTML = '<option value="">Error al cargar suscripciones</option>';
         subscriptionSelect.disabled = true;

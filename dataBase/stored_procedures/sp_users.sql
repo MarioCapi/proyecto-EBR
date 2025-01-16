@@ -33,8 +33,7 @@ BEGIN
             last_name,
             email,
             password_hash,
-            role_id,
-            subscription_id,  
+            role_id,            
             active,
             created_at,
             updated_at
@@ -45,8 +44,7 @@ BEGIN
             @last_name,
             @email,
             @password_hash,
-            @role_id,
-            @subscription_id,  
+            @role_id,            
             @active,
             GETDATE(),
             GETDATE()
@@ -58,97 +56,3 @@ BEGIN
         RAISERROR(@ErrorMessage, 16, 1);
     END CATCH
 END;
-
--- SP para actualizar el usuario
-CREATE OR ALTER PROCEDURE admin.UpdateUser
-    @user_id INT,                     -- ID del usuario a actualizar
-    @first_name NVARCHAR(50),         -- Nuevo nombre del usuario
-    @last_name NVARCHAR(50),          -- Nuevo apellido del usuario
-    @email NVARCHAR(100),             -- Nuevo correo electrónico
-    @role_id INT,                     -- Nuevo rol
-    @active BIT                       -- Nuevo estado (activo o inactivo)
-AS
-BEGIN
-    SET NOCOUNT ON;
-    BEGIN TRY
-        -- Validar si el usuario existe
-        IF NOT EXISTS (SELECT 1 FROM admin.Users WHERE user_id = @user_id)
-            THROW 50000, 'El usuario especificado no existe.', 1;
-
-        -- Validar si el role_id existe
-        IF NOT EXISTS (SELECT 1 FROM admin.Roles WHERE role_id = @role_id)
-            THROW 50000, 'El rol especificado no existe.', 1;
-
-        -- Validar si el nuevo email ya existe para otro usuario
-        IF EXISTS (SELECT 1 FROM admin.Users WHERE email = @email AND user_id != @user_id)
-            THROW 50000, 'Ya existe otro usuario con ese correo electrónico.', 1;
-
-        -- Actualizar los datos del usuario
-        UPDATE admin.Users
-        SET
-            first_name = @first_name,
-            last_name = @last_name,
-            email = @email,
-            role_id = @role_id,
-            active = @active,
-            updated_at = GETDATE()
-        WHERE user_id = @user_id;
-
-        -- Devolver el ID del usuario actualizado
-        SELECT @user_id as user_id;
-    END TRY
-    BEGIN CATCH
-        THROW;
-    END CATCH
-END;
-GO
-
-
--- Procedimiento para verificar credenciales
-CREATE OR ALTER PROCEDURE [admin].[sp_validateUsersCredentials]
-    @email NVARCHAR(100),
-    @password NVARCHAR(255)
-AS
-BEGIN
-    SET NOCOUNT ON;
-    BEGIN TRY
-        -- Verificar si existe el usuario con las credenciales proporcionadas
-        IF NOT EXISTS (
-            SELECT 1 
-            FROM admin.Users 
-            WHERE email = @email 
-            AND password_hash = @password 
-            AND active = 1
-        )
-        BEGIN
-            -- Si no existe, lanzar error
-            THROW 50001, 'Credenciales inválidas', 1;
-            RETURN;
-        END
-
-        -- Si existe, retornar los datos específicos solicitados
-        SELECT 
-            u.user_id,
-            u.company_id,
-            u.role_id,
-            u.email,
-            u.created_at,
-            c.company_name,
-            c.tax_id,
-            c.subscription_type,
-            c.subscription_id
-        FROM admin.Users u
-        INNER JOIN admin.Companies c ON u.company_id = c.company_id
-        WHERE u.email = @email 
-        AND u.active = 1
-        AND c.active = 1;
-
-        -- Retornar código de éxito
-        RETURN 0;
-    END TRY
-    BEGIN CATCH
-        THROW;
-        RETURN -1;
-    END CATCH
-END;
-GO

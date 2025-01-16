@@ -8,6 +8,10 @@ from typing import Optional, List, Literal
 from datetime import date
 from routes.users import create_user_from_company
 import inspect
+import bcrypt
+import secrets
+import string
+
 
 # Definir los tipos de suscripción permitidos
 SubscriptionType = Literal['FREEMIUM', 'BASIC', 'PREMIUM', 'ENTERPRISE']
@@ -21,8 +25,8 @@ class CompanyBase(BaseModel):
     company_type: Optional[str]
     address: Optional[str]
     phone: Optional[str]
-    subscription_type: str
-    subscription_end_date: Optional[date]
+    status: Optional[str]
+    subscription_id: int
 
 class CompanyUpdate(CompanyBase):
     status: Optional[str]
@@ -35,71 +39,38 @@ class CompanyUpdate(CompanyBase):
 # Router
 companies_router = APIRouter()
 
-# Endpoints
+
+def generate_secure_password(length=8):
+    characters = string.ascii_letters + string.digits + "!@#$%^&*"
+    password = ''.join(secrets.choice(characters) for _ in range(length))
+    return password
+
+
 @companies_router.post("/companies")
 async def create_company(
     request: CompanyBase,
     db: Session = Depends(get_db)
 ):
     try:
-        # Primero obtenemos el subscription_id basado en el subscription_type
-        subscription_result = ejecutar_procedimiento_read(
+        password_automatic = generate_secure_password()
+        parametros_create = {
+            "company_name": request.company_name,
+            "tax_identification_type": request.tax_identification_type,
+            "tax_id": request.tax_id,
+            "email": request.email,
+            "num_employees": request.num_employees,
+            "company_type": request.company_type,
+            "address": request.address,
+            "phone": request.phone,
+            "status": 1,
+            "subscription_id": request.subscription_id,  # Agregamos el subscription_id            
+            "password": password_automatic
+        }
+        company_id = ejecutar_procedimiento(
             db,
-            'admin.sp_GetSubscriptionByName',
-            {'subscription_name': request.subscription_type.upper()}  # Convertimos a mayúsculas para consistencia
+            'admin.Sp_CreateCompany',
+            parametros_create
         )
-        
-        if not subscription_result:
-            raise HTTPException(
-                status_code=400,
-                detail=f"El tipo de suscripción '{request.subscription_type}' no es válido"
-            )
-            
-        subscription_id = subscription_result[0]['id_subscription']
-                       
-        company_id = exec_sp_save_data(
-            db,
-            'admin.sp_CreateCompany',
-            return_scalar=True,
-            company_name=request.company_name,
-            tax_identification_type=request.tax_identification_type,
-            tax_id=request.tax_id,
-            email=request.email,
-            num_employees=request.num_employees,
-            company_type=request.company_type,
-            address=request.address,
-            phone=request.phone,
-            subscription_type=request.subscription_type,
-            subscription_id=subscription_id,  # Agregamos el subscription_id
-            subscription_end_date=request.subscription_end_date
-        )
-        
-        if company_id:
-            try:
-                user_response = await create_user_from_company(
-                    tax_id=request.tax_id,
-                    company_id=company_id,
-                    company_name=request.company_name,
-                    email=request.email,
-                    subscription_id=subscription_id,
-                    db=db
-                )
-                
-                return {
-                    "data": {
-                        "company_id": company_id
-                    },
-                    "message": "Compañía y usuario creados exitosamente"
-                }
-            except Exception as user_error:
-                print(f"Error detallado al crear usuario: {str(user_error)}")
-                import traceback
-                print("Traceback de error de usuario:", traceback.format_exc())
-                return {
-                    "data": company_id,
-                    "message": "Compañía creada exitosamente, pero hubo un error al crear el usuario"
-                }
-        
         return {
             "data": company_id,
             "message": 'Compañía creada exitosamente'

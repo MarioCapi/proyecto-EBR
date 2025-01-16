@@ -5,7 +5,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-ALTER PROCEDURE [Admin].[sp_SaveDatoContable]
+create or ALTER PROCEDURE [Admin].[sp_SaveDatoContable]
 	@ArchivoID INT,
     @Transaccional BIT,
     @CodigoCuenta NVARCHAR(50),

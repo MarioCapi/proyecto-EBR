@@ -164,3 +164,77 @@
     .hidden-column {
         display: none;
     }
+
+
+
+
+
+    /* Contenedor de los botones  para guardar presupuesto 
+    y para exportar a pdf y excel*/
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+/* Estilo general de los botones */
+.modern-btn {
+    font-family: 'Arial', sans-serif;
+    font-size: 1rem;
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+/* Botón para guardar */
+.save-btn {
+    background-color: #2196f3; /* Azul vibrante */
+    box-shadow: 0 4px 10px rgba(33, 150, 243, 0.5);
+}
+
+.save-btn:hover {
+    background-color: #1976d2; /* Azul más oscuro para hover */
+    box-shadow: 0 6px 15px rgba(33, 150, 243, 0.7);
+}
+
+/* Botón para PDF */
+.pdf-btn {
+    background-color: #e53935; /* Rojo */
+    box-shadow: 0 4px 10px rgba(229, 57, 53, 0.5);
+}
+
+.pdf-btn:hover {
+    background-color: #c62828;
+    box-shadow: 0 6px 15px rgba(229, 57, 53, 0.7);
+}
+
+/* Botón para Excel */
+.excel-btn {
+    background-color: #43a047; /* Verde */
+    box-shadow: 0 4px 10px rgba(67, 160, 71, 0.5);
+}
+
+.excel-btn:hover {
+    background-color: #388e3c;
+    box-shadow: 0 6px 15px rgba(67, 160, 71, 0.7);
+}
+
+/* Sección para guardar y descargar */
+.save-section {
+    margin-bottom: 20px;
+}
+
+.download-section {
+    display: flex;
+    gap: 15px;
+}

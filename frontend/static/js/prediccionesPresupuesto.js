@@ -204,7 +204,7 @@ async function GuardaPrediccionPresupuesto(data) {
                 Coeficiente_Diferencia: parseFloat(prediccion.coeficiente) // debe ser un número
             };
 
-            console.log('Datos a enviar:', JSON.stringify(params, null, 2));
+            //console.log('Datos a enviar:', JSON.stringify(params, null, 2));
             // Enviar solicitud POST a la API
             const response = await fetch(API_URL, {
                 method: "POST",
@@ -216,12 +216,7 @@ async function GuardaPrediccionPresupuesto(data) {
 
             if (!response.ok) {
                 const errorResponse = await response.json(); // Obtener el cuerpo de la respuesta de error
-                console.error(
-                    `Error al guardar la predicción del mes ${mes}:`,
-                    response.status,
-                    response.statusText,
-                    errorResponse // Mostrar el mensaje de error del servidor
-                );
+                //console.error(`Error al guardar la predicción del mes ${mes}:`,response.status,response.statusText,errorResponse );
                 continue;
             }
             const result = await response.json();
@@ -275,7 +270,7 @@ const savePredictionContainer = document.getElementById('savePredictionContainer
     if (savePredictionButton) {
 
         savePredictionButton.addEventListener('click', async () => {
-        console.log('Botón de guardar predicción clickeado');  // Depuración
+        //console.log('Botón de guardar predicción clickeado');  // Depuración
 
         // Llamar a la función GuardaPrediccionPresupuesto con los datos completos
         try {            

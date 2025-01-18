@@ -131,17 +131,26 @@ createApp({
                 }        
                 contentDiv.innerHTML = `
                             </br> 
-                                <button onclick="guardarPresupuestoSugerido()">Guardar Presupuesto</button>
+                                <div class="button-container">
+                                
+                                    <!-- Botón para guardar presupuesto -->
+                                    <div class="save-section">
+                                        <button class="modern-btn save-btn" onclick="guardarPresupuestoSugerido()">
+                                            Guardar Presupuesto
+                                        </button>
+                                    </div>
 
-                                <!-- Botón para descargar PDF -->
-                                <button id="download-btn" class="btn btn-primary" title="Descargar presupuesto sugerido">
-                                    <i class="fas fa-file-pdf"></i>  PDF
-                                </button>
+                                    <!-- Sección para descargar -->
+                                    <div class="download-section">
+                                        <button id="download-btn" class="modern-btn pdf-btn" title="Descargar presupuesto sugerido">
+                                            <i class="fas fa-file-pdf"></i> PDF
+                                        </button>
+                                        <button id="download-excel-btn" class="modern-btn excel-btn" title="Descargar presupuesto en formato Excel">
+                                            <i class="fas fa-file-excel"></i> Excel
+                                        </button>
+                                    </div>
 
-                                <!-- Botón para descargar Excel -->
-                                <button id="download-excel-btn" class="btn btn-success" title="Descargar presupuesto en formato Excel">
-                                    <i class="fas fa-file-excel"></i>  Excel
-                                </button>
+                                </div>
                             </br>
                         </br>
                         <h1>Ingresos</h1>
@@ -314,7 +323,6 @@ createApp({
             }
         },
         // <td class="total-column">28300</td>
-
 
 
         /*HTML que tiene la tabla detallada de los productos por mes*/
@@ -542,6 +550,14 @@ createApp({
                                 <!-- Se llenará dinámicamente -->
                             </tbody>
                         </table>
+                    
+                        <div id="savePredictionContainer"  class="hidden">
+                            <button id="savePredictionButton" class="data-science-button">                        
+                                <i class="fas fa-brain"></i> 
+                            Guardar Prediccion
+                            </button>
+                        </div>
+
                     </div>
                 </div>
             `;
@@ -567,6 +583,13 @@ createApp({
                     }
 
                 };
+
+
+
+
+
+
+
                 script.onerror = (error) => {
                     //console.error('Error al cargar el script de predicciones:', error);
                 };

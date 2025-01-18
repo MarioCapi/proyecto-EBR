@@ -14,6 +14,8 @@ from routes.API_Generate_Suggested_Budget import generate_suggested_budget_route
 from routes.API_guarda_presupuesto_sugerido_final import Presupuesto_sugerido_router as Presupuesto_sugerido_router
 from routes.API_Consulta_si_PresupuestoSugeridoAnual import consulta_si_presu_suger_anual_router as consulta_si_presu_suger_anual_router
 from routes.API_ConciliationMonthly_vs_budget import ConciliationMonthly_budget_router as ConciliationMonthly_budget_router
+from routes.API_ConciliationMonthly_vs_Expenses import ConciliationMonthly_expenses_router as ConciliationMonthly_expenses_router
+from routes.API_ConciliationMonthly_vs_Cost import ConciliationMonthly_cost_router as ConciliationMonthly_cost_router
 from utils.config.connection import test_database_connection
 from routes.companies import companies_router
 
@@ -45,6 +47,8 @@ app.include_router(generate_suggested_budget_router)
 app.include_router(Presupuesto_sugerido_router)
 app.include_router(consulta_si_presu_suger_anual_router)
 app.include_router(ConciliationMonthly_budget_router)
+app.include_router(ConciliationMonthly_expenses_router)
+app.include_router(ConciliationMonthly_cost_router)
 
 #@app.on_event("startup")
 #async def startup_event():

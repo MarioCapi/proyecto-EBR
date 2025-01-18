@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 sessionStorage.setItem('email', userData.email);
                 sessionStorage.setItem('company_id', userData.company_id);
                 sessionStorage.setItem('company_name', userData.company_name);
-                sessionStorage.setItem('subscription_type', userData.subscription_type);
+                //sessionStorage.setItem('subscription_type', userData.subscription_type);
                 sessionStorage.setItem('subscription_id', userData.subscription_id);
                 sessionStorage.setItem('tax_id', userData.tax_id);
                 sessionStorage.setItem('created_at', userData.created_at);

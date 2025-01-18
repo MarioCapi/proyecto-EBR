@@ -66,7 +66,7 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
                 'company_id': user_data['company_id'],
                 'company_name': user_data['company_name'],
                 'tax_id': user_data['tax_id'],
-                'subscription_type': user_data['subscription_type'],
+                #'subscription_type': user_data['subscription_type'],
                 'subscription_id': user_data['subscription_id'],
                 'created_at': user_data['created_at']
             }

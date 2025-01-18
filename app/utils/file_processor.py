@@ -6,8 +6,9 @@ import re
 from datetime import datetime
 from .exec_procedure_SQLServer import sp_save_archivo, sp_save_dato_contable
 from .exec_any_SP_SQLServer import ejecutar_procedimiento
+import math
 
-async def process_excel_file(contents: bytes, filename: str, db_session) -> FileProcessor:
+async def process_excel_file(contents: bytes, filename: str, db_session, tax_id) -> FileProcessor:
     """
     Procesa el archivo Excel y guarda los datos en la base de datos
     """
@@ -19,7 +20,7 @@ async def process_excel_file(contents: bytes, filename: str, db_session) -> File
         metadata = extract_metadata(df, filename)
         
         # Guardar metadata en la base de datos
-        empresa = save_empresa(db_session, metadata)
+        empresa = save_empresa(db_session, tax_id)  # extraer el ID de la empresa por nit
         archivo = save_archivo(db_session, metadata, empresa)
         
         # Encontrar donde empiezan los datos y obtener mapeo de columnas
@@ -41,7 +42,7 @@ async def process_excel_file(contents: bytes, filename: str, db_session) -> File
         parametros = {
             "user_id": 999999999,
             "action_type": inspect.currentframe().f_code.co_name,
-            "action_details": "intenta obtener toda la lista de los productos",
+            "action_details": "Utils:File_procesor, metodo: process_excel_file",
             "error" : 1,
             "error_details" : str(e)
         }
@@ -70,7 +71,7 @@ def extract_metadata(df: pd.DataFrame, filename: str) -> FileMetadata:
     primeras_filas.extend(column_values)
     
     # Añadir valores de las primeras 5 filas
-    for i in range(min(5, len(df))):
+    for i in range(min(10, len(df))):
         row_values = [str(val).strip() for val in df.iloc[i] if str(val).strip()]
         if row_values:
             primeras_filas.extend(row_values)
@@ -93,10 +94,10 @@ def extract_metadata(df: pd.DataFrame, filename: str) -> FileMetadata:
             break
     
     # Buscar NIT
-    for texto in primeras_filas:
-        if re.search(patrones['nit'], texto):
-            metadata_dict['codigo_nit'] = re.search(patrones['nit'], texto).group()
-            break
+    #for texto in primeras_filas:
+    #    if re.search(patrones['nit'], texto):
+    #        metadata_dict['codigo_nit'] = re.search(patrones['nit'], texto).group()
+    #        break
     
     # Buscar periodo
     for texto in primeras_filas:
@@ -186,12 +187,18 @@ def process_main_data(df: pd.DataFrame, start_row: int, mapeo_columnas: dict) ->
         row = df.iloc[i]
         
         try:
+            # Lista de valores válidos para la primera columna
+            #valores_validos = ['clase', 'grupo', 'cuenta', 'subcuenta', 'auxiliar','subauxiliar']
+
             # Verificar si la fila es la cadena de procesamiento
             #primera_columna = str(row[mapeo_columnas['nivel']]).strip().lower()
-            primera_columna = str(row[0]).strip().lower()
-            if primera_columna.startswith('procesado'):
-                print(f"Se encontró marca de procesamiento en fila {i}: {primera_columna}")
-                break
+            #primera_columna = str(row[0]).strip().lower()
+            #if primera_columna.startswith('procesado'):
+            #    print(f"Se encontró marca de procesamiento en fila {i}: {primera_columna}")
+            #    break
+            #if primera_columna.lower() not in valores_validos:
+            #    print(f"Valor inválido encontrado en fila {i}: {primera_columna}")
+            #    break
                 
             # Verificar si todas las columnas numéricas son válidas
             valores_numericos = [
@@ -217,12 +224,18 @@ def process_main_data(df: pd.DataFrame, start_row: int, mapeo_columnas: dict) ->
                 'transaccional': str(row[mapeo_columnas.get('transaccional', '')]).strip().lower() == 'si' 
                             if 'transaccional' in mapeo_columnas else False
             }
-            
-            # Validar que los campos obligatorios no estén vacíos
-            if row_dict['codigo_cuenta'] and row_dict['nombre_cuenta']:
-                data_rows.append(row_dict)
+            if row_dict['codigo_cuenta'] and not (isinstance(row_dict['codigo_cuenta'], float) and math.isnan(row_dict['codigo_cuenta'])):
+                if row_dict['nombre_cuenta'] and str(row_dict['nombre_cuenta']).lower() != 'nan':
+                    data_rows.append(row_dict)
+                else:
+                    print(f"Fila {i} ignorada: 'nombre_cuenta' vacío")
             else:
-                print(f"Fila {i} ignorada: campos obligatorios vacíos")
+                print(f"Fila {i} ignorada: 'codigo_cuenta' no válido")
+                    
+            # Validar que los campos obligatorios no estén vacíos
+            #if row_dict['codigo_cuenta'] and row_dict['nombre_cuenta']:
+            #    data_rows.append(row_dict)
+            
                 
         except ValueError as ve:
             print(f"Error procesando fila {i}: {str(ve)}")
@@ -234,7 +247,7 @@ def process_main_data(df: pd.DataFrame, start_row: int, mapeo_columnas: dict) ->
     return data_rows
 
 
-def save_empresa(db_session, metadata: FileMetadata):
+def save_empresa(db_session, tax_id):
     from sqlalchemy.exc import SQLAlchemyError
     from sqlalchemy import text
     try:
@@ -243,10 +256,10 @@ def save_empresa(db_session, metadata: FileMetadata):
         FROM admin.companies
         WHERE tax_id = :tax_id
         """)
-        result = db_session.execute(query, {"tax_id": metadata.codigo_nit}).fetchone()        
+        result = db_session.execute(query, {"tax_id": tax_id}).fetchone()        
         
         if not result:
-            raise Exception(f"No se encontró ningún registro en 'admin.companies' con tax_id={metadata.codigo_nit}")
+            raise Exception(f"No se encontró ningún registro en 'admin.companies' con tax_id={tax_id}")
         
         empresa = result[0]  # Extraer el company_id del resultado
         return empresa

@@ -711,8 +711,6 @@ createApp({
             }
             nit_actual = userData.tax_id;
             await this.$nextTick();
-
-            
             try {
                 const anioActual=this.get_current_year();
                 const params = {
@@ -850,22 +848,28 @@ createApp({
                 alert('No hay archivos para procesar.');
                 return;
             }
-            const Nit_Empresa = '901292126'; // NIT de la empresa
+            let Nit_Empresa;
+            const userData = JSON.parse(sessionStorage.getItem("userData"));
+            if (!userData || !userData.tax_id) {
+                throw new Error("No se encontró el usuario o el tax_id en sessionStorage");
+            }
+            const tax_id = userData.tax_id;
+            await this.$nextTick();
             this.isProcessing = true;
             this.showSummary = true;
             
             const promises = Array.from(this.files).map(async (file) => {
                 const formData = new FormData();
                 formData.append('file', file);
-        
                 try {
-                    const response = await axios.post(UrlAPIUpload, formData, {
+
+                    const response = await axios.post(`${UrlAPIUpload}?tax_id=${encodeURIComponent(tax_id)}`, formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data'
                         },
                         onUploadProgress: progressEvent => {
                             this.uploadProgress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                        }                        
+                        }
                     });
                     this.successFiles.push(file.name);
                     return { success: true, file: file.name };

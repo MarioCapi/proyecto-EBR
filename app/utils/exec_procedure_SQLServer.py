@@ -1,5 +1,31 @@
 from sqlalchemy import text
+from datetime import datetime
+from sqlalchemy.exc import SQLAlchemyError
 
+
+def log_backend_error(db_session, user_id: int, action_type: str, error_details: str):
+    """
+    Registra un error en la tabla logs_bakend.
+    """
+    try:
+        log_query = text("""
+            INSERT INTO Admin.logs_bakend (user_id, action_type, error, error_details, timestamp)
+            VALUES (:user_id, :action_type, 1, :error_details, :timestamp)
+        """)
+        db_session.execute(
+            log_query,
+            {
+                "user_id": user_id,
+                "action_type": action_type,
+                "error_details": error_details,
+                "timestamp": datetime.now()
+            }
+        )
+        db_session.commit()
+    except SQLAlchemyError as e:
+        print(f"Error al registrar en logs: {str(e)}")  # No lanzar otra excepción para evitar loops
+        
+        
 #def exec_sp_save_data(db_session, sp_name: str, **params):
 def exec_sp_save_data(db_session, sp_name: str, return_scalar: bool = False, **params):
     """
@@ -33,6 +59,13 @@ def exec_sp_save_data(db_session, sp_name: str, return_scalar: bool = False, **p
         return result
     except Exception as e:
         db_session.rollback()
+        error_details = f"Error ejecutando SP {sp_name}: {str(e)}"
+        log_backend_error(
+            db_session=db_session,
+            user_id="usuario desconocido",  
+            action_type="Ejecutando el metodo: exec_sp_save_data",
+            error_details=error_details
+        )
         raise Exception(f"Error ejecutando SP {sp_name}: {str(e)}")
 
 # Funciones específicas para cada SP

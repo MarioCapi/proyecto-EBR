@@ -78,7 +78,7 @@ async def generar_reporte_ingresos(
         parametros = {
             "user_id": request.nit,
             "action_type": inspect.currentframe().f_code.co_name,
-            "action_details": "intenta obtener toda la lista de los productos",
+            "action_details": "generar_reporte_ingresos",
             "error" : 1,
             "error_details" : str(e)
         }

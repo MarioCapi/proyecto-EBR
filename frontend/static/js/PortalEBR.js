@@ -763,7 +763,7 @@ createApp({
                     }        
                     contentDiv.innerHTML = `
                         </br>
-                        <h1>Comparativo de Conciliacion</h1>
+                        <h1>Conciliacion de Ingresos</h1>
                         </br>                        
                         <div class="table-container">
                             <table id="ComparativeMonthlyConciliation">
@@ -783,6 +783,53 @@ createApp({
                                 </tbody>
                             </table>
                         </div>                            
+
+                        </br>
+                        <h1>Conciliacion de Gastos</h1>
+                        </br>                        
+                        <div class="table-container">
+                            <table id="ComparativeMonthlyConciliation_expenses">
+                                <thead>
+                                    <tr>
+                                        <th>Codigo Cuenta</th>
+                                        <th>Nombre Cuenta</th>
+                                        <th>Valor Presupuestado</th>
+                                        <th>Valor Mes Actual</th>
+                                        <th>Diferencia</th>
+                                        <th>Porcentaje </th>
+                                        <th>Resultado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Se llenará dinámicamente -->
+                                </tbody>
+                            </table>
+                        </div>   
+                        
+                        
+                        </br>
+                        <h1>Conciliacion de Costos</h1>
+                        </br>                        
+                        <div class="table-container">
+                            <table id="ComparativeMonthlyConciliation_cost">
+                                <thead>
+                                    <tr>
+                                        <th>Codigo Cuenta</th>
+                                        <th>Nombre Cuenta</th>
+                                        <th>Valor Presupuestado</th>
+                                        <th>Valor Mes Actual</th>
+                                        <th>Diferencia</th>
+                                        <th>Porcentaje </th>
+                                        <th>Resultado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Se llenará dinámicamente -->
+                                </tbody>
+                            </table>
+                        </div>         
+
+
                 `;
                 const oldScript = document.getElementById('presupuesto-script_conciliation');
                 if (oldScript) {

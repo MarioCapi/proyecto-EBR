@@ -59,9 +59,11 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.table-container {
-    overflow-x: auto;
+.table-container {    
+    overflow-y: auto;    
 }
+
+
 
 #predictionsTable {
     width: 100%;
@@ -102,5 +104,48 @@ body {
     .metric-card {
         width: 100%;
         justify-content: center;
+    }
+}
+
+
+
+#ComparativeMonthlyConciliation_expenses {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#ComparativeMonthlyConciliation_expenses thead {
+    position: sticky; /* Mantiene el encabezado fijo */
+    top: 0;
+    background-color: #fff; /* O el color que prefieras */
+    z-index: 1;
+}
+
+#ComparativeMonthlyConciliation_expenses th,
+#ComparativeMonthlyConciliation_expenses td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+/* Asegura que las filas sean visibles */
+#ComparativeMonthlyConciliation_expenses tbody tr {
+    display: table-row;
+}
+
+/* Estilo para las filas alternadas (opcional) */
+#ComparativeMonthlyConciliation_expenses tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+
+/* Para pantallas pequeñas */
+@media screen and (max-width: 768px) {
+    .table-container {
+        overflow-x: auto; /* Permite scroll horizontal en pantallas pequeñas */
+    }
+
+    #ComparativeMonthlyConciliation_expenses {
+        min-width: 800px; /* Asegura que la tabla mantenga un ancho mínimo */
     }
 }

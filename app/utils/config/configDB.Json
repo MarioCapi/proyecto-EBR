@@ -1,6 +1,6 @@
 {
-    "server": "localhost",
+    "server": "MARIOCAPI",
     "database": "EBR",
     "username": "sa",
-    "password": "1028494065!"
+    "password": "123456"
 }

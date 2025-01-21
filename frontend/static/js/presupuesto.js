@@ -39,14 +39,14 @@ function determinarAnioConsulta() {
 
 
 // Función principal de inicialización
-async function initPresupuesto() {
+async function initPresupuesto(tax_id) {
     console.log('Iniciando carga de datos de presupuesto...');
     const anioConsulta = determinarAnioConsulta();
     const API_URL = "http://127.0.0.1:8080/GenerarReporteIngresos";
 
     const params = {
         anio: anioConsulta,
-        nit: "901292126" // Reemplaza con el valor real
+        nit: tax_id // Reemplaza con el valor real
     };
 
     // Mostrar spinner y mensaje
@@ -73,8 +73,8 @@ async function initPresupuesto() {
         });
 
         if (!response.ok) {
-            console.error('Error en la respuesta de la API:', response.status, response.statusText);
-            message.textContent = "Hubo un error al procesar las predicciones. Por favor, intenta nuevamente.";
+            //console.error('Error en la respuesta de la API:', response.status, response.statusText);
+            message.textContent = "Hubo un error al procesar. Por favor, intenta nuevamente.";
             container.removeChild(spinner); // Ocultar spinner
             return;
         }

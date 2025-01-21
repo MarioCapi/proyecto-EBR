@@ -19,6 +19,26 @@ async def process_excel_file(contents: bytes, filename: str, db_session, tax_id)
         # Extraer metadata
         metadata = extract_metadata(df, filename)
         
+        if metadata.codigo_nit != tax_id:
+            import inspect
+            parametros = {
+            "user_id": tax_id,
+            "action_type": inspect.currentframe().f_code.co_name,
+            "action_details": "Utils:File_procesor, metodo: process_excel_file",
+            "error" : 1,
+            "error_details" : "NIT del archivo no coinciden con usuario de la empresa autenticado"
+            }
+            ejecutar_procedimiento(
+                db_session, 
+                "Admin.SaveLogBakend", 
+                parametros
+            )
+            return {
+                "data": [],
+                "message": "NIT del archivo no coinciden con usuario de la empresa autenticado"
+            }
+                    
+        
         # Guardar metadata en la base de datos
         empresa = save_empresa(db_session, tax_id)  # extraer el ID de la empresa por nit
         archivo = save_archivo(db_session, metadata, empresa)
@@ -93,11 +113,11 @@ def extract_metadata(df: pd.DataFrame, filename: str) -> FileMetadata:
             metadata_dict['nombre_archivo'] = texto.strip()
             break
     
-    # Buscar NIT
-    #for texto in primeras_filas:
-    #    if re.search(patrones['nit'], texto):
-    #        metadata_dict['codigo_nit'] = re.search(patrones['nit'], texto).group()
-    #        break
+    #Buscar NIT
+    for texto in primeras_filas:
+        if re.search(patrones['nit'], texto):
+            metadata_dict['codigo_nit'] = re.search(patrones['nit'], texto).group()
+            break
     
     # Buscar periodo
     for texto in primeras_filas:
@@ -331,18 +351,18 @@ def process_datos_contables(db_session, datos, archivo):
     try:
         for i in range(0, len(datos), BATCH_SIZE):
             batch = datos[i:i + BATCH_SIZE]
-            print(f"\nProcesando lote {i//BATCH_SIZE + 1}, registros {i} a {i + len(batch)}")
+            #print(f"\nProcesando lote {i//BATCH_SIZE + 1}, registros {i} a {i + len(batch)}")
             
             try:
                 save_datos_contables(db_session, batch, archivo.ArchivoID)
                 db_session.commit()
                 total_procesados += len(batch)
-                print(f"Lote procesado exitosamente. Total procesados: {total_procesados}")
+                #print(f"Lote procesado exitosamente. Total procesados: {total_procesados}")
                 
             except Exception as e:
                 db_session.rollback()
                 errores.append(f"Error en lote {i//BATCH_SIZE + 1}: {str(e)}")
-                print(f"Error procesando lote: {str(e)}")
+                #print(f"Error procesando lote: {str(e)}")
                 raise
                 
     except Exception as e:

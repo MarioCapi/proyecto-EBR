@@ -395,7 +395,7 @@ createApp({
                 script.src = './static/js/presupuesto.js';
                 script.onload = () => {
                     if (window.initPresupuesto) {
-                        window.initPresupuesto();
+                        window.initPresupuesto(nit_actual);
                     }
                     this.agregarEventosClick(nit_actual);
                 };

@@ -16,6 +16,9 @@ __pycache__
 # Ignorar carpeta myvenv
 myvenv
 
+# Ignorar node_modules
+node_modules
+
 # Ignorar carpeta myvenv
 .venv
 
@@ -42,3 +45,14 @@ Files for training
 
 
 .codegpt
+
+# Ignorar archivos txt
+.mermaid
+.json
+.env.example
+
+
+# Ignorar carpeta tests
+tests
+# Ignorar carpeta Test_Sp's
+Test_Sp's

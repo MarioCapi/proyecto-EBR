@@ -92,7 +92,6 @@ async function initDescargarPresupuestoXLSX() {
         } catch (error) {
             // Manejar errores y mostrar mensaje
             alert(`Error al generar el archivo Excel: ${error.message}`);
-            console.error('Detalles del error:', error);
         } finally {
             // Eliminar overlay de carga
             const loadingOverlay = document.getElementById('loading-overlay');

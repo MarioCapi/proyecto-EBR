@@ -22,19 +22,14 @@ function determinarAnioConsulta() {
     const mes = fechaActual.getMonth() + 1; // getMonth() retorna 0-11
     
     // Si estamos después del 1 de julio (mes >= 7)
-    const anioConsulta = mes >= 7 ? anioActual : anioActual - 1;
-    
-    console.log('Fecha actual:', fechaActual.toLocaleDateString());
-    console.log('Mes actual:', mes);
-    console.log('Año a consultar:', anioConsulta);
-    
+    const anioConsulta = mes >= 7 ? anioActual : anioActual - 1;  
     return anioConsulta;
 }
 
 
 // Función principal de inicialización
 async function initPresupuesto_x_producto() {
-    console.log('Iniciando carga de datos de presupuesto...');
+    
     const anioConsulta = determinarAnioConsulta();
     const API_URL_allProducts = "http://127.0.0.1:8080/get_all_list_Products";
 
@@ -49,7 +44,6 @@ async function initPresupuesto_x_producto() {
         });
 
         if (!response.ok) {
-            console.error('Error en la respuesta de la API:', response.status, response.statusText);
             return;
         }
         const products = await response.json();        
@@ -59,10 +53,10 @@ async function initPresupuesto_x_producto() {
             mostrarResultadosEnTabla(presupuestoData);
             
         } else {
-            console.error('No se recibieron datos válidos de la API');
+            
         }
     } catch (error) {
-        console.error('Error al obtener datos:', error);
+        
     }
 }
 
@@ -90,12 +84,11 @@ async function initPresupuesto_x_producto_forecast(codigoCuenta) {
         });
 
         if (!response.ok) {
-            console.error('Error en la respuesta de la API:', response.status, response.statusText);
             return;
         }
 
         const result = await response.json();
-        console.log('Datos recibidos:', result);
+        
 
         if (result && result.predicciones) {
             const predictionData = result.predicciones;
@@ -117,10 +110,9 @@ async function initPresupuesto_x_producto_forecast(codigoCuenta) {
                 tableBody.appendChild(row);
             });
         } else {
-            console.error('No se recibieron datos válidos de la API');
+            
         }
-    } catch (error) {
-        console.error('Error al obtener datos:', error);
+    } catch (error) {        
     }finally {        
         setTimeout(() => {
             document.body.removeChild(loadingIndicator);
@@ -231,10 +223,9 @@ document.getElementById('next-page_products').addEventListener('click', () => {
 });
 
 function renderChart_forecast_prod(data) {
-    console.log('Renderizando gráfico...');
+    
     const ctx = document.getElementById("report-chart");
     if (!ctx) {
-        console.error('No se encontró el elemento canvas');
         return;
     }
 

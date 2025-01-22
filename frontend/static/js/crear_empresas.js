@@ -68,7 +68,6 @@ document.getElementById('createCompanyForm').addEventListener('submit', async fu
     };
 
     try {
-        //console.log('Enviando datos:', formData);
 
         const paramsLogTrace = {
             user_id: taxId, // el userid
@@ -104,8 +103,7 @@ document.getElementById('createCompanyForm').addEventListener('submit', async fu
             body: JSON.stringify(formData)
         });
 
-        const result = await response.json();
-        //console.log('Respuesta del servidor:', result);
+        const result = await response.json();        
 
         if (!response.ok) {
             // Manejar diferentes tipos de errores
@@ -134,8 +132,7 @@ document.getElementById('createCompanyForm').addEventListener('submit', async fu
         const otherContainer = document.getElementById('other_company_type_container');
         otherContainer.style.display = 'none';
         
-    } catch (error) {
-        //console.error('Error completo:', error);        
+    } catch (error) {        
             const paramsLogError = {
                 user_id: taxId, // el userid
                 action_type: "createCompanyForm",  //tipo de accion
@@ -322,8 +319,7 @@ async function loadSubscriptions() {
         } else {
             throw new Error('La respuesta no contiene un array de suscripciones');
         }
-    } catch (error) {
-        //console.error('Error al cargar las suscripciones:', error);
+    } catch (error) {        
         const subscriptionSelect = document.getElementById('subscription_type');
         subscriptionSelect.innerHTML = '<option value="">Error al cargar suscripciones</option>';
         subscriptionSelect.disabled = true;

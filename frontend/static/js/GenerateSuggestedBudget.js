@@ -6,7 +6,7 @@ let resultTotals = []; // Aquí se guardarán los resultados de la resta
 
 
 async function initPresupuestoFinal() {
-    //console.log('Iniciando carga de datos de presupuesto...');
+    
     try {
         const params = {
             NIT_Empresa: "901292126" // Reemplaza con el valor real
@@ -21,11 +21,9 @@ async function initPresupuestoFinal() {
         });
 
         if (!response.ok) {
-            //console.error('Error en la respuesta de la API:', response.status, response.statusText);
             return;
         }
         const result = await response.json();
-        //console.log('Datos recibidos:', result);
 
         if (result && result.dataIngresos) {            
             const Costos = result.dataCosto;
@@ -34,8 +32,7 @@ async function initPresupuestoFinal() {
             populateTableCostos(result.dataCosto)
             calculateResultTotals();
         }
-    } catch (error) {
-        //console.error('Error al obtener datos:', error);
+    } catch (error) {        
         container.removeChild(spinner); // Ocultar spinner
     }
 }
@@ -133,7 +130,6 @@ function populateTableCostos(data) {
         // Agregar la fila de totales al cuerpo de la tabla
         tableBody.appendChild(totalRow);
     }catch(error){
-        console.error('Error: ' , error)
     }
 }
 
@@ -222,8 +218,7 @@ function populateTableGastos(data) {
         totalRow.appendChild(grandTotalCell);
         // Agregar la fila de totales al cuerpo de la tabla
         tableBody.appendChild(totalRow);
-    } catch (error) {
-        console.error('Error:', error);
+    } catch (error) {        
     }
 }
 
@@ -320,8 +315,7 @@ function populateTable(data) {
 
         // Agregar la fila de totales al cuerpo de la tabla
         tableBody.appendChild(totalRow);
-    } catch (error) {
-        console.error('Error:', error);
+    } catch (error) {        
     }
 }
 
@@ -334,16 +328,14 @@ function calculateResultTotals() {
         if (
             monthlyTotalsIngresos.length !== monthlyTotalsCostos.length || 
             monthlyTotalsIngresos.length !== monthlyTotalsGastos.length
-        ) {
-            console.error("Las longitudes no coinciden.");
+        ) {            
             return;
         }
         // Realizar la resta: (Ingresos - Costos - Gastos) para cada mes
         const resultTotals = monthlyTotalsIngresos.map(
             (ingreso, index) => ingreso - monthlyTotalsCostos[index] - monthlyTotalsGastos[index]
         );
-
-        //console.log(resultTotals); // Muestra los resultados en consola
+        
         // Calcular el total anual
         const totalAnual = resultTotals.reduce((sum, value) => sum + value, 0);
 
@@ -379,8 +371,7 @@ function calculateResultTotals() {
         tbody.appendChild(newRow);
 
         return resultTotals; // Opcional, devolver resultados para uso adicional
-    }catch(error){
-        console.error('Error:', error)
+    }catch(error){        
     }
 }
 
@@ -435,9 +426,8 @@ async function guardarPresupuestoSugerido() {
             const error = await response.json();
             alert(error.error || "Error al guardar los datos");
         }
-    } catch (error) {
-        console.error("Error al guardar los datos:", error);
-        alert("Hubo un error al comunicarse con el servidor");
+    } catch (error) {        
+        alert("Hubo un error en comunicacion");
     }
 }
 
@@ -460,7 +450,6 @@ function leerTablaComoJSON(tableId) {
                     });
                 });
             }catch(err){
-                console.error('Error es:', err)
             }            
         }
         else

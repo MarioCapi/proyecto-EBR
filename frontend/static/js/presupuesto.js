@@ -8,7 +8,7 @@ function mostrarResultadosEnTabla_presupuesto(resultados) {
 
     // Verificar si el elemento de la tabla existe
     if (!reportTableBody) {
-        console.error('El elemento de la tabla no se encontró.');
+        
         return; // Salir de la función si el elemento no existe
     }
 
@@ -30,9 +30,7 @@ function determinarAnioConsulta() {
     // Si estamos después del 1 de julio (mes >= 7)
     const anioConsulta = mes >= 7 ? anioActual : anioActual - 1;
     
-    console.log('Fecha actual:', fechaActual.toLocaleDateString());
-    console.log('Mes actual:', mes);
-    console.log('Año a consultar:', anioConsulta);
+    
     
     return anioConsulta;
 }
@@ -40,7 +38,7 @@ function determinarAnioConsulta() {
 
 // Función principal de inicialización
 async function initPresupuesto(tax_id) {
-    console.log('Iniciando carga de datos de presupuesto...');
+    
     const anioConsulta = determinarAnioConsulta();
     const API_URL = "http://127.0.0.1:8080/GenerarReporteIngresos";
 
@@ -56,7 +54,7 @@ async function initPresupuesto(tax_id) {
     message.textContent = "Estamos procesando las predicciones. Esto puede tomar algunos minutos...";
     const container = document.getElementById('loading-container');
     if (!container) {
-        console.error('El contenedor "loading-container" no existe en el DOM.');
+        
         return;
     }
     container.innerHTML = ''; // Limpiar el contenedor
@@ -73,14 +71,14 @@ async function initPresupuesto(tax_id) {
         });
 
         if (!response.ok) {
-            //console.error('Error en la respuesta de la API:', response.status, response.statusText);
+            
             message.textContent = "Hubo un error al procesar. Por favor, intenta nuevamente.";
             container.removeChild(spinner); // Ocultar spinner
             return;
         }
 
         const result = await response.json();
-        console.log('Datos recibidos:', result);
+        
 
         if (result && result.data) {
             const presupuestoData = result.data;   // presupuesto actual consolidado para cada mes con la diferencia entre debito y credito
@@ -96,12 +94,12 @@ async function initPresupuesto(tax_id) {
             mostrarResultadosEnTabla_presupuesto(presupuestoData);
             renderChart(presupuestoData);
         } else {
-            console.error('No se recibieron datos válidos de la API');
+            
             message.textContent = "No se recibieron datos válidos. Por favor, revisa los parámetros.";
             container.removeChild(spinner); // Ocultar spinner
         }
     } catch (error) {
-        console.error('Error al obtener datos:', error);
+        
         message.textContent = "Ocurrió un error inesperado. Por favor, intenta más tarde.";
         container.removeChild(spinner); // Ocultar spinner
     }
@@ -118,7 +116,7 @@ function setupPredictionButton() {
                 sessionStorage.setItem('predictionData', JSON.stringify(predictionData));
                 window.location.href = 'PrediccionesPresupuesto.html';
             } else {
-                console.error('No hay datos de predicción disponibles');
+                
                 alert('No hay datos de predicción disponibles en este momento');
             }
         });
@@ -171,10 +169,10 @@ document.getElementById('next-page').addEventListener('click', () => {
 });
 
 function renderChart(data) {
-    console.log('Renderizando gráfico...');
+    
     const ctx = document.getElementById("report-chart");
     if (!ctx) {
-        console.error('No se encontró el elemento canvas');
+        
         return;
     }
 

@@ -20,22 +20,22 @@ function initPredictions(data,tax_id) {
             renderPredictionsChart(data);
         }
     } catch (error) {
-        console.error('Error en initPredictions:', error);
+        
     }
 }
 
 function renderPredictionsTable(data) {
     try {
-        console.log('Renderizando tabla con datos:', data);
+        
         const tbody = document.querySelector('#predictionsTable tbody');
         if (!tbody) {
-            console.error('No se encontró el elemento tbody');
+            
             return;
         }
         tbody.innerHTML = '';
 
         if (!data.predicciones_mensuales) {
-            console.error('No hay datos de predicciones mensuales');
+            
             return;
         }
 
@@ -56,21 +56,21 @@ function renderPredictionsTable(data) {
             });
         });
     } catch (error) {
-        console.error('Error en renderPredictionsTable:', error);
+        
     }
 }
 
 function renderPredictionsChart(data) {
     try {
-        console.log('Renderizando gráfico con datos:', data);
+        
         const ctx = document.getElementById('predictionsChart');
         if (!ctx) {
-            console.error('No se encontró el elemento canvas');
+         
             return;
         }
 
         if (!data.predicciones_mensuales) {
-            console.error('No hay datos para el gráfico');
+            
             return;
         }
 
@@ -128,7 +128,7 @@ function renderPredictionsChart(data) {
             }
         });
     } catch (error) {
-        console.error('Error en renderPredictionsChart:', error);
+        
     }
 }
 
@@ -206,7 +206,7 @@ async function GuardaPrediccionPresupuesto(data, tax_id) {
                 Coeficiente_Diferencia: parseFloat(prediccion.coeficiente) // debe ser un número
             };
 
-            //console.log('Datos a enviar:', JSON.stringify(params, null, 2));
+            
             // Enviar solicitud POST a la API
             const response = await fetch(API_URL, {
                 method: "POST",
@@ -218,19 +218,18 @@ async function GuardaPrediccionPresupuesto(data, tax_id) {
 
             if (!response.ok) {
                 const errorResponse = await response.json(); // Obtener el cuerpo de la respuesta de error
-                //console.error(`Error al guardar la predicción del mes ${mes}:`,response.status,response.statusText,errorResponse );
+                
                 continue;
             }
             const result = await response.json();
-            //console.log(`Predicción del mes ${mes} guardada exitosamente:`, result);
+            
         }
 
         // Mostrar información de métricas
-        //console.log('Métricas:', metricas);
+        
         alert('Predicciones Guardadas exitosamente.')
 
-    } catch (error) {
-        console.error('Error al guardar predicciones:', error);
+    } catch (error) {        
     }
 }
 function parseCurrency(value) {
@@ -245,7 +244,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
         // Recuperar los datos de predicción almacenados en sessionStorage
         const predictionData = JSON.parse(sessionStorage.getItem('predictionData'));
-        console.log('Datos recuperados:', predictionData);
+        
         // Verificar que los datos de predicción están completos
         if (predictionData && 
             predictionData.predictions && 
@@ -255,13 +254,13 @@ document.addEventListener('DOMContentLoaded', function() {
             initPredictions(predictionData);
         } else {
             // Si los datos están incompletos, mostrar error y redirigir
-            console.error('Datos de predicción incompletos:', predictionData);
+            
             alert('Los datos de predicción están incompletos');
             window.location.href = 'index.html';
         }
 
     } catch (error) {
-        console.error('Error al inicializar predicciones:', error);
+        
     }
 });
 const savePredictionContainer = document.getElementById('savePredictionContainer');
@@ -272,16 +271,15 @@ const savePredictionContainer = document.getElementById('savePredictionContainer
     if (savePredictionButton) {
 
         savePredictionButton.addEventListener('click', async () => {
-        //console.log('Botón de guardar predicción clickeado');  // Depuración
+        
 
         // Llamar a la función GuardaPrediccionPresupuesto con los datos completos
         try {            
             await GuardaPrediccionPresupuesto(presupuestoData,tax_id_rec);
         } catch (error) {
-            console.error('Error al guardar predicción:', error);
+            
         }
     });
     } else {
-        console.error('El botón de guardar predicción no se encontró en el DOM');
     }
 

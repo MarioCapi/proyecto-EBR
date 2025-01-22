@@ -21,7 +21,7 @@ async function init_get_prediction_x_producto(tax_id) {
         });
 
         if (!response.ok) {
-            console.error('Error en la respuesta de la API:', response.status, response.statusText);
+            
             return;
         }
         predicted = await response.json();        
@@ -39,10 +39,10 @@ async function init_get_prediction_x_producto(tax_id) {
 
             
         } else {
-           // console.error('No se recibieron datos válidos de la API');
+           
         }
     } catch (error) {
-        //console.error('Error al obtener datos:', error);
+        
     }
 }
 
@@ -166,8 +166,7 @@ function renderChart(predicted, codigoProducto, anio) {
     const anioNumber = parseInt(anio, 10); // Convertir a número si es necesario
     const filteredData = predicted.data.filter(item => {
         const codigoMatch = codigoProducto ? item.Codigo_Producto.trim() === codigoProducto.trim() : true; // Comparar sin espacios
-        const anioMatch = anioNumber ? item.Año === anioNumber : true; // Comparar como número
-        console.log(`Comparando: ${item.Codigo_Producto} con ${codigoProducto}, ${item.Año} con ${anioNumber}`); // Verificar comparación
+        const anioMatch = anioNumber ? item.Año === anioNumber : true; // Comparar como número        
         return codigoMatch && anioMatch; // Retornar verdadero si ambos coinciden
     });
 

@@ -274,7 +274,7 @@ createApp({
                     }
                 };
                 script.onerror = (error) => {
-                    //console.error('Error al cargar el script de presupuesto final:', error);
+                    
                 };
                 const scriptpdf = document.createElement('script');
                 scriptpdf.id = 'downloadInfoPDF-script';
@@ -303,7 +303,7 @@ createApp({
                 const userData = JSON.parse(sessionStorage.getItem("userData")) || {};
                 const nit_actual = userData.tax_id || "Desconocido";
 
-                //console.error('Error al cargar el contenido final del presupuesto con costo y gasto:', error);
+                
                 const paramsLogError = {
                     user_id: nit_actual, // el userid
                     action_type: "loadPrediccionFinalPresupuesto",  //tipo de accion
@@ -400,7 +400,7 @@ createApp({
                     this.agregarEventosClick(nit_actual);
                 };
                 script.onerror = (error) => {
-                    //console.error('Error al cargar el script de presupuesto:', error);
+                    
                 };
                 document.body.appendChild(script);
                 
@@ -438,7 +438,7 @@ createApp({
                     const anio = row.cells[0].textContent.trim(); // Año
                     const mes = row.cells[1].textContent.trim(); // Mes
                     const nit = nit_actual;
-                    //console.log(`Fila clickeada: Año: ${anio}, Mes: ${mes}, NIT: ${nit}`); // Para depuración
+                    
                     // Llamar a la función para enviar los datos a la API
                     this.enviarDatosANuevaAPI(anio, mes, nit);
                 }
@@ -455,15 +455,15 @@ createApp({
             axios.post(UrlAPI_tot_prod_mes, data)
                 .then(response => {
                     const resultados = response.data.data;
-                    //console.log('Datos obtenidos:', resultados); // Para depuración
+                    
                     if (resultados.length > 0) {
                         this.mostrarTablaDetallada(resultados);
                     } else {
-                        //console.log('No se encontraron datos.');
+                        
                     }
                 })
                 .catch(error => {
-                    //console.error('Error al obtener datos:', error);
+                    
                     alert('Error al obtener datos. Intenta nuevamente.');
                     const paramsLogError = {
                         user_id: Nit_Empresa, // el userid
@@ -578,7 +578,7 @@ createApp({
                 script.id = 'presupuesto-script_2';
                 script.src = './static/js/prediccionesPresupuesto.js';
                 script.onload = () => {
-                    //console.log('Script de predicciones cargado correctamente');
+                    
                     const predictionData = JSON.parse(sessionStorage.getItem('predictionData'));
                     if (window.initPredictions && predictionData) {
                         window.initPredictions(predictionData,userData.tax_id);
@@ -592,7 +592,7 @@ createApp({
                 };
 
                 script.onerror = (error) => {
-                    //console.error('Error al cargar el script de predicciones:', error);
+                    
                 };
                 document.body.appendChild(script);
 
@@ -705,7 +705,7 @@ createApp({
                     //this.agregarEventosClick(nit_actual);
                 };
                 script.onerror = (error) => {
-                    //console.error('Error al cargar el script de presupuesto:', error);
+                    
                 };
                 document.body.appendChild(script);
                 

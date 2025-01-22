@@ -1,5 +1,5 @@
 async function initConciliation(nit_actual) {
-    //console.log('Iniciando carga de datos de presupuesto...');
+    
     try {
         const { mes, anio } = obtenerMesAnteriorYAñoActual();
         const params = {
@@ -53,12 +53,8 @@ async function initConciliation(nit_actual) {
             populateComparativeTable(resultBudget);
             populateComparativeTable_cost(resultCost);
             populateComparativeTable_expenses(resultExpenses);
-            /*console.log("Datos de presupuesto:", resultBudget);
-            console.log("Datos de gastos:", resultExpenses);
-            console.log("Datos de costos:", resultCost);*/
         }        
     } catch (error) {
-        //console.error('Error al obtener datos:', error);
     }
 }
 function obtenerMesAnteriorYAñoActual() {
@@ -78,7 +74,6 @@ function obtenerMesAnteriorYAñoActual() {
 function populateComparativeTable(result) {
     // Verificar que result tenga datos válidos
     if (!result || !result.data || !Array.isArray(result.data)) {
-        //console.error("Datos inválidos para llenar la tabla.");
         return;
     }
 
@@ -138,7 +133,6 @@ function populateComparativeTable(result) {
 
 function populateComparativeTable_expenses(result) {
     try {
-        //console.log("Iniciando población de tabla...");
         
         // Validación de entrada
         if (!result) {
@@ -162,14 +156,14 @@ function populateComparativeTable_expenses(result) {
         // Limpiar tabla
         tableBody.innerHTML = "";
         
-       // console.log(`Número total de registros a procesar: ${result.data.length}`);
+       
         
         // Crear un fragmento de documento para mejor rendimiento
         const fragment = document.createDocumentFragment();
 
         result.data.forEach((row, index) => {
             try {
-                //console.log(`Procesando registro ${index + 1}`);
+                
                 
                 // Validación de datos de la fila
                 if (!row) {
@@ -210,7 +204,7 @@ function populateComparativeTable_expenses(result) {
                         value: row.ValorPresupuesto,
                         format: value => {
                             if (typeof value !== 'number') {
-                                //console.warn(`ValorPresupuesto no es un número en la fila ${index + 1}`);
+                                
                                 return '0';
                             }
                             return value.toLocaleString("es-CO");
@@ -220,7 +214,7 @@ function populateComparativeTable_expenses(result) {
                         value: row.TotalIngreso,
                         format: value => {
                             if (typeof value !== 'number') {
-                                //console.warn(`TotalIngreso no es un número en la fila ${index + 1}`);
+                                
                                 return '0';
                             }
                             return value.toLocaleString("es-CO");
@@ -230,7 +224,7 @@ function populateComparativeTable_expenses(result) {
                         value: row.Diferencia,
                         format: value => {
                             if (typeof value !== 'number') {
-                                //console.warn(`Diferencia no es un número en la fila ${index + 1}`);
+                                
                                 return '0';
                             }
                             return value.toLocaleString("es-CO");
@@ -240,7 +234,6 @@ function populateComparativeTable_expenses(result) {
                         value: row.PorcentajeDiferencia,
                         format: value => {
                             if (typeof value !== 'number') {
-                                //console.warn(`PorcentajeDiferencia no es un número en la fila ${index + 1}`);
                                 return '0%';
                             }
                             return `${value.toFixed(2)}%`;
@@ -259,7 +252,6 @@ function populateComparativeTable_expenses(result) {
                         td.setAttribute('data-cell-index', cellIndex);
                         tableRow.appendChild(td);
                     } catch (cellError) {
-                       // console.error(`Error al crear celda ${cellIndex} en fila ${index + 1}:`, cellError);
                         const td = document.createElement("td");
                         td.textContent = 'Error';
                         td.style.color = 'red';
@@ -281,12 +273,10 @@ function populateComparativeTable_expenses(result) {
                         }
                     }
                 } catch (styleError) {
-                    //console.error(`Error al aplicar estilos en fila ${index + 1}:`, styleError);
                 }
 
                 fragment.appendChild(tableRow);
             } catch (rowError) {
-                //console.error(`Error al procesar la fila ${index + 1}:`, rowError);
                 // Crear una fila de error
                 const errorRow = document.createElement("tr");
                 const errorCell = document.createElement("td");
@@ -302,19 +292,17 @@ function populateComparativeTable_expenses(result) {
         tableBody.appendChild(fragment);
 
         // Verificaciones finales
-       // console.log(`Número final de filas en la tabla: ${tableBody.children.length}`);
         
         // Verificar visibilidad de las filas
         setTimeout(() => {
             const rows = tableBody.querySelectorAll('tr');
             rows.forEach((row, index) => {
                 const isVisible = row.offsetParent !== null;
-                //console.log(`Fila ${index + 1} visible: ${isVisible}`);
             });
         }, 100);
 
     } catch (error) {
-       // console.error("Error general al poblar la tabla:", error);
+       
         // Mostrar mensaje de error en la interfaz
         const tableContainer = document.querySelector(".table-container");
         if (tableContainer) {
@@ -336,7 +324,6 @@ function populateComparativeTable_expenses(result) {
 function populateComparativeTable_cost(result) {
     // Verificar que result tenga datos válidos
     if (!result || !result.data || !Array.isArray(result.data)) {
-       // console.error("Datos inválidos para llenar la tabla.");
         return;
     }
 

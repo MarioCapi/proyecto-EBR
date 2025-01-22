@@ -506,7 +506,17 @@ createApp({
 
         /*HTML de los botones con total de la prediccion, rango de años ymese analizados*/
         async loadPrediccionPresupuesto() {
+            let nit_actual;
             try {
+                // Recuperar tax_id desde sessionStorage
+                const userData = JSON.parse(sessionStorage.getItem("userData"));
+                if (!userData || !userData.tax_id) {
+                    throw new Error("No se encontró el usuario o el tax_id en sessionStorage");
+                }
+                nit_actual = userData.tax_id;
+                await this.$nextTick();
+
+
                 await this.$nextTick();
                 const contentDiv = document.getElementById('contentPresu');
                 if (!contentDiv) {
@@ -574,7 +584,7 @@ createApp({
                     //console.log('Script de predicciones cargado correctamente');
                     const predictionData = JSON.parse(sessionStorage.getItem('predictionData'));
                     if (window.initPredictions && predictionData) {
-                        window.initPredictions(predictionData);
+                        window.initPredictions(predictionData,userData.tax_id);
                     }
                       // Mostrar el botón después de cargar las predicciones
                     const savePredictionContainer = document.getElementById('savePredictionContainer');
@@ -583,12 +593,6 @@ createApp({
                     }
 
                 };
-
-
-
-
-
-
 
                 script.onerror = (error) => {
                     //console.error('Error al cargar el script de predicciones:', error);
@@ -616,7 +620,7 @@ createApp({
         
             } catch (error) {
                 const paramsLogError = {
-                    user_id: Nit_Empresa, // el userid
+                    user_id: nit_actual, // el userid
                     action_type: "loadPrediccionPresupuesto",  //tipo de accion
                     action_details: "Error al cargar el contenido de predicciones de presupuesto",
                     ip_address: "localhost", 

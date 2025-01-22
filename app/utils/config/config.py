@@ -2,10 +2,10 @@
 from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     # Configuraciones de Base de Datos
-    DB_SERVER: str = "MARIOCAPI"
+    DB_SERVER: str = "localhost"
     DB_NAME: str = "EBR"
-    DB_USER: str = "sa"
-    DB_PASSWORD: str = "123456"
+    DB_USER: str = "EBR_Admin_Super"
+    DB_PASSWORD: str = "1028494065!"
     
     # Configuraciones de API
     API_VERSION: str = "v1"

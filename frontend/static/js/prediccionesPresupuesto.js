@@ -1,7 +1,9 @@
 // predicciones.js
 let presupuestoData = null;
-function initPredictions(data) {
+let tax_id_rec;
+function initPredictions(data,tax_id) {
     try {
+        tax_id_rec = tax_id
         // Actualizar métricas
         if (data.metricas) {
             presupuestoData = data;
@@ -141,9 +143,9 @@ function formatCurrency(value) {
 
 
 
-async function GuardaPrediccionPresupuesto(data) {
+async function GuardaPrediccionPresupuesto(data, tax_id) {
     const API_URL = "http://127.0.0.1:8080/GuardaPrediccionPresupuesto_x_empresa";
-    const Nit_Empresa = '901292126'; // NIT de la empresa
+    const Nit_Empresa = tax_id; // NIT de la empresa
 
     const tbody = document.querySelector('#predictionsTable tbody');
     if (!tbody || tbody.rows.length === 0) {
@@ -274,7 +276,7 @@ const savePredictionContainer = document.getElementById('savePredictionContainer
 
         // Llamar a la función GuardaPrediccionPresupuesto con los datos completos
         try {            
-            await GuardaPrediccionPresupuesto(presupuestoData);
+            await GuardaPrediccionPresupuesto(presupuestoData,tax_id_rec);
         } catch (error) {
             console.error('Error al guardar predicción:', error);
         }

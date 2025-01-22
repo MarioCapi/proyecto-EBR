@@ -515,9 +515,6 @@ createApp({
                 }
                 nit_actual = userData.tax_id;
                 await this.$nextTick();
-
-
-                await this.$nextTick();
                 const contentDiv = document.getElementById('contentPresu');
                 if (!contentDiv) {
                     throw new Error('No se encontró el elemento con id "contentPresu"');
@@ -641,8 +638,14 @@ createApp({
 
         async loadPredictionXProducto()  /*HTML de Ingreso  x Producto*/
         {
+            let nit_actual;
             try {
-                const nit_actual = '901292126'
+                // Recuperar tax_id desde sessionStorage
+                const userData = JSON.parse(sessionStorage.getItem("userData"));
+                if (!userData || !userData.tax_id) {
+                    throw new Error("No se encontró el usuario o el tax_id en sessionStorage");
+                }
+                nit_actual = userData.tax_id;
                 await this.$nextTick();
                 const contentDiv = document.getElementById('contentPresuXProduct');
                 if (!contentDiv) {
@@ -697,7 +700,7 @@ createApp({
                 script.src = './static/js/predict_x_empresa_x_product.js';
                 script.onload = () => {
                     if (window.init_get_prediction_x_producto) {
-                        window.init_get_prediction_x_producto();
+                        window.init_get_prediction_x_producto(userData.tax_id);
                     }
                     //this.agregarEventosClick(nit_actual);
                 };
@@ -709,7 +712,7 @@ createApp({
         
             } catch (error) {
                 const paramsLogError = {
-                    user_id: Nit_Empresa, // el userid
+                    user_id: nit_actual, // el userid
                     action_type: "loadPredictionXProducto",  //tipo de accion
                     action_details: "error ejecutando la carga de la prediccion pro producto",
                     ip_address: "localhost", 

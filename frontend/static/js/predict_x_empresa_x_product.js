@@ -6,10 +6,11 @@ const recordsPerPage_ = 12; // Número de registros por página
 
 
 // Función principal de inicialización
-async function init_get_prediction_x_producto() {    
+//let tax_id_rec
+async function init_get_prediction_x_producto(tax_id) {    
     const API_URL_GetPredict_Products = "http://127.0.0.1:8080/Get_pred_empresa_producto";
 
-    const params = {nit: "901292126"};
+    const params = {nit: tax_id};
     try {
         const response = await fetch(API_URL_GetPredict_Products, {
             method: "POST",
@@ -38,10 +39,10 @@ async function init_get_prediction_x_producto() {
 
             
         } else {
-            console.error('No se recibieron datos válidos de la API');
+           // console.error('No se recibieron datos válidos de la API');
         }
     } catch (error) {
-        console.error('Error al obtener datos:', error);
+        //console.error('Error al obtener datos:', error);
     }
 }
 

@@ -23,7 +23,7 @@ def log_backend_error(db_session, user_id: int, action_type: str, error_details:
         )
         db_session.commit()
     except SQLAlchemyError as e:
-        print(f"Error al registrar en logs: {str(e)}")  # No lanzar otra excepción para evitar loops
+        print(":")  # No lanzar otra excepción para evitar loops
         
         
 #def exec_sp_save_data(db_session, sp_name: str, **params):
@@ -40,8 +40,6 @@ def exec_sp_save_data(db_session, sp_name: str, return_scalar: bool = False, **p
             sp_params.append(f"@{key}=:{key}")
         
         sp_call += ", ".join(sp_params)
-        #print(f"SQL Query: {sp_call}")  # Para debug
-        #print(f"Params: {params}")      # Para debug
         
         # Ejecutar el SP
         result = db_session.execute(text(sp_call), params)
@@ -113,5 +111,5 @@ def sp_save_dato_contable(db_session, archivo_id: int,
         )
         
     except Exception as e:
-        print(f"Error en SP: {str(e)}")
+        print(":")
         raise

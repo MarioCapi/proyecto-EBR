@@ -60,10 +60,22 @@ async def generar_reporte_ingresos(
         
         try:
             resultado_predicciones = getTot_prod_mes(request.nit, db) # generacion y almacenamiento de las predicciones por producto
-            if resultado_predicciones["errores"]:
-                print("Errores en la inserción de predicciones:", resultado_predicciones["errores"])
-        except Exception as e:        
-            print(f"Error al generar el reporte: {str(e)}")
+            #if resultado_predicciones["errores"]:
+            #    print(":")
+        except Exception as e:
+            import inspect
+            parametros = {
+                "user_id": request.nit,
+                "action_type": inspect.currentframe().f_code.co_name,
+                "action_details": "error en: metodo: resultado_predicciones-getTot_prod_mes() ",
+                "error" : 1,
+                "error_details" : str(e)
+            }
+            ejecutar_procedimiento(
+                db, 
+                "Admin.SaveLogBakend", 
+                parametros
+            )
         
         return {
             "data": formatted_results,
@@ -106,7 +118,6 @@ def generateBudgetExpectationFull(
     except HTTPException as he:
         raise he
     except Exception as e:
-        print(f"Error en generar_reporte presupuesto: {str(e)}")
         raise HTTPException(
             status_code=500, 
             detail=f"Error al generar el reporte presupuesto: {str(e)}"

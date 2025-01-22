@@ -77,7 +77,6 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
     except HTTPException as he:
         raise he
     except Exception as e:
-        print(f"Error en login: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=f"Error en el servidor: {str(e)}"

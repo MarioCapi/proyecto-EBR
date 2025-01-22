@@ -57,7 +57,7 @@ async def getTot_prod_mes(
     except HTTPException as he:
         raise he
     except Exception as e:
-        #print(f"Error en generar consulta de mes producto: {str(e)}")
+        
         import inspect
         parametros = {
             "user_id": request.nit,

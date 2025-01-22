@@ -52,7 +52,7 @@ async def GuardaPrediPresupuesto(
     except HTTPException as he:
         raise he
     except Exception as e:
-        #print(f"Error en GuardaPrediccionPresupuesto_x_empresa: {str(e)}")
+        
         import inspect
         parametros = {
             "user_id": request.Nit_Empresa,

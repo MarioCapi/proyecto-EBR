@@ -214,10 +214,9 @@ def process_main_data(df: pd.DataFrame, start_row: int, mapeo_columnas: dict) ->
             #primera_columna = str(row[mapeo_columnas['nivel']]).strip().lower()
             #primera_columna = str(row[0]).strip().lower()
             #if primera_columna.startswith('procesado'):
-            #    print(f"Se encontró marca de procesamiento en fila {i}: {primera_columna}")
+            
             #    break
             #if primera_columna.lower() not in valores_validos:
-            #    print(f"Valor inválido encontrado en fila {i}: {primera_columna}")
             #    break
                 
             # Verificar si todas las columnas numéricas son válidas
@@ -228,8 +227,7 @@ def process_main_data(df: pd.DataFrame, start_row: int, mapeo_columnas: dict) ->
             ]
             
             # Si todos los valores numéricos están vacíos o no son números, saltar la fila
-            if all(not val.strip() or not any(char.isdigit() for char in val) for val in valores_numericos):
-                print(f"Fila {i} ignorada: no contiene valores numéricos válidos")
+            if all(not val.strip() or not any(char.isdigit() for char in val) for val in valores_numericos):                
                 continue
             
             # Crear diccionario con los datos mapeados
@@ -248,9 +246,9 @@ def process_main_data(df: pd.DataFrame, start_row: int, mapeo_columnas: dict) ->
                 if row_dict['nombre_cuenta'] and str(row_dict['nombre_cuenta']).lower() != 'nan':
                     data_rows.append(row_dict)
                 else:
-                    print(f"Fila {i} ignorada: 'nombre_cuenta' vacío")
+                    print(":")
             else:
-                print(f"Fila {i} ignorada: 'codigo_cuenta' no válido")
+                print(":")
                     
             # Validar que los campos obligatorios no estén vacíos
             #if row_dict['codigo_cuenta'] and row_dict['nombre_cuenta']:
@@ -258,10 +256,8 @@ def process_main_data(df: pd.DataFrame, start_row: int, mapeo_columnas: dict) ->
             
                 
         except ValueError as ve:
-            print(f"Error procesando fila {i}: {str(ve)}")
             continue
         except Exception as e:
-            print(f"Error inesperado en fila {i}: {str(e)}")
             continue
     
     return data_rows
@@ -351,18 +347,18 @@ def process_datos_contables(db_session, datos, archivo):
     try:
         for i in range(0, len(datos), BATCH_SIZE):
             batch = datos[i:i + BATCH_SIZE]
-            #print(f"\nProcesando lote {i//BATCH_SIZE + 1}, registros {i} a {i + len(batch)}")
+            
             
             try:
                 save_datos_contables(db_session, batch, archivo.ArchivoID)
                 db_session.commit()
                 total_procesados += len(batch)
-                #print(f"Lote procesado exitosamente. Total procesados: {total_procesados}")
+                
                 
             except Exception as e:
                 db_session.rollback()
                 errores.append(f"Error en lote {i//BATCH_SIZE + 1}: {str(e)}")
-                #print(f"Error procesando lote: {str(e)}")
+                
                 raise
                 
     except Exception as e:
@@ -405,5 +401,4 @@ def save_datos_contables(db_session, datos: List[Dict], archivo_id: int):
         except Exception as e:
             error_msg = f"Error en registro {i}: {str(e)}"
             errores_batch.append(error_msg)
-            print(error_msg)
             raise Exception(f"Error al guardar datos contables: {str(e)}")

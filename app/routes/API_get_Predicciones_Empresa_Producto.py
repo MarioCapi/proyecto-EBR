@@ -59,7 +59,7 @@ async def get_all_predictions_Emp_Products(
     except HTTPException as he:
         raise he
     except Exception as e:
-        #print(f"Error en consultar predicciones: {str(e)}")
+        
         import inspect
         parametros = {
             "user_id": request.nit,

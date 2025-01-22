@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
 from sklearn.linear_model import LinearRegression
 from typing import List, Dict
 from xgboost import XGBRegressor
@@ -8,6 +8,9 @@ import xgboost as xgb
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import TimeSeriesSplit
 from datetime import datetime
+from utils.config.connection import get_db
+from sqlalchemy.orm import Session
+from utils.exec_any_SP_SQLServer import ejecutar_procedimiento
 
 def generateBudgetExpectation(dataFull: List[tuple]) -> Dict:    
     """
@@ -218,6 +221,19 @@ def generateBudgetExpectation(dataFull: List[tuple]) -> Dict:
         return predicciones
 
     except Exception as e:
+        import inspect
+        db: Session = Depends(get_db)
+        parametros = {
+            "user_id": "999999999",
+            "action_type": inspect.currentframe().f_code.co_name,
+            "action_details": "error en metodo: utils-CalculatePrediction-generateBudgetExpectation",
+            "error" : 1,
+            "error_details" : str(e)
+        }
+        ejecutar_procedimiento(
+            db, 
+            "Admin.SaveLogBakend", 
+            parametros
+        )
         error_msg = f"Error al generar predicciones: {str(e)}"
-        print(error_msg)
         raise Exception(error_msg)

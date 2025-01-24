@@ -18,7 +18,7 @@ from routes.API_ConciliationMonthly_vs_Expenses import ConciliationMonthly_expen
 from routes.API_ConciliationMonthly_vs_Cost import ConciliationMonthly_cost_router as ConciliationMonthly_cost_router
 from utils.config.connection import test_database_connection
 from routes.companies import companies_router
-import os
+
 
 
 
@@ -61,7 +61,3 @@ app.include_router(ConciliationMonthly_cost_router)
 ##    import uvicorn
 ##    uvicorn.run(app, host="127.0.0.1", port=8080)
     
-if __name__ == "__main__":
-    import uvicorn
-    port = int(os.environ.get("PORT", 8000))  # Usa el puerto de Azure o 8000 por defecto
-    uvicorn.run(app, host="0.0.0.0", port=port)

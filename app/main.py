@@ -22,13 +22,13 @@ from routes.companies import companies_router
 
 
 
-app = FastAPI(
+ebr = FastAPI(
     title="API Gestion Contable",
     description="API para gestion de carga de archivos contables y predicciones",
     version="1.1.0"
 )
 
-app.add_middleware(
+ebr.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
@@ -36,21 +36,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(Logsrouter)
-app.include_router(file_upload_router)
-app.include_router(presupuesto_router)
-app.include_router(PredicPres_x_empresa_router)
-app.include_router(Tot_prod_mes_router)
-app.include_router(Get_pred_empresa_producto_router)
-app.include_router(companies_router, prefix="/api")
-app.include_router(users_router, prefix="/api")
-app.include_router(auth_router, prefix="/api")
-app.include_router(generate_suggested_budget_router)
-app.include_router(Presupuesto_sugerido_router)
-app.include_router(consulta_si_presu_suger_anual_router)
-app.include_router(ConciliationMonthly_budget_router)
-app.include_router(ConciliationMonthly_expenses_router)
-app.include_router(ConciliationMonthly_cost_router)
+ebr.include_router(Logsrouter)
+ebr.include_router(file_upload_router)
+ebr.include_router(presupuesto_router)
+ebr.include_router(PredicPres_x_empresa_router)
+ebr.include_router(Tot_prod_mes_router)
+ebr.include_router(Get_pred_empresa_producto_router)
+ebr.include_router(companies_router, prefix="/api")
+ebr.include_router(users_router, prefix="/api")
+ebr.include_router(auth_router, prefix="/api")
+ebr.include_router(generate_suggested_budget_router)
+ebr.include_router(Presupuesto_sugerido_router)
+ebr.include_router(consulta_si_presu_suger_anual_router)
+ebr.include_router(ConciliationMonthly_budget_router)
+ebr.include_router(ConciliationMonthly_expenses_router)
+ebr.include_router(ConciliationMonthly_cost_router)
 
 #@app.on_event("startup")
 #async def startup_event():

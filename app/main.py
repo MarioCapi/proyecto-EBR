@@ -55,7 +55,7 @@ app.include_router(ConciliationMonthly_cost_router)
     ## Probar conexión a base de datos
 #    test_database_connection()
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8080)
+##if __name__ == "__main__":
+##    import uvicorn
+##    uvicorn.run(app, host="127.0.0.1", port=8080)
     

@@ -2,7 +2,7 @@
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 # More info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
 
-name: Build and deploy Python app to Azure Web App - ebr
+name: Build and deploy Python app to Azure Web App - EBR
 
 on:
   push:
@@ -13,6 +13,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read #This is required for actions/checkout
 
     steps:
       - uses: actions/checkout@v4
@@ -20,7 +22,7 @@ jobs:
       - name: Set up Python version
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.11'
 
       - name: Create and start virtual environment
         run: |
@@ -51,6 +53,7 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
       id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
 
     steps:
       - name: Download artifact from build job
@@ -65,14 +68,14 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_1D208E846DA7461EB24BFD6465DC615F }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_18390CD1EB0245FFB3DD8F8358998B60 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_549DB27FF90A4C4D81005C7608DEDFE8 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_E19E4FD61DA94405B60CA9A86EF234E5 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_694A72F4D5274301AB7879FB19DDA8CC }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_8E8D0236893A40759BCF3D86611D3AF4 }}
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'ebr'
+          app-name: 'EBR'
           slot-name: 'Production'
           

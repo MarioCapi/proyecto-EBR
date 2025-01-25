@@ -18,7 +18,9 @@ from routes.API_ConciliationMonthly_vs_Expenses import ConciliationMonthly_expen
 from routes.API_ConciliationMonthly_vs_Cost import ConciliationMonthly_cost_router as ConciliationMonthly_cost_router
 from utils.config.connection import test_database_connection
 from routes.companies import companies_router
-
+from pathlib import Path
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 
 
 
@@ -54,3 +56,15 @@ ebr.include_router(ConciliationMonthly_cost_router)
 
 
     
+# Configuración para servir archivos estáticos y HTML
+frontend_dir = Path("frontend")  # Carpeta donde está el frontend
+ebr.mount("/static", StaticFiles(directory=frontend_dir / "static"), name="static")
+
+
+@ebr.get("/", response_class=HTMLResponse)
+async def serve_login_page():
+    """Servir el archivo login.html como página principal."""
+    login_path = frontend_dir / "login.html"
+    if login_path.exists():
+        return HTMLResponse(content=login_path.read_text(), status_code=200)
+    return HTMLResponse(content="Archivo login.html no encontrado", status_code=404)

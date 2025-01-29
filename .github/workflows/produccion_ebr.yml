@@ -62,7 +62,7 @@ jobs:
           name: python-app
 
       - name: Unzip artifact for deployment
-        run: zip -r release.zip . -x 'myvenv/*'
+        run: unzip release.zip
 
       - name: Login to Azure
         uses: azure/login@v2

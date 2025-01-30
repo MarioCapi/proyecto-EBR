@@ -22,7 +22,8 @@ from pathlib import Path
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
-
+frontend_dir = Path(__file__).parent.parent / "frontend"
+static_dir = frontend_dir / "static"
 
 ebr = FastAPI(
     title="API Gestion Contable",
@@ -56,15 +57,24 @@ ebr.include_router(ConciliationMonthly_cost_router)
 
 
     
-# Configuración para servir archivos estáticos y HTML
-frontend_dir = Path("frontend")  # Carpeta donde está el frontend
-ebr.mount("/static", StaticFiles(directory=frontend_dir / "static"), name="static")
+# Montar archivos estáticos
+#ebr.mount("/frontend", StaticFiles(directory=frontend_dir), name="static")
+#ebr.mount("/static", StaticFiles(directory=static_dir), name="static")
+#ebr.mount("/", StaticFiles(directory=frontend_dir), name="frontend")
+#ebr.mount("/static", StaticFiles(directory=static_dir), name="static")
+#ebr.mount("/static", StaticFiles(directory=frontend_dir / "static"), name="static")
 
-
+# Ruta principal para servir login.html
 @ebr.get("/", response_class=HTMLResponse)
 async def serve_login_page():
     """Servir el archivo login.html como página principal."""
     login_path = frontend_dir / "login.html"
+    print(f"Buscando login.html en: {login_path}")
     if login_path.exists():
         return HTMLResponse(content=login_path.read_text(), status_code=200)
     return HTMLResponse(content="Archivo login.html no encontrado", status_code=404)
+
+
+# Montar archivos estáticos
+ebr.mount("/static", StaticFiles(directory=static_dir), name="static")
+ebr.mount("/", StaticFiles(directory=frontend_dir), name="frontend")

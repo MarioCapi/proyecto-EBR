@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const token = sessionStorage.getItem('token');
                 if (token) {
                     setTimeout(() => {
-                        window.location.href = './PortalEBR.html';
+                        window.location.href = '/frontend/PortalEBR.html';
                     }, 1500);
                 } else {
                     showNotification('Error al guardar la sesión', 'error');
